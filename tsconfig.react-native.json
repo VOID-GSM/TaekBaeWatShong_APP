@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "React Native (Expo)",
+  "extends": ["expo/tsconfig.base", "./tsconfig.base.json"],
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "lib": ["ESNext", "DOM"],
+    "noEmit": true,
+    "allowJs": true
+  }
+}

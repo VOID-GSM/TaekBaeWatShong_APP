@@ -1,0 +1,23 @@
+# 줄바꿈은 저장소에서 항상 LF 로 통일한다.
+# Prettier 가 endOfLine: "lf" 로 설정되어 있어, Windows 에서 CRLF 로 체크아웃되면
+# format:check 가 전부 실패한다.
+* text=auto eol=lf
+
+# 바이너리는 변환하지 않는다.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.keystore binary
+*.jks binary
+*.p8 binary
+*.p12 binary
+*.mobileprovision binary
+
+# diff 노이즈를 줄인다.
+pnpm-lock.yaml linguist-generated=true

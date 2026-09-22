@@ -1,0 +1,21 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# React Native / Metro 는 심볼릭 링크 기반 해석에서 중복 인스턴스 문제가 생기기 쉬우므로
+# Expo 공식 가이드대로 평탄한 node_modules 를 쓴다.
+nodeLinker: hoisted
+
+# Expo / RN 패키지들이 peer dependency 를 느슨하게 선언하는 경우가 많다.
+strictPeerDependencies: false
+autoInstallPeers: true
+
+# 네이티브 바인딩이 필요한 패키지만 설치 스크립트를 허용한다.
+allowBuilds:
+  '@parcel/watcher': true
+  dtrace-provider: false
+  protobufjs: true
+  unrs-resolver: true
+minimumReleaseAgeExclude:
+  - '@tanstack/query-core@5.103.2'
+  - '@tanstack/react-query@5.103.2'
