@@ -19,6 +19,8 @@ const appName = IS_DEV
 const config: ExpoConfig = {
   name: appName,
   slug: 'taekbaewatshong-admin',
+  /** 동적 설정(app.config.ts)에서는 소유 계정을 명시해야 EAS 가 프로젝트를 찾는다. */
+  owner: 'jyuuuuu0',
   version: '0.1.0',
   orientation: 'portrait',
   icon: './assets/icon.png',
@@ -77,10 +79,10 @@ const config: ExpoConfig = {
       root: './src/app/routes',
     },
     eas: {
-      // TODO: `cd apps/admin && pnpm exec eas init` 으로 발급받은 값을 리터럴로 적는다.
-      // client 와 마찬가지로 환경 변수로 빼면 안 된다 —
-      // eas.json 의 EXPO_NO_DOTENV=1 때문에 EAS 빌드 중에는 .env 를 읽지 않는다.
-      projectId: process.env.EAS_PROJECT_ID,
+      // 비밀값이 아니므로 리터럴로 박는다.
+      // eas.json 의 base 프로필에 EXPO_NO_DOTENV=1 이 있어 빌드 중에는 .env 를 읽지 않는다.
+      // 환경 변수로 빼면 로컬에서만 되고 EAS 빌드에서 undefined 가 된다.
+      projectId: '73c8dedd-a41b-4016-bac5-fa32a4b9e294',
     },
   },
 };
