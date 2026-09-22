@@ -24,6 +24,21 @@ const config: ExpoConfig = {
   userInterfaceStyle: 'automatic',
   assetBundlePatterns: ['**/*'],
 
+  /**
+   * EAS Update(OTA). eas.json 의 빌드 프로필이 channel 을 쓰므로 필요하다.
+   * 스토어 재심사 없이 JS 변경분만 기기에 내려보낼 수 있다.
+   *
+   * runtimeVersion 이 같은 빌드끼리만 업데이트가 적용된다.
+   * appVersion 정책이면 위의 `version` 값이 기준이 되므로,
+   * 네이티브 의존성을 추가했다면 version 을 올리고 새로 빌드해야 한다.
+   */
+  updates: {
+    url: 'https://u.expo.dev/1935b1a2-e674-4591-97ae-11edac02f0bf',
+  },
+  runtimeVersion: {
+    policy: 'appVersion',
+  },
+
   ios: {
     supportsTablet: false,
     bundleIdentifier: bundleId,
