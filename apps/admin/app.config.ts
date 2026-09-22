@@ -45,12 +45,6 @@ const config: ExpoConfig = {
     predictiveBackGestureEnabled: false,
   },
 
-  web: {
-    favicon: './assets/favicon.png',
-    bundler: 'metro',
-    output: 'static',
-  },
-
   plugins: [
     'expo-router',
     'expo-secure-store',
@@ -83,7 +77,9 @@ const config: ExpoConfig = {
       root: './src/app/routes',
     },
     eas: {
-      // `eas init` 실행 후 발급되는 값으로 교체한다.
+      // TODO: `cd apps/admin && pnpm exec eas init` 으로 발급받은 값을 리터럴로 적는다.
+      // client 와 마찬가지로 환경 변수로 빼면 안 된다 —
+      // eas.json 의 EXPO_NO_DOTENV=1 때문에 EAS 빌드 중에는 .env 를 읽지 않는다.
       projectId: process.env.EAS_PROJECT_ID,
     },
   },

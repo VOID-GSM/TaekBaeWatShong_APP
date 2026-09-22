@@ -15,6 +15,8 @@ const appName = IS_DEV ? '택배왔슝 (dev)' : IS_PREVIEW ? '택배왔슝 (prev
 const config: ExpoConfig = {
   name: appName,
   slug: 'taekbaewatshong',
+  /** 동적 설정(app.config.ts)에서는 소유 계정을 명시해야 EAS 가 프로젝트를 찾는다. */
+  owner: 'jyuuuuu0',
   version: '0.1.0',
   orientation: 'portrait',
   icon: './assets/icon.png',
@@ -39,12 +41,6 @@ const config: ExpoConfig = {
       backgroundColor: '#FFE7DD',
     },
     predictiveBackGestureEnabled: false,
-  },
-
-  web: {
-    favicon: './assets/favicon.png',
-    bundler: 'metro',
-    output: 'static',
   },
 
   plugins: [
@@ -86,8 +82,10 @@ const config: ExpoConfig = {
       root: './src/app/routes',
     },
     eas: {
-      // `eas init` 실행 후 발급되는 값으로 교체한다.
-      projectId: process.env.EAS_PROJECT_ID,
+      // 비밀값이 아니므로 리터럴로 박는다.
+      // eas.json 의 base 프로필에 EXPO_NO_DOTENV=1 이 있어 빌드 중에는 .env 를 읽지 않는다.
+      // 환경 변수로 빼면 로컬에서만 되고 EAS 빌드에서 undefined 가 된다.
+      projectId: '1935b1a2-e674-4591-97ae-11edac02f0bf',
     },
   },
 };
