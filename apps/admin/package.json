@@ -15,7 +15,9 @@
     "typecheck": "tsc --noEmit",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
-    "clean": "rimraf .turbo .expo node_modules coverage"
+    "clean": "rimraf .turbo .expo node_modules coverage",
+    "go": "expo start --go --port 8082",
+    "go:tunnel": "expo start --go --tunnel --port 8082"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
