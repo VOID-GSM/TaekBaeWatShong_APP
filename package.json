@@ -10,6 +10,8 @@
     "dev": "turbo run dev",
     "dev:client": "turbo run dev --filter=@taekbae/client",
     "dev:admin": "turbo run dev --filter=@taekbae/admin",
+    "go:client": "pnpm --filter @taekbae/client run go",
+    "go:admin": "pnpm --filter @taekbae/admin run go",
     "start": "turbo run start",
     "android": "turbo run android",
     "ios": "turbo run ios",

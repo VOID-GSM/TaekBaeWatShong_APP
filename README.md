@@ -135,7 +135,11 @@ Turborepo 가 패키지 단위로 캐싱하므로 두 번째 실행부터는 변
 | `EXPO_PUBLIC_API_URL` | REST API 베이스 URL                      |
 | `EXPO_PUBLIC_WS_URL`  | 채팅 WebSocket URL                       |
 | `APP_VARIANT`         | `development` / `preview` / `production` |
-| `EAS_PROJECT_ID`      | `eas init` 후 발급되는 값                |
+
+EAS projectId 는 환경 변수가 **아닙니다.** `eas.json` 의 base 프로필에
+`EXPO_NO_DOTENV=1` 이 있어 EAS 빌드 중에는 `.env` 를 읽지 않기 때문에,
+환경 변수로 빼면 로컬에서만 되고 빌드에서 undefined 가 됩니다.
+비밀값도 아니므로 `app.config.ts` 의 `extra.eas.projectId` 에 리터럴로 적습니다.
 
 ## 빌드 / 배포 (EAS)
 
@@ -145,11 +149,18 @@ Turborepo 가 패키지 단위로 캐싱하므로 두 번째 실행부터는 변
 ```bash
 pnpm eas login                       # expo.dev 계정 필요
 
-cd apps/client && pnpm exec eas init # projectId 발급 → .env 의 EAS_PROJECT_ID
-cd ../admin    && pnpm exec eas init # 앱마다 따로 발급
+# 앱마다 따로 발급받고, 나온 projectId 를 app.config.ts 에 적는다.
+cd apps/client && pnpm exec eas init
+cd ../admin    && pnpm exec eas init
 
 pnpm eas:build:client --profile development --platform android
 ```
+
+동적 설정(`app.config.ts`)이라 `eas init` 이 projectId 를 자동으로 써넣지 못합니다.
+출력된 값을 `extra.eas.projectId` 에 직접 붙여넣어야 합니다.
+
+업로드 제외 목록은 `.gitignore` 를 그대로 씁니다. `.easignore` 를 만들면
+**`.gitignore` 가 통째로 무시되어** `.env` 같은 파일이 빌드 서버로 올라가므로 두지 않습니다.
 
 `eas.json` 에 `development` / `preview` / `production` 세 프로필이 있고,
 프로필마다 번들 ID 와 API URL 이 다릅니다(한 기기에 동시 설치 가능).
