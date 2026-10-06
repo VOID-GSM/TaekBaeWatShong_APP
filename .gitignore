@@ -51,3 +51,6 @@ yarn-error.*
 .DS_Store
 Thumbs.db
 
+
+# claude harness
+_workspace/
