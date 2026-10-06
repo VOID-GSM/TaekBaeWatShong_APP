@@ -1,0 +1,13 @@
+# 커밋 메시지 첫 줄 형식 검사: "<type>: <요약>"
+first_line=$(head -n1 "$1")
+
+case "$first_line" in
+  Merge\ *|Revert\ *|fixup!\ *|squash!\ *) exit 0 ;;
+esac
+
+if ! printf '%s' "$first_line" | grep -Eq '^(feat|fix|refactor|style|design|docs|test|chore): [^ ].*'; then
+  echo "✖ 커밋 메시지 형식이 올바르지 않습니다: $first_line"
+  echo "  형식: <type>: <요약>   예) feat: axios 기본 설정"
+  echo "  type: feat | fix | refactor | style | design | docs | test | chore"
+  exit 1
+fi
