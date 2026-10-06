@@ -1,5 +1,27 @@
 {
   "enabledPlugins": {
     "expo@claude-plugins-official": true
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh repo view:*)",
+      "Bash(bash .claude/skills/fsd-review/scripts/check-fsd-imports.sh:*)",
+      "Bash(bash .claude/skills/review-reply/scripts/threads.sh list:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm turbo run lint:*)",
+      "Bash(pnpm turbo run typecheck:*)",
+      "Bash(pnpm turbo run test:*)"
+    ]
   }
 }
