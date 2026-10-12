@@ -139,24 +139,29 @@ Turborepo 가 패키지 단위로 캐싱하므로 두 번째 실행부터는 변
 인증 제공자는 앱과 사용자 역할에 따라 분리합니다.
 
 - **사용자 앱 (`apps/client`)**: 학생과 선생님 모두 DataGSM OAuth로 로그인합니다.
-  `apps/client/.env` 에 `EXPO_PUBLIC_DATAGSM_CLIENT_ID` 를 설정하세요.
-- **관리자 앱 (`apps/admin`)**: Google OAuth로 로그인합니다.
-  `apps/admin/.env` 에 `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` 와
-  `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` 를 설정하세요.
+- **관리자 앱 (`apps/admin`)**: 택배기사님이 Google OAuth로 회원가입·로그인합니다.
 
-앱은 DataGSM Access Token을 `/auth/datagsm` 으로, Google ID Token을
-`/auth/google` 로 전달하고 백엔드가 앱 세션을 반환한 경우에만 로그인을 완료합니다.
-두 엔드포인트는 `{ accessToken, expiresIn, user: { id, name, role } }` 형식으로 응답해야 합니다.
-`/auth/datagsm` 은 DataGSM 토큰을 서버에서 검증하고 실제 계정 역할(`STUDENT` 또는 `TEACHER`)을
-응답해야 하며, `/auth/google` 은 Google ID Token의 서명·issuer·audience·만료를 검증하고
-관리자 권한이 확인된 계정에 한해 `ADMIN` 역할을 응답해야 합니다. 계정 식별에는 이름이 아닌
-검증된 토큰의 subject를 사용하세요. 현재 저장소에는 백엔드가 없으므로 이 API들은 서버에
-별도로 구현해야 합니다.
+OAuth 인가 흐름은 백엔드([TaekBaeWatShong_SERVER](https://github.com/VOID-GSM/TaekBaeWatShong_SERVER))가
+수행하므로 앱에는 Client ID·Secret 을 두지 않습니다. 필요한 값은 `EXPO_PUBLIC_API_URL` 뿐입니다.
 
-Google Client ID들은 공개 식별자이며 비밀값이 아닙니다. Google Cloud Console에서 관리자 앱의
-Android 패키지/SHA-1과 iOS Client ID를 등록하세요. `@react-native-google-signin/google-signin`
-은 Expo Go에서 동작하지 않으므로 `apps/admin` 의 네이티브 설정을 반영한 development build가
-필요합니다. EAS 빌드는 `.env` 를 읽지 않으므로 앱별 Client ID를 각 EAS 환경에도 설정하세요.
+1. 앱이 인증 브라우저로 `/auth/login?provider=datagsm`(사용자 앱) 또는
+   `/auth/admin/login?provider=google`(관리자 앱)을 엽니다.
+2. 백엔드가 로그인을 마치고 앱 딥링크로 `?code=`(실패 시 `?error=`)를 붙여 돌려보냅니다.
+3. 앱이 30초 안에 `GET /auth/token?code=` 로 JWT 를 받고, `GET /api/users/me` 로 사용자와
+   역할을 확인한 뒤 `expo-secure-store` 에 세션을 저장합니다.
+
+가입 전용 API 는 없습니다. 처음 로그인하는 계정은 백엔드가 자동으로 가입시키며, 학생·선생님
+역할은 DataGSM 계정 유형으로 정해집니다. 택배기사 계정은 백엔드 `ADMIN_EMAILS` 에 등록된
+Google 이메일만 허용됩니다.
+
+백엔드 환경 변수의 리다이렉트 URI 는 앱 scheme 과 정확히 일치해야 합니다.
+
+| 백엔드 변수                 | 값                                        |
+| --------------------------- | ----------------------------------------- |
+| `OAUTH2_REDIRECT_URI`       | `taekbaewatshong://oauth2/redirect`       |
+| `ADMIN_OAUTH2_REDIRECT_URI` | `taekbaewatshong-admin://oauth2/redirect` |
+
+커스텀 scheme 딥링크는 Expo Go 에서 받을 수 없으므로 로그인은 development build 에서 확인하세요.
 
 EAS projectId 는 환경 변수가 **아닙니다.** `eas.json` 의 base 프로필에
 `EXPO_NO_DOTENV=1` 이 있어 EAS 빌드 중에는 `.env` 를 읽지 않기 때문에,

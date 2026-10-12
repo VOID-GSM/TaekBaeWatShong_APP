@@ -2,20 +2,6 @@ import type { ExpoConfig } from 'expo/config';
 
 const IS_DEV = process.env.APP_VARIANT === 'development';
 const IS_PREVIEW = process.env.APP_VARIANT === 'preview';
-const googleIosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
-const googleIosUrlScheme = googleIosClientId?.match(/^(.+)\.apps\.googleusercontent\.com$/)?.[1];
-
-if (googleIosClientId && !googleIosUrlScheme) {
-  throw new Error('EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID 형식이 올바르지 않습니다.');
-}
-
-const googleSignInPlugin: [string, { iosUrlScheme: string }] | undefined = googleIosUrlScheme
-  ? [
-      '@react-native-google-signin/google-signin',
-      { iosUrlScheme: `com.googleusercontent.apps.${googleIosUrlScheme}` },
-    ]
-  : undefined;
-
 /** 빌드 variant 별로 다른 앱을 한 기기에 같이 깔 수 있게 식별자를 분리한다. */
 const bundleId = IS_DEV
   ? 'kr.hs.gsm.taekbaewatshong.admin.dev'
@@ -78,7 +64,6 @@ const config: ExpoConfig = {
   plugins: [
     'expo-router',
     'expo-secure-store',
-    ...(googleSignInPlugin ? [googleSignInPlugin] : []),
     [
       'expo-camera',
       {
