@@ -1,4 +1,4 @@
-# 택배왔슝 (TaekBaeWatShong)
+# 택배왔숑 (TaekBaeWatShong)
 
 기숙사 택배 수령 알림 서비스. pnpm + Turborepo 모노레포이며, 앱 두 개(사용자용 `client`,
 관리자용 `admin`)가 **FSD(Feature-Sliced Design)** 구조로 되어 있습니다.
