@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
+    "@react-native-google-signin/google-signin": "^16.1.5",
     "@taekbae/api": "workspace:*",
     "@taekbae/types": "workspace:*",
     "@taekbae/utils": "workspace:*",

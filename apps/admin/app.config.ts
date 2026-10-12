@@ -2,6 +2,19 @@ import type { ExpoConfig } from 'expo/config';
 
 const IS_DEV = process.env.APP_VARIANT === 'development';
 const IS_PREVIEW = process.env.APP_VARIANT === 'preview';
+const googleIosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
+const googleIosUrlScheme = googleIosClientId?.match(/^(.+)\.apps\.googleusercontent\.com$/)?.[1];
+
+if (googleIosClientId && !googleIosUrlScheme) {
+  throw new Error('EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID 형식이 올바르지 않습니다.');
+}
+
+const googleSignInPlugin: [string, { iosUrlScheme: string }] | undefined = googleIosUrlScheme
+  ? [
+      '@react-native-google-signin/google-signin',
+      { iosUrlScheme: `com.googleusercontent.apps.${googleIosUrlScheme}` },
+    ]
+  : undefined;
 
 /** 빌드 variant 별로 다른 앱을 한 기기에 같이 깔 수 있게 식별자를 분리한다. */
 const bundleId = IS_DEV
@@ -21,7 +34,7 @@ const config: ExpoConfig = {
   slug: 'taekbaewatshong-admin',
   /** 동적 설정(app.config.ts)에서는 소유 계정을 명시해야 EAS 가 프로젝트를 찾는다. */
   owner: 'jyuuuuu0',
-  version: '0.1.0',
+  version: '0.1.1',
   orientation: 'portrait',
   icon: './assets/icon.png',
   scheme: 'taekbaewatshong-admin',
@@ -65,6 +78,7 @@ const config: ExpoConfig = {
   plugins: [
     'expo-router',
     'expo-secure-store',
+    ...(googleSignInPlugin ? [googleSignInPlugin] : []),
     [
       'expo-camera',
       {

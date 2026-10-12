@@ -136,6 +136,28 @@ Turborepo 가 패키지 단위로 캐싱하므로 두 번째 실행부터는 변
 | `EXPO_PUBLIC_WS_URL`  | 채팅 WebSocket URL                       |
 | `APP_VARIANT`         | `development` / `preview` / `production` |
 
+인증 제공자는 앱과 사용자 역할에 따라 분리합니다.
+
+- **사용자 앱 (`apps/client`)**: 학생과 선생님 모두 DataGSM OAuth로 로그인합니다.
+  `apps/client/.env` 에 `EXPO_PUBLIC_DATAGSM_CLIENT_ID` 를 설정하세요.
+- **관리자 앱 (`apps/admin`)**: Google OAuth로 로그인합니다.
+  `apps/admin/.env` 에 `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` 와
+  `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` 를 설정하세요.
+
+앱은 DataGSM Access Token을 `/auth/datagsm` 으로, Google ID Token을
+`/auth/google` 로 전달하고 백엔드가 앱 세션을 반환한 경우에만 로그인을 완료합니다.
+두 엔드포인트는 `{ accessToken, expiresIn, user: { id, name, role } }` 형식으로 응답해야 합니다.
+`/auth/datagsm` 은 DataGSM 토큰을 서버에서 검증하고 실제 계정 역할(`STUDENT` 또는 `TEACHER`)을
+응답해야 하며, `/auth/google` 은 Google ID Token의 서명·issuer·audience·만료를 검증하고
+관리자 권한이 확인된 계정에 한해 `ADMIN` 역할을 응답해야 합니다. 계정 식별에는 이름이 아닌
+검증된 토큰의 subject를 사용하세요. 현재 저장소에는 백엔드가 없으므로 이 API들은 서버에
+별도로 구현해야 합니다.
+
+Google Client ID들은 공개 식별자이며 비밀값이 아닙니다. Google Cloud Console에서 관리자 앱의
+Android 패키지/SHA-1과 iOS Client ID를 등록하세요. `@react-native-google-signin/google-signin`
+은 Expo Go에서 동작하지 않으므로 `apps/admin` 의 네이티브 설정을 반영한 development build가
+필요합니다. EAS 빌드는 `.env` 를 읽지 않으므로 앱별 Client ID를 각 EAS 환경에도 설정하세요.
+
 EAS projectId 는 환경 변수가 **아닙니다.** `eas.json` 의 base 프로필에
 `EXPO_NO_DOTENV=1` 이 있어 EAS 빌드 중에는 `.env` 를 읽지 않기 때문에,
 환경 변수로 빼면 로컬에서만 되고 빌드에서 undefined 가 됩니다.
