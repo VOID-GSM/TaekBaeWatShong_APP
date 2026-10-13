@@ -1,4 +1,4 @@
-# 택배왔슝 (TaekBaeWatShong)
+# 택배왔숑 (TaekBaeWatShong)
 
 기숙사 택배 수령 알림 서비스. pnpm + Turborepo 모노레포이며, 앱 두 개(사용자용 `client`,
 관리자용 `admin`)가 **FSD(Feature-Sliced Design)** 구조로 되어 있습니다.
@@ -135,6 +135,33 @@ Turborepo 가 패키지 단위로 캐싱하므로 두 번째 실행부터는 변
 | `EXPO_PUBLIC_API_URL` | REST API 베이스 URL                      |
 | `EXPO_PUBLIC_WS_URL`  | 채팅 WebSocket URL                       |
 | `APP_VARIANT`         | `development` / `preview` / `production` |
+
+인증 제공자는 앱과 사용자 역할에 따라 분리합니다.
+
+- **사용자 앱 (`apps/client`)**: 학생과 선생님 모두 DataGSM OAuth로 로그인합니다.
+- **관리자 앱 (`apps/admin`)**: 택배기사님이 Google OAuth로 회원가입·로그인합니다.
+
+OAuth 인가 흐름은 백엔드([TaekBaeWatShong_SERVER](https://github.com/VOID-GSM/TaekBaeWatShong_SERVER))가
+수행하므로 앱에는 Client ID·Secret 을 두지 않습니다. 필요한 값은 `EXPO_PUBLIC_API_URL` 뿐입니다.
+
+1. 앱이 인증 브라우저로 `/auth/login?provider=datagsm`(사용자 앱) 또는
+   `/auth/admin/login?provider=google`(관리자 앱)을 엽니다.
+2. 백엔드가 로그인을 마치고 앱 딥링크로 `?code=`(실패 시 `?error=`)를 붙여 돌려보냅니다.
+3. 앱이 30초 안에 `GET /auth/token?code=` 로 JWT 를 받고, `GET /api/users/me` 로 사용자와
+   역할을 확인한 뒤 `expo-secure-store` 에 세션을 저장합니다.
+
+가입 전용 API 는 없습니다. 처음 로그인하는 계정은 백엔드가 자동으로 가입시키며, 학생·선생님
+역할은 DataGSM 계정 유형으로 정해집니다. 택배기사 계정은 백엔드 `ADMIN_EMAILS` 에 등록된
+Google 이메일만 허용됩니다.
+
+백엔드 환경 변수의 리다이렉트 URI 는 앱 scheme 과 정확히 일치해야 합니다.
+
+| 백엔드 변수                 | 값                                        |
+| --------------------------- | ----------------------------------------- |
+| `OAUTH2_REDIRECT_URI`       | `taekbaewatshong://oauth2/redirect`       |
+| `ADMIN_OAUTH2_REDIRECT_URI` | `taekbaewatshong-admin://oauth2/redirect` |
+
+커스텀 scheme 딥링크는 Expo Go 에서 받을 수 없으므로 로그인은 development build 에서 확인하세요.
 
 EAS projectId 는 환경 변수가 **아닙니다.** `eas.json` 의 base 프로필에
 `EXPO_NO_DOTENV=1` 이 있어 EAS 빌드 중에는 `.env` 를 읽지 않기 때문에,

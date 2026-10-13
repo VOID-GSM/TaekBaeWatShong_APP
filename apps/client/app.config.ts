@@ -2,7 +2,6 @@ import type { ExpoConfig } from 'expo/config';
 
 const IS_DEV = process.env.APP_VARIANT === 'development';
 const IS_PREVIEW = process.env.APP_VARIANT === 'preview';
-
 /** 빌드 variant 별로 다른 앱을 한 기기에 같이 깔 수 있게 식별자를 분리한다. */
 const bundleId = IS_DEV
   ? 'kr.hs.gsm.taekbaewatshong.dev'
@@ -17,7 +16,7 @@ const config: ExpoConfig = {
   slug: 'taekbaewatshong',
   /** 동적 설정(app.config.ts)에서는 소유 계정을 명시해야 EAS 가 프로젝트를 찾는다. */
   owner: 'jyuuuuu0',
-  version: '0.1.0',
+  version: '0.1.1',
   orientation: 'portrait',
   icon: './assets/icon.png',
   scheme: 'taekbaewatshong',
