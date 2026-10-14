@@ -1,6 +1,6 @@
 import { tokenResponseSchema, type User, type UserRole, userSchema } from '@taekbae/types';
 
-export type OAuthProvider = 'google' | 'datagsm';
+export type OAuthProvider = 'google';
 
 export type OAuthLoginTarget =
   | { audience: 'client'; provider: OAuthProvider; role?: Extract<UserRole, 'STUDENT' | 'TEACHER'> }

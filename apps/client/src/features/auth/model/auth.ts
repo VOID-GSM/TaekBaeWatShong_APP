@@ -8,7 +8,7 @@ import {
 
 import { appUserSchema } from '@/entities/user';
 
-import { requestDataGsmAuthCode } from '../api/oauth-login';
+import { requestGoogleAuthCode } from '../api/oauth-login';
 import {
   type AppSession,
   clearStoredAppSession,
@@ -64,16 +64,16 @@ async function restoreSession(): Promise<AppSession | null> {
 }
 
 /**
- * 학생·선생님 공통 DataGSM 로그인. 역할은 백엔드가 DataGSM 계정 유형으로 결정하며,
+ * 학생·선생님 공통 Google 로그인. 역할은 백엔드가 Google 계정으로 판별하며,
  * 처음 로그인하는 계정은 백엔드가 자동으로 가입시킨다. 사용자가 취소하면 false.
  */
-export async function loginWithDataGsm(): Promise<boolean> {
+export async function loginWithGoogle(): Promise<boolean> {
   const { status, user } = useAuthStore.getState();
   useAuthStore.getState().setStatus('loading');
   useAuthStore.getState().setError(null);
 
   try {
-    const code = await requestDataGsmAuthCode();
+    const code = await requestGoogleAuthCode();
 
     if (code === null) {
       useAuthStore.setState({ status, user });
