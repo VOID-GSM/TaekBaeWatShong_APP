@@ -7,7 +7,6 @@ import { Typography } from '../typography';
 
 export interface TopBarProps {
   title: string;
-  /** 주면 왼쪽에 뒤로가기 버튼이 보인다. */
   onBack?: () => void;
 }
 

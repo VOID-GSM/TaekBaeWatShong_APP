@@ -17,36 +17,22 @@ const palette = {
 } as const;
 
 export const lightColors = {
-  /** color/bg-app */
   bgApp: palette.grey50,
-  /** color/bg-surface */
   bgSurface: palette.white,
-  /** color/bg-navy */
   bgNavy: palette.navy700,
-  /** color/bg-brand-soft */
   bgBrandSoft: palette.indigo50,
-  /** color/bg-success-soft */
   bgSuccessSoft: palette.green100,
   /** 브랜드 버튼 그라디언트 시작·끝 (Figma Button 채움) */
   bgBrandStart: palette.indigo500,
   bgBrandEnd: palette.indigo700,
-  /** color/border-default */
   borderDefault: palette.grey200,
-  /** color/text-primary */
   textPrimary: palette.navy900,
-  /** color/text-secondary */
   textSecondary: palette.slate500,
-  /** color/text-tertiary */
   textTertiary: palette.slate400,
-  /** color/text-brand */
   textBrand: palette.indigo600,
-  /** color/text-success */
   textSuccess: palette.green700,
-  /** color/text-on-brand */
   textOnBrand: palette.white,
-  /** bg-navy 위에 올라가는 글자·인디케이터 */
   textOnNavy: palette.white,
-  /** color/icon-strong */
   iconStrong: palette.navy900,
   /** 에러 문구. Figma 변수에 없어 임의로 정한 값 — 디자이너 확인 필요. */
   textDanger: palette.red600,

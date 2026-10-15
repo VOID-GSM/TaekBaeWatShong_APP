@@ -19,15 +19,11 @@ export const spacing = {
 /** Figma 변수(radius/*). */
 export const radius = { md: 16, lg: 22, full: 999 } as const;
 
-/** 컴포넌트 고정 크기. */
 export const size = {
-  /** Button/L 높이 */
   buttonL: 56,
   /** 브랜드 버튼 높이 */
   buttonM: 52,
-  /** 입력 필드 높이 */
   field: 52,
-  /** TopBar 높이 */
   topBar: 56,
   /** TopBar 아이콘 버튼 터치 영역 */
   iconButton: 40,
@@ -35,11 +31,8 @@ export const size = {
   iconL: 24,
   /** 버튼 안 아이콘 */
   iconM: 22,
-  /** 로고 마크 본체 */
   logoMark: 130,
-  /** 로고 마크를 감싸는 Ring */
   logoRing: 160,
-  /** Ring 을 감싸는 Halo */
   logoHalo: 220,
 } as const;
 
@@ -52,7 +45,6 @@ export const motion = { fast: 150, normal: 250, slow: 400 } as const;
  * 표현이 안 되므로 `boxShadow`(New Architecture, Android 9+)를 쓴다.
  */
 export const shadow = {
-  /** Shadow/Card */
   card: {
     boxShadow: [
       { offsetX: 0, offsetY: 1, blurRadius: 3, spreadDistance: 0, color: 'rgba(15, 23, 41, 0.05)' },
