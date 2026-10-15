@@ -79,12 +79,13 @@ export function Button({
       accessibilityState={{ disabled: isDisabled, busy: loading }}
       {...props}
       disabled={isDisabled}
-      onLayout={
-        isBrand
-          ? ({ nativeEvent }) =>
-              setLayout({ width: nativeEvent.layout.width, height: nativeEvent.layout.height })
-          : undefined
-      }
+      onLayout={(event) => {
+        if (isBrand) {
+          const { width, height } = event.nativeEvent.layout;
+          setLayout({ width, height });
+        }
+        props.onLayout?.(event);
+      }}
       style={({ pressed }) => [
         styles.container,
         isBrand ? styles.brand : styles.navy,
