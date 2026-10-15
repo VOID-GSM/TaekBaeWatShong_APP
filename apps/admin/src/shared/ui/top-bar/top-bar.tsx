@@ -22,6 +22,8 @@ export function TopBar({ title, onBack }: TopBarProps) {
           accessibilityRole="button"
           accessibilityLabel="뒤로가기"
           onPress={onBack}
+          // 시안 크기(40pt)를 유지하면서 터치 영역을 최소 44pt로 넓힌다.
+          hitSlop={4}
           style={({ pressed }) => [styles.side, pressed && styles.pressed]}
         >
           <SvgXml xml={chevronLeftXml} width={size.iconL} height={size.iconL} />
