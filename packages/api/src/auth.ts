@@ -1,10 +1,9 @@
-import { tokenResponseSchema, type User, type UserRole, userSchema } from '@taekbae/types';
+import { tokenResponseSchema, type User, userSchema } from '@taekbae/types';
 
 export type OAuthProvider = 'google';
 
 export type OAuthLoginTarget =
-  | { audience: 'client'; provider: OAuthProvider; role?: Extract<UserRole, 'STUDENT' | 'TEACHER'> }
-  | { audience: 'admin'; provider: OAuthProvider };
+  { audience: 'client'; provider: OAuthProvider } | { audience: 'admin'; provider: OAuthProvider };
 
 export class AuthError extends Error {
   constructor(
@@ -35,17 +34,8 @@ export function resolveApiBaseUrl(apiUrl: string | undefined): string {
  * 백엔드가 앱 딥링크로 돌려주는 일회용 code 를 `exchangeAuthCode` 로 교환한다.
  */
 export function buildOAuthLoginUrl(baseUrl: string, target: OAuthLoginTarget): string {
-  const query = [`provider=${encodeURIComponent(target.provider)}`];
-
-  if (target.audience === 'admin') {
-    return `${baseUrl}/auth/admin/login?${query.join('&')}`;
-  }
-
-  if (target.role) {
-    query.push(`role=${encodeURIComponent(target.role)}`);
-  }
-
-  return `${baseUrl}/auth/login?${query.join('&')}`;
+  const path = target.audience === 'admin' ? '/auth/admin/login' : '/auth/login';
+  return `${baseUrl}${path}?provider=${encodeURIComponent(target.provider)}`;
 }
 
 async function readJson(response: Response): Promise<unknown> {
