@@ -61,7 +61,7 @@ export function SignUpPage({ onSubmit }: SignUpPageProps) {
                 onChangeText={field.onChange}
                 onBlur={field.onBlur}
                 errorMessage={fieldState.error?.message}
-                autoCapitalize="none"
+                autoCapitalize="words"
                 autoComplete="name"
                 returnKeyType="done"
                 onSubmitEditing={() => void handleSubmit()}
