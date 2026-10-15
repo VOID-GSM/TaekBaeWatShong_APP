@@ -8,7 +8,7 @@ import {
 
 import { appUserSchema } from '@/entities/user';
 
-import { requestDataGsmAuthCode } from '../api/oauth-login';
+import { requestGoogleAuthCode } from '../api/oauth-login';
 import {
   type AppSession,
   clearStoredAppSession,
@@ -18,7 +18,9 @@ import {
 import { useAuthStore } from './auth-store';
 
 function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : '알 수 없는 인증 오류가 발생했습니다.';
+  return error instanceof AuthError
+    ? error.message
+    : '로그인 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.';
 }
 
 async function createSession(code: string): Promise<AppSession> {
@@ -64,16 +66,16 @@ async function restoreSession(): Promise<AppSession | null> {
 }
 
 /**
- * 학생·선생님 공통 DataGSM 로그인. 역할은 백엔드가 DataGSM 계정 유형으로 결정하며,
+ * 학생·선생님 공통 Google 로그인. 역할은 백엔드가 Google 계정으로 판별하며,
  * 처음 로그인하는 계정은 백엔드가 자동으로 가입시킨다. 사용자가 취소하면 false.
  */
-export async function loginWithDataGsm(): Promise<boolean> {
+export async function loginWithGoogle(): Promise<boolean> {
   const { status, user } = useAuthStore.getState();
   useAuthStore.getState().setStatus('loading');
   useAuthStore.getState().setError(null);
 
   try {
-    const code = await requestDataGsmAuthCode();
+    const code = await requestGoogleAuthCode();
 
     if (code === null) {
       useAuthStore.setState({ status, user });

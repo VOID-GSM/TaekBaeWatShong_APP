@@ -20,6 +20,7 @@
     "go:tunnel": "expo start --go --tunnel --port 8082"
   },
   "dependencies": {
+    "@expo-google-fonts/noto-sans-kr": "^0.4.4",
     "@hookform/resolvers": "^5.9.1",
     "@taekbae/api": "workspace:*",
     "@taekbae/types": "workspace:*",
@@ -30,6 +31,7 @@
     "expo-camera": "~57.0.5",
     "expo-constants": "~57.0.19",
     "expo-dev-client": "~57.0.19",
+    "expo-font": "~57.0.4",
     "expo-linking": "~57.0.10",
     "expo-router": "~57.0.22",
     "expo-secure-store": "~57.0.4",
@@ -44,6 +46,7 @@
     "react-native-reanimated": "~4.5.1",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.2",
+    "react-native-svg": "15.15.4",
     "zod": "^4.6.5",
     "zustand": "^5.0.15"
   },

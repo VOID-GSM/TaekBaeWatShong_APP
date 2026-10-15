@@ -2,7 +2,7 @@ import * as Linking from 'expo-linking';
 import * as SecureStore from 'expo-secure-store';
 import * as WebBrowser from 'expo-web-browser';
 
-import { getAppAccessToken, loginWithDataGsm, logout } from '../auth';
+import { getAppAccessToken, loginWithGoogle, logout } from '../auth';
 import { useAuthStore } from '../auth-store';
 
 jest.mock('expo-secure-store', () => ({
@@ -43,7 +43,7 @@ function mockCallback(query: string): void {
   });
 }
 
-describe('client DataGSM login', () => {
+describe('client Google login', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.mocked(Linking.parse).mockImplementation((url) => ({
@@ -69,10 +69,10 @@ describe('client DataGSM login', () => {
       .mockResolvedValueOnce(jsonResponse({ token }))
       .mockResolvedValueOnce(jsonResponse(user));
 
-    await expect(loginWithDataGsm()).resolves.toBe(true);
+    await expect(loginWithGoogle()).resolves.toBe(true);
 
     expect(WebBrowser.openAuthSessionAsync).toHaveBeenCalledWith(
-      'https://api.example.test/auth/login?provider=datagsm',
+      'https://api.example.test/auth/login?provider=google',
       'taekbaewatshong://oauth2/redirect',
     );
     expect(fetchMock.mock.calls[0]?.[0]).toBe(
@@ -94,17 +94,17 @@ describe('client DataGSM login', () => {
       type: 'cancel' as WebBrowser.WebBrowserResultType,
     });
 
-    await expect(loginWithDataGsm()).resolves.toBe(false);
+    await expect(loginWithGoogle()).resolves.toBe(false);
 
     expect(fetchMock).not.toHaveBeenCalled();
     expect(useAuthStore.getState().status).toBe('unauthenticated');
   });
 
   it('surfaces the error the backend puts on the callback', async () => {
-    const message = 'DataGSM 계정 상태(PENDING)로는 로그인할 수 없습니다';
+    const message = '이 Google 계정으로는 로그인할 수 없습니다';
     mockCallback(`error=${encodeURIComponent(message)}`);
 
-    await expect(loginWithDataGsm()).rejects.toThrow(message);
+    await expect(loginWithGoogle()).rejects.toThrow(message);
 
     expect(fetchMock).not.toHaveBeenCalled();
     expect(useAuthStore.getState()).toMatchObject({ status: 'unauthenticated', error: message });
@@ -118,7 +118,7 @@ describe('client DataGSM login', () => {
         jsonResponse({ id: 9, email: 'driver@example.test', name: '기사', role: 'ADMIN' }),
       );
 
-    await expect(loginWithDataGsm()).rejects.toThrow('학생·선생님 계정으로만');
+    await expect(loginWithGoogle()).rejects.toThrow('학생·선생님 계정으로만');
     expect(SecureStore.setItemAsync).not.toHaveBeenCalled();
   });
 
