@@ -38,9 +38,9 @@ function RootNavigator() {
       </Stack.Protected>
       <Stack.Protected guard={!isAuthenticated}>
         <Stack.Screen name="login" options={{ headerShown: false }} />
+        {/* 가입 API·진입 조건이 정해지지 않아 로그인 흐름에서 자동으로 열리지 않는다. 미인증일 때만 진입할 수 있다. */}
+        <Stack.Screen name="signup" options={{ headerShown: false }} />
       </Stack.Protected>
-      {/* 가입 API·진입 조건이 정해지지 않아 아직 가드 밖에 둔다. 로그인 흐름에서 자동으로 열리지 않는다. */}
-      <Stack.Screen name="signup" options={{ headerShown: false }} />
     </Stack>
   );
 }
