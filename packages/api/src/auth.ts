@@ -2,8 +2,7 @@ import { tokenResponseSchema, type User, userSchema } from '@taekbae/types';
 
 export type OAuthProvider = 'google';
 
-export type OAuthLoginTarget =
-  { audience: 'client'; provider: OAuthProvider } | { audience: 'admin'; provider: OAuthProvider };
+export type OAuthLoginTarget = { audience: 'client' | 'admin'; provider: OAuthProvider };
 
 export class AuthError extends Error {
   constructor(
