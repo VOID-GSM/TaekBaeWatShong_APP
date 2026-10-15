@@ -29,7 +29,7 @@ describe('LoginPage', () => {
     expect(loginAdminWithGoogle).toHaveBeenCalledTimes(1);
   });
 
-  it('로그인이 실패해도 화면에 에러 문구를 띄우지 않는다', async () => {
+  it('로그인이 실패하면 에러 문구를 보여준다', async () => {
     jest.mocked(loginAdminWithGoogle).mockImplementation(async () => {
       useAdminAuthStore.setState({ error: '로그인에 실패했습니다.' });
       throw new Error('로그인에 실패했습니다.');
@@ -38,7 +38,16 @@ describe('LoginPage', () => {
 
     await fireEvent.press(screen.getByRole('button', { name: BUTTON_LABEL }));
 
-    expect(screen.queryByText('로그인에 실패했습니다.')).toBeNull();
+    expect(await screen.findByRole('alert')).toHaveTextContent('로그인에 실패했습니다.');
+  });
+
+  it('로그인을 취소하면 에러 문구를 띄우지 않는다', async () => {
+    jest.mocked(loginAdminWithGoogle).mockResolvedValue(false);
+    await render(<LoginPage />);
+
+    await fireEvent.press(screen.getByRole('button', { name: BUTTON_LABEL }));
+
+    expect(screen.queryByRole('alert')).toBeNull();
   });
 
   it('로그인 중에는 버튼이 비활성화된다', async () => {

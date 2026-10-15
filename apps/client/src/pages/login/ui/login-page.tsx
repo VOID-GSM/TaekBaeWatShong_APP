@@ -7,9 +7,10 @@ import { Button, GoogleIcon, LogoMark, makeStyles, Typography } from '@/shared/u
 export function LoginPage() {
   const styles = useStyles();
   const status = useAuthStore((state) => state.status);
+  const error = useAuthStore((state) => state.error);
 
   const handleLogin = () => {
-    // 실패·취소 모두 화면에는 표시하지 않는다. 실패 문구는 스토어의 error 에 남는다.
+    // 실패 문구는 스토어의 error 로 화면에 표시한다. 취소는 error 를 남기지 않아 조용히 넘어간다.
     loginWithGoogle().catch(() => {});
   };
 
@@ -32,6 +33,11 @@ export function LoginPage() {
           loading={status === 'loading'}
           onPress={handleLogin}
         />
+        {error !== null && (
+          <Typography variant="caption" color="textDanger" align="center" accessibilityRole="alert">
+            {error}
+          </Typography>
+        )}
         <Typography variant="bodyMStrong" color="textTertiary" align="center">
           학교 구글 계정으로 로그인해 주세요
         </Typography>
