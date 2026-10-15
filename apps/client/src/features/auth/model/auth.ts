@@ -18,7 +18,9 @@ import {
 import { useAuthStore } from './auth-store';
 
 function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : '알 수 없는 인증 오류가 발생했습니다.';
+  return error instanceof AuthError
+    ? error.message
+    : '로그인 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.';
 }
 
 async function createSession(code: string): Promise<AppSession> {
