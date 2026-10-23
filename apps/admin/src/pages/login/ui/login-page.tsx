@@ -9,7 +9,6 @@ export function LoginPage() {
   const styles = useStyles();
   const status = useAdminAuthStore((state) => state.status);
   const error = useAdminAuthStore((state) => state.error);
-  // 스토어 status 는 provider 를 모르므로, 누른 버튼에만 로딩을 보이려고 따로 기억한다.
   const [pendingProvider, setPendingProvider] = useState<OAuthProvider | null>(null);
   const isLoading = status === 'loading';
 
@@ -82,7 +81,6 @@ const useStyles = makeStyles(({ colors, size, spacing }) => ({
     paddingBottom: spacing.lg,
     paddingHorizontal: spacing['2xl'],
   },
-  // 시안의 Halo(220) 안 Ring(160)은 둘 다 채움 없는 가운데 정렬 컨테이너라 Halo 하나로 합쳤다.
   halo: {
     width: size.logoHalo,
     height: size.logoHalo,

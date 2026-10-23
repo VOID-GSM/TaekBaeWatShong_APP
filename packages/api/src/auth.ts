@@ -28,10 +28,6 @@ export function resolveApiBaseUrl(apiUrl: string | undefined): string {
   return trimmed;
 }
 
-/**
- * 백엔드가 OAuth 인가 흐름을 직접 수행한다. 앱은 이 URL 을 인증 브라우저로 열기만 하고,
- * 백엔드가 앱 딥링크로 돌려주는 일회용 code 를 `exchangeAuthCode` 로 교환한다.
- */
 export function buildOAuthLoginUrl(baseUrl: string, target: OAuthLoginTarget): string {
   const path = target.audience === 'admin' ? '/auth/admin/login' : '/auth/login';
   return `${baseUrl}${path}?provider=${encodeURIComponent(target.provider)}`;

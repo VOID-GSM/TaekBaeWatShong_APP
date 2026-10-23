@@ -7,7 +7,6 @@ export const OAUTH_REDIRECT_PATH = 'oauth2/redirect';
 // 백엔드의 ADMIN_OAUTH2_REDIRECT_URI 와 정확히 같아야 한다.
 const OAUTH_REDIRECT_URI = `taekbaewatshong-admin://${OAUTH_REDIRECT_PATH}`;
 
-/** provider 로그인 브라우저를 열고 백엔드가 돌려준 일회용 code 를 반환한다. 취소하면 null. */
 export async function requestOAuthCode(provider: OAuthProvider): Promise<string | null> {
   const loginUrl = buildOAuthLoginUrl(resolveApiBaseUrl(process.env.EXPO_PUBLIC_API_URL), {
     audience: 'admin',
