@@ -7,11 +7,10 @@ export const OAUTH_REDIRECT_PATH = 'oauth2/redirect';
 // 백엔드의 OAUTH2_REDIRECT_URI 와 정확히 같아야 한다.
 const OAUTH_REDIRECT_URI = `taekbaewatshong://${OAUTH_REDIRECT_PATH}`;
 
-/** Google 로그인 브라우저를 열고 백엔드가 돌려준 일회용 code 를 반환한다. 취소하면 null. */
-export async function requestGoogleAuthCode(): Promise<string | null> {
+export async function requestDataGsmAuthCode(): Promise<string | null> {
   const loginUrl = buildOAuthLoginUrl(resolveApiBaseUrl(process.env.EXPO_PUBLIC_API_URL), {
     audience: 'client',
-    provider: 'google',
+    provider: 'datagsm',
   });
   const result = await WebBrowser.openAuthSessionAsync(loginUrl, OAUTH_REDIRECT_URI);
 

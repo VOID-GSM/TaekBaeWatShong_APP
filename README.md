@@ -136,23 +136,24 @@ Turborepo 가 패키지 단위로 캐싱하므로 두 번째 실행부터는 변
 | `EXPO_PUBLIC_WS_URL`  | 채팅 WebSocket URL                       |
 | `APP_VARIANT`         | `development` / `preview` / `production` |
 
-모든 사용자가 Google OAuth 로 로그인합니다. 앱에 따라 로그인 엔드포인트만 다릅니다.
+앱과 사용자에 따라 로그인 수단이 다릅니다.
 
-- **사용자 앱 (`apps/client`)**: 학생과 선생님이 Google OAuth로 로그인합니다.
-- **관리자 앱 (`apps/admin`)**: 택배기사님이 Google OAuth로 회원가입·로그인합니다.
+- **사용자 앱 (`apps/client`)**: 학생과 선생님이 DataGSM OAuth로 로그인합니다.
+- **관리자 앱 (`apps/admin`)**: 학생생활안전부 선생님·관리자는 DataGSM, 택배기사님은 Google OAuth로
+  회원가입·로그인합니다.
 
 OAuth 인가 흐름은 백엔드([TaekBaeWatShong_SERVER](https://github.com/VOID-GSM/TaekBaeWatShong_SERVER))가
 수행하므로 앱에는 Client ID·Secret 을 두지 않습니다. 필요한 값은 `EXPO_PUBLIC_API_URL` 뿐입니다.
 
-1. 앱이 인증 브라우저로 `/auth/login?provider=google`(사용자 앱) 또는
-   `/auth/admin/login?provider=google`(관리자 앱)을 엽니다.
+1. 앱이 인증 브라우저로 `/auth/login?provider=datagsm`(사용자 앱) 또는
+   `/auth/admin/login?provider=datagsm|google`(관리자 앱)을 엽니다.
 2. 백엔드가 로그인을 마치고 앱 딥링크로 `?code=`(실패 시 `?error=`)를 붙여 돌려보냅니다.
 3. 앱이 30초 안에 `GET /auth/token?code=` 로 JWT 를 받고, `GET /api/users/me` 로 사용자와
    역할을 확인한 뒤 `expo-secure-store` 에 세션을 저장합니다.
 
 가입 전용 API 는 없습니다. 처음 로그인하는 계정은 백엔드가 자동으로 가입시키며, 학생·선생님
-역할은 백엔드가 Google 계정으로 판별하므로 앱은 역할을 보내지 않습니다. 택배기사 계정은 백엔드 `ADMIN_EMAILS` 에 등록된
-Google 이메일만 허용됩니다.
+역할은 백엔드가 DataGSM 계정 유형으로 판별하므로 앱은 역할을 보내지 않습니다. 관리자 앱은
+provider 와 관계없이 백엔드 `ADMIN_EMAILS` 에 등록된 이메일만 허용됩니다.
 
 백엔드 환경 변수의 리다이렉트 URI 는 앱 scheme 과 정확히 일치해야 합니다.
 

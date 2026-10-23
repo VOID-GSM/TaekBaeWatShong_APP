@@ -1,8 +1,8 @@
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { loginWithGoogle, useAuthStore } from '@/features/auth';
-import { Button, GoogleIcon, LogoMark, makeStyles, Typography } from '@/shared/ui';
+import { loginWithDataGsm, useAuthStore } from '@/features/auth';
+import { Button, LogoMark, makeStyles, Typography } from '@/shared/ui';
 
 export function LoginPage() {
   const styles = useStyles();
@@ -11,7 +11,7 @@ export function LoginPage() {
 
   const handleLogin = () => {
     // 실패 문구는 스토어의 error 로 화면에 표시한다. 취소는 error 를 남기지 않아 조용히 넘어간다.
-    loginWithGoogle().catch(() => {});
+    loginWithDataGsm().catch(() => {});
   };
 
   return (
@@ -27,9 +27,8 @@ export function LoginPage() {
 
       <View style={styles.actions}>
         <Button
-          label="Google로 계속하기"
+          label="DataGSM으로 계속하기"
           labelVariant="bodyMStrong"
-          leftIcon={<GoogleIcon />}
           loading={status === 'loading'}
           onPress={handleLogin}
         />
@@ -39,7 +38,7 @@ export function LoginPage() {
           </Typography>
         )}
         <Typography variant="bodyMStrong" color="textTertiary" align="center">
-          학교 구글 계정으로 로그인해 주세요
+          학교 DataGSM 계정으로 로그인해 주세요
         </Typography>
       </View>
     </SafeAreaView>
