@@ -1,6 +1,6 @@
 import { tokenResponseSchema, type User, userSchema } from '@taekbae/types';
 
-export type OAuthProvider = 'google';
+export type OAuthProvider = 'google' | 'datagsm';
 
 export type OAuthLoginTarget = { audience: 'client' | 'admin'; provider: OAuthProvider };
 
