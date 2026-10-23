@@ -2,7 +2,7 @@ import * as Linking from 'expo-linking';
 import * as SecureStore from 'expo-secure-store';
 import * as WebBrowser from 'expo-web-browser';
 
-import { loginAdminWithGoogle, logoutAdmin } from '../auth';
+import { loginAdmin, logoutAdmin } from '../auth';
 import { useAdminAuthStore } from '../auth-store';
 
 jest.mock('expo-secure-store', () => ({
@@ -43,7 +43,7 @@ function mockCallback(query: string): void {
   });
 }
 
-describe('admin Google sign-up and login', () => {
+describe('admin sign-up and login', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.mocked(Linking.parse).mockImplementation((url) => ({
@@ -61,35 +61,38 @@ describe('admin Google sign-up and login', () => {
     delete process.env.EXPO_PUBLIC_API_URL;
   });
 
-  it('opens the admin Google login and stores the ADMIN session', async () => {
-    const token = createJwt(EXPIRES_AT_SECONDS);
-    const user = { id: 7, email: 'driver@example.test', name: '택배기사', role: 'ADMIN' };
-    mockCallback('code=one-time-code');
-    fetchMock
-      .mockResolvedValueOnce(jsonResponse({ token }))
-      .mockResolvedValueOnce(jsonResponse(user));
+  it.each(['datagsm', 'google'] as const)(
+    'opens the admin %s login and stores the ADMIN session',
+    async (provider) => {
+      const token = createJwt(EXPIRES_AT_SECONDS);
+      const user = { id: 7, email: 'driver@example.test', name: '택배기사', role: 'ADMIN' };
+      mockCallback('code=one-time-code');
+      fetchMock
+        .mockResolvedValueOnce(jsonResponse({ token }))
+        .mockResolvedValueOnce(jsonResponse(user));
 
-    await expect(loginAdminWithGoogle()).resolves.toBe(true);
+      await expect(loginAdmin(provider)).resolves.toBe(true);
 
-    expect(WebBrowser.openAuthSessionAsync).toHaveBeenCalledWith(
-      'https://api.example.test/auth/admin/login?provider=google',
-      'taekbaewatshong-admin://oauth2/redirect',
-    );
-    expect(fetchMock.mock.calls[0]?.[0]).toBe(
-      'https://api.example.test/auth/token?code=one-time-code',
-    );
-    expect(SecureStore.setItemAsync).toHaveBeenCalledWith(
-      SESSION_KEY,
-      JSON.stringify({ accessToken: token, expiresAt: EXPIRES_AT_SECONDS * 1000, user }),
-    );
-    expect(useAdminAuthStore.getState()).toMatchObject({ status: 'authenticated', user });
-  });
+      expect(WebBrowser.openAuthSessionAsync).toHaveBeenCalledWith(
+        `https://api.example.test/auth/admin/login?provider=${provider}`,
+        'taekbaewatshong-admin://oauth2/redirect',
+      );
+      expect(fetchMock.mock.calls[0]?.[0]).toBe(
+        'https://api.example.test/auth/token?code=one-time-code',
+      );
+      expect(SecureStore.setItemAsync).toHaveBeenCalledWith(
+        SESSION_KEY,
+        JSON.stringify({ accessToken: token, expiresAt: EXPIRES_AT_SECONDS * 1000, user }),
+      );
+      expect(useAdminAuthStore.getState()).toMatchObject({ status: 'authenticated', user });
+    },
+  );
 
-  it('surfaces the backend rejection for a Google account that is not allowed', async () => {
+  it('surfaces the backend rejection for an account that is not allowed', async () => {
     const message = '관리자 계정이 아닙니다';
     mockCallback(`error=${encodeURIComponent(message)}`);
 
-    await expect(loginAdminWithGoogle()).rejects.toThrow(message);
+    await expect(loginAdmin('datagsm')).rejects.toThrow(message);
 
     expect(fetchMock).not.toHaveBeenCalled();
     expect(useAdminAuthStore.getState()).toMatchObject({
@@ -106,7 +109,7 @@ describe('admin Google sign-up and login', () => {
         jsonResponse({ id: 3, email: 's25048@gsm.hs.kr', name: '학생', role: 'STUDENT' }),
       );
 
-    await expect(loginAdminWithGoogle()).rejects.toThrow('택배기사(관리자) 계정으로만');
+    await expect(loginAdmin('datagsm')).rejects.toThrow('관리자 계정으로만');
     expect(SecureStore.setItemAsync).not.toHaveBeenCalled();
   });
 
@@ -115,7 +118,7 @@ describe('admin Google sign-up and login', () => {
       type: 'cancel' as WebBrowser.WebBrowserResultType,
     });
 
-    await expect(loginAdminWithGoogle()).resolves.toBe(false);
+    await expect(loginAdmin('google')).resolves.toBe(false);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
