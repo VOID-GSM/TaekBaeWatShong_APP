@@ -7,7 +7,6 @@ import { type SignUpFormValues, useSignUpForm } from '@/features/sign-up';
 import { Badge, Button, GoogleIcon, makeStyles, TextField, TopBar, Typography } from '@/shared/ui';
 
 export interface SignUpPageProps {
-  /** 가입 API 가 정해지면 연결한다. 없으면 검증만 하고 아무 일도 하지 않는다. */
   onSubmit?: (values: SignUpFormValues) => void | Promise<void>;
 }
 

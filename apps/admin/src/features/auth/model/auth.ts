@@ -2,13 +2,14 @@ import {
   AuthError,
   exchangeAuthCode,
   fetchCurrentUser,
+  type OAuthProvider,
   readTokenExpiresAt,
   resolveApiBaseUrl,
 } from '@taekbae/api';
 
 import { adminUserSchema } from '@/entities/user';
 
-import { requestGoogleAuthCode } from '../api/oauth-login';
+import { requestOAuthCode } from '../api/oauth-login';
 import {
   type AdminSession,
   clearStoredAdminSession,
@@ -35,7 +36,7 @@ async function createSession(code: string): Promise<AdminSession> {
   const user = adminUserSchema.safeParse(await fetchCurrentUser(baseUrl, accessToken));
 
   if (!user.success) {
-    throw new AuthError('택배기사(관리자) 계정으로만 로그인할 수 있습니다.');
+    throw new AuthError('관리자 계정으로만 로그인할 수 있습니다.');
   }
 
   const session: AdminSession = { accessToken, expiresAt, user: user.data };
@@ -43,7 +44,6 @@ async function createSession(code: string): Promise<AdminSession> {
   return session;
 }
 
-/** 저장된 세션을 읽어 스토어에 반영한다. 만료됐으면 지우고 null. */
 async function restoreSession(): Promise<AdminSession | null> {
   try {
     const session = await readStoredAdminSession();
@@ -65,17 +65,13 @@ async function restoreSession(): Promise<AdminSession | null> {
   }
 }
 
-/**
- * 택배기사 Google 회원가입 겸 로그인. 백엔드에 가입 전용 API 가 없고, 허용된 Google 계정이
- * 처음 로그인하면 백엔드가 ADMIN 계정을 만든다. 사용자가 취소하면 false.
- */
-export async function loginAdminWithGoogle(): Promise<boolean> {
+export async function loginAdmin(provider: OAuthProvider): Promise<boolean> {
   const { status, user } = useAdminAuthStore.getState();
   useAdminAuthStore.getState().setStatus('loading');
   useAdminAuthStore.getState().setError(null);
 
   try {
-    const code = await requestGoogleAuthCode();
+    const code = await requestOAuthCode(provider);
 
     if (code === null) {
       useAdminAuthStore.setState({ status, user });

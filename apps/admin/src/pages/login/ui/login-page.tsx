@@ -1,17 +1,23 @@
+import { useState } from 'react';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { loginAdminWithGoogle, useAdminAuthStore } from '@/features/auth';
+import { loginAdmin, type OAuthProvider, useAdminAuthStore } from '@/features/auth';
 import { Badge, Button, GoogleIcon, LogoMark, makeStyles, Typography } from '@/shared/ui';
 
 export function LoginPage() {
   const styles = useStyles();
   const status = useAdminAuthStore((state) => state.status);
   const error = useAdminAuthStore((state) => state.error);
+  const [pendingProvider, setPendingProvider] = useState<OAuthProvider | null>(null);
+  const isLoading = status === 'loading';
 
-  const handleLogin = () => {
+  const handleLogin = (provider: OAuthProvider) => {
+    setPendingProvider(provider);
     // 실패 문구는 스토어의 error 로 화면에 표시한다. 취소는 error 를 남기지 않아 조용히 넘어간다.
-    loginAdminWithGoogle().catch(() => {});
+    loginAdmin(provider)
+      .catch(() => {})
+      .finally(() => setPendingProvider(null));
   };
 
   return (
@@ -29,21 +35,36 @@ export function LoginPage() {
       </View>
 
       <View style={styles.actions}>
-        <Button
-          label="Google로 계속하기"
-          labelVariant="buttonL"
-          leftIcon={<GoogleIcon />}
-          loading={status === 'loading'}
-          onPress={handleLogin}
-        />
+        <View style={styles.option}>
+          <Button
+            label="DataGSM으로 계속하기"
+            labelVariant="buttonL"
+            loading={isLoading && pendingProvider === 'datagsm'}
+            disabled={isLoading}
+            onPress={() => handleLogin('datagsm')}
+          />
+          <Typography variant="caption" color="textTertiary" align="center">
+            학생생활안전부 선생님 · 관리자
+          </Typography>
+        </View>
+        <View style={styles.option}>
+          <Button
+            label="Google로 계속하기"
+            labelVariant="buttonL"
+            leftIcon={<GoogleIcon />}
+            loading={isLoading && pendingProvider === 'google'}
+            disabled={isLoading}
+            onPress={() => handleLogin('google')}
+          />
+          <Typography variant="caption" color="textTertiary" align="center">
+            택배 기사님
+          </Typography>
+        </View>
         {error !== null && (
           <Typography variant="caption" color="textDanger" align="center" accessibilityRole="alert">
             {error}
           </Typography>
         )}
-        <Typography variant="caption" color="textTertiary" align="center">
-          관리자 계정으로 로그인해 주세요
-        </Typography>
       </View>
     </SafeAreaView>
   );
@@ -60,7 +81,6 @@ const useStyles = makeStyles(({ colors, size, spacing }) => ({
     paddingBottom: spacing.lg,
     paddingHorizontal: spacing['2xl'],
   },
-  // 시안의 Halo(220) 안 Ring(160)은 둘 다 채움 없는 가운데 정렬 컨테이너라 Halo 하나로 합쳤다.
   halo: {
     width: size.logoHalo,
     height: size.logoHalo,
@@ -68,6 +88,7 @@ const useStyles = makeStyles(({ colors, size, spacing }) => ({
     justifyContent: 'center',
   },
   titles: { alignItems: 'center', gap: spacing.md },
+  option: { gap: spacing.sm },
   actions: {
     gap: spacing.mdPlus,
     paddingTop: spacing['3xl'],

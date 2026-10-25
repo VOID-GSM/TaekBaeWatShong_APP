@@ -8,7 +8,7 @@ import {
 
 import { appUserSchema } from '@/entities/user';
 
-import { requestGoogleAuthCode } from '../api/oauth-login';
+import { requestDataGsmAuthCode } from '../api/oauth-login';
 import {
   type AppSession,
   clearStoredAppSession,
@@ -43,7 +43,6 @@ async function createSession(code: string): Promise<AppSession> {
   return session;
 }
 
-/** 저장된 세션을 읽어 스토어에 반영한다. 만료됐으면 지우고 null. */
 async function restoreSession(): Promise<AppSession | null> {
   try {
     const session = await readStoredAppSession();
@@ -65,17 +64,13 @@ async function restoreSession(): Promise<AppSession | null> {
   }
 }
 
-/**
- * 학생·선생님 공통 Google 로그인. 역할은 백엔드가 Google 계정으로 판별하며,
- * 처음 로그인하는 계정은 백엔드가 자동으로 가입시킨다. 사용자가 취소하면 false.
- */
-export async function loginWithGoogle(): Promise<boolean> {
+export async function loginWithDataGsm(): Promise<boolean> {
   const { status, user } = useAuthStore.getState();
   useAuthStore.getState().setStatus('loading');
   useAuthStore.getState().setError(null);
 
   try {
-    const code = await requestGoogleAuthCode();
+    const code = await requestDataGsmAuthCode();
 
     if (code === null) {
       useAuthStore.setState({ status, user });
