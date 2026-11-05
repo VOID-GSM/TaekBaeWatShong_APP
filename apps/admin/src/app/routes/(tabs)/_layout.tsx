@@ -29,7 +29,7 @@ export default function TabsLayout() {
             <MainTabButton icon={qrXml} label="QR 코드" />
           </TabTrigger>
           {/* 채팅 화면이 머지되면 탭이 아닌 스택 화면(/chats)으로 연결한다. */}
-          <MainTabButton icon={chatXml} label="채팅" />
+          <MainTabButton icon={chatXml} label="채팅" disabled />
         </MainTabBar>
       </TabList>
     </Tabs>
