@@ -10,10 +10,12 @@ const palette = {
   red600: '#d93036',
   indigo500: '#4f5ed8',
   indigo700: '#3a47be',
+  grey50: '#f1f3fa',
   grey200: '#e3e6f2',
 } as const;
 
 export const lightColors = {
+  bgApp: palette.grey50,
   bgSurface: palette.white,
   bgNavy: palette.navy700,
   bgBrandSoft: palette.indigo50,
