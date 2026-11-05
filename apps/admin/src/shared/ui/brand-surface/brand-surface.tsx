@@ -68,7 +68,9 @@ export function BrandSurface({
       {...props}
       onLayout={(event) => {
         const { width, height } = event.nativeEvent.layout;
-        setLayout({ width, height });
+        setLayout((prev) =>
+          prev.width === width && prev.height === height ? prev : { width, height },
+        );
         onLayout?.(event);
       }}
       style={[styles.container, style]}
