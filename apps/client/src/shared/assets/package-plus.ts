@@ -1,0 +1,11 @@
+/**
+ * 택배 등록 아이콘 (Figma `icon/package-plus`, 22×22).
+ * 선 색은 `currentColor` 라 `SvgXml` 의 `color` 로 토큰 색을 넣는다.
+ */
+export const packagePlusXml = `<svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="icon/package-plus">
+<path id="Vector" d="M14.6667 14.6667H17.4167M17.4167 14.6667H20.1667M17.4167 14.6667V11.9167M17.4167 14.6667V17.4167" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+<path id="Vector_2" d="M19.25 9.16667V7.33333C19.2497 7.01184 19.1648 6.69608 19.0039 6.41773C18.843 6.13939 18.6118 5.90825 18.3333 5.7475L11.9167 2.08083C11.638 1.91992 11.3218 1.83521 11 1.83521C10.6782 1.83521 10.362 1.91992 10.0833 2.08083L3.66667 5.7475C3.38824 5.90825 3.15698 6.13939 2.99609 6.41773C2.8352 6.69608 2.75033 7.01184 2.75 7.33333V14.6667C2.75033 14.9882 2.8352 15.3039 2.99609 15.5823C3.15698 15.8606 3.38824 16.0918 3.66667 16.2525L10.0833 19.9192C10.362 20.0801 10.6782 20.1648 11 20.1648C11.3218 20.1648 11.638 20.0801 11.9167 19.9192L13.75 18.8742" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+<path id="Vector_3" d="M3.025 6.41667L11 11M11 11L18.975 6.41667M11 11V20.1667" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor"/>
+</g>
+</svg>`;
