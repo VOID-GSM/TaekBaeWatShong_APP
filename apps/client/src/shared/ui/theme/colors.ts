@@ -8,12 +8,17 @@ const palette = {
   slate500: '#6e7595',
   slate400: '#9aa1bf',
   red600: '#d93036',
+  indigo500: '#4f5ed8',
+  indigo700: '#3a47be',
 } as const;
 
 export const lightColors = {
   bgSurface: palette.white,
   bgNavy: palette.navy700,
   bgBrandSoft: palette.indigo50,
+  /** 브랜드 그라디언트 시작·끝 (Figma 브랜드 채움) */
+  bgBrandStart: palette.indigo500,
+  bgBrandEnd: palette.indigo700,
   textPrimary: palette.navy900,
   textSecondary: palette.slate500,
   textTertiary: palette.slate400,
