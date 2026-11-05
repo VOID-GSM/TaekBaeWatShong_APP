@@ -1,4 +1,5 @@
 export * from './badge';
+export * from './brand-surface';
 export * from './button';
 export * from './google-icon';
 export * from './logo-mark';
