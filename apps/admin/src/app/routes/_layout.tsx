@@ -34,7 +34,7 @@ function RootNavigator() {
   return (
     <Stack>
       <Stack.Protected guard={isAuthenticated}>
-        <Stack.Screen name="index" />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack.Protected>
       <Stack.Protected guard={!isAuthenticated}>
         <Stack.Screen name="login" options={{ headerShown: false }} />
