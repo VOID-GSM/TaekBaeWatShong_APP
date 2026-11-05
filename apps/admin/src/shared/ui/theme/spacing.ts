@@ -17,7 +17,13 @@ export const spacing = {
 } as const;
 
 /** Figma 변수(radius/*). */
-export const radius = { md: 16, lg: 22, full: 999 } as const;
+export const radius = {
+  md: 16,
+  lg: 22,
+  /** 하단 탭 바 위쪽 모서리. Figma 에 변수 없이 쓰인 값. */
+  sheet: 20,
+  full: 999,
+} as const;
 
 export const size = {
   buttonL: 56,
@@ -31,6 +37,9 @@ export const size = {
   iconL: 24,
   /** 버튼 안 아이콘 */
   iconM: 22,
+  /** 하단 탭 바 항목의 알약 모양 배경 */
+  tabPillWidth: 56,
+  tabPillHeight: 30,
   logoMark: 130,
   logoRing: 160,
   logoHalo: 220,
@@ -54,6 +63,18 @@ export const shadow = {
         blurRadius: 16,
         spreadDistance: -4,
         color: 'rgba(15, 23, 41, 0.04)',
+      },
+    ],
+  },
+  /** Figma `Shadow/Float-Up` — 하단 탭 바처럼 화면 아래에 붙은 면 */
+  floatUp: {
+    boxShadow: [
+      {
+        offsetX: 0,
+        offsetY: -4,
+        blurRadius: 20,
+        spreadDistance: 0,
+        color: 'rgba(15, 23, 41, 0.08)',
       },
     ],
   },

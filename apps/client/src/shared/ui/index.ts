@@ -1,3 +1,4 @@
+export * from './brand-surface';
 export * from './button';
 export * from './logo-mark';
 export * from './theme';
