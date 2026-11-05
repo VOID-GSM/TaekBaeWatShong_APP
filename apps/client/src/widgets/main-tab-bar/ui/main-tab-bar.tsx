@@ -29,9 +29,8 @@ export interface MainTabButtonProps extends Omit<PressableProps, 'children'> {
   icon: string;
   /** 스크린 리더용 이름. 시안에 글자 라벨이 없다. */
   label: string;
-  /** 아이콘 SVG 크기. 기본은 22. 알림처럼 알약 전체를 그린 SVG 는 알약 크기를 넘긴다. */
-  iconWidth?: number;
-  iconHeight?: number;
+  /** 아이콘 오른쪽 위 빨간 점. 새 알림이 있을 때만 켠다. */
+  showDot?: boolean;
   /** `<TabTrigger asChild>` 가 넣어 준다. */
   isFocused?: boolean;
   /** `<TabTrigger asChild>` 가 넣어 주지만 이동은 onPress 가 처리하므로 쓰지 않는다. */
@@ -42,8 +41,7 @@ export interface MainTabButtonProps extends Omit<PressableProps, 'children'> {
 export function MainTabButton({
   icon,
   label,
-  iconWidth,
-  iconHeight,
+  showDot = false,
   isFocused = false,
   href: _href,
   style,
@@ -52,18 +50,21 @@ export function MainTabButton({
   const styles = useStyles();
   const { colors, size } = useTheme();
   const iconNode = (
-    <SvgXml
-      xml={icon}
-      width={iconWidth ?? size.iconM}
-      height={iconHeight ?? size.iconM}
-      color={isFocused ? colors.textOnBrand : colors.textTertiary}
-    />
+    <>
+      <SvgXml
+        xml={icon}
+        width={size.iconM}
+        height={size.iconM}
+        color={isFocused ? colors.textOnBrand : colors.textTertiary}
+      />
+      {showDot && <View style={styles.dot} />}
+    </>
   );
 
   return (
     <Pressable
       accessibilityRole="tab"
-      accessibilityLabel={label}
+      accessibilityLabel={showDot ? `${label}, 새 알림 있음` : label}
       accessibilityState={{ selected: isFocused }}
       {...props}
       // TabTrigger 가 넘기는 기본 스타일(가로·양끝 정렬)은 시안과 달라 이 버튼 스타일로 덮는다.
@@ -83,6 +84,9 @@ export function MainTabButton({
     </Pressable>
   );
 }
+
+// 점 지름 7 + 양쪽 테두리 2
+const DOT_SIZE = 11;
 
 const useStyles = makeStyles(({ colors, opacity, radius, shadow, size, spacing }) => ({
   bar: {
@@ -106,6 +110,18 @@ const useStyles = makeStyles(({ colors, opacity, radius, shadow, size, spacing }
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radius.full,
+  },
+  // Figma `Pill` 의 Dot: 지름 7 + 흰 테두리 2, 알약 기준 중심 (37.5, 6.5)
+  dot: {
+    position: 'absolute',
+    top: 6.5 - DOT_SIZE / 2,
+    left: 37.5 - DOT_SIZE / 2,
+    width: DOT_SIZE,
+    height: DOT_SIZE,
+    borderRadius: radius.full,
+    borderWidth: 2,
+    borderColor: colors.bgSurface,
+    backgroundColor: colors.textDanger,
   },
   pressed: { opacity: opacity.pressed },
 }));
