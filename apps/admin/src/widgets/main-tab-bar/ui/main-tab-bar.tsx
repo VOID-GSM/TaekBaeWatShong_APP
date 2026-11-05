@@ -19,7 +19,9 @@ export function MainTabBar({ style, children, ...props }: ViewProps) {
       // TabList 가 넘기는 기본 스타일(가로 정렬)은 안쪽 row 가 맡으므로 바깥 틀 스타일로 덮는다.
       style={[style, styles.bar, { paddingBottom: Math.max(insets.bottom, spacing.sm) }]}
     >
-      <View style={styles.row}>{children}</View>
+      <View style={styles.row} accessibilityRole="tablist">
+        {children}
+      </View>
     </View>
   );
 }
