@@ -1,0 +1,66 @@
+import { ScrollView, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { ParcelCard, ParcelSummaryCard } from '@/entities/parcel';
+import { useAuthStore } from '@/features/auth';
+import { IconButton, makeStyles, Typography } from '@/shared/ui';
+
+import { MOCK_PARCELS, MOCK_SUMMARY } from '../model/mock';
+
+export function HomePage() {
+  const styles = useStyles();
+  const userName = useAuthStore((state) => state.user?.name);
+
+  return (
+    <SafeAreaView style={styles.screen} edges={['top']}>
+      <View style={styles.header}>
+        <View>
+          <Typography variant="bodyL" color="textSecondary">
+            안녕하세요 👋
+          </Typography>
+          <Typography variant="titlePage" accessibilityRole="header">
+            {userName ?? '김민준'}님
+          </Typography>
+        </View>
+        <IconButton icon="bell" accessibilityLabel="알림" />
+      </View>
+
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <ParcelSummaryCard summary={MOCK_SUMMARY} />
+
+        <View style={styles.listHeader}>
+          <Typography variant="bodyMStrong" style={styles.flex}>
+            내 택배
+          </Typography>
+          <Typography variant="bodyMStrong" color="textTertiary">
+            최신순
+          </Typography>
+        </View>
+
+        {MOCK_PARCELS.map((parcel) => (
+          <ParcelCard key={parcel.id} parcel={parcel} />
+        ))}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const useStyles = makeStyles(({ colors, spacing }) => ({
+  screen: { flex: 1, backgroundColor: colors.bgApp },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: spacing.xs,
+    paddingBottom: spacing.sm,
+    paddingHorizontal: spacing.lg,
+  },
+  content: {
+    gap: spacing.lg,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.lg,
+    paddingHorizontal: spacing.lg,
+  },
+  listHeader: { flexDirection: 'row', alignItems: 'center' },
+  flex: { flex: 1 },
+}));
