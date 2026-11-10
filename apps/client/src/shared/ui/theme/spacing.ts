@@ -3,9 +3,12 @@ import type { ViewStyle } from 'react-native';
 /**
  * 간격. xs~2xl 은 Figma 변수(space/*).
  * mdPlus·3xl·4xl 은 시안에 변수 없이 쓰인 수치를 토큰으로 올린 것 — 디자이너 확인 필요.
+ * (Figma 의 space/3xl 은 32 라 여기 3xl(28)과 다르다.)
  */
 export const spacing = {
+  '2xs': 2,
   xs: 4,
+  xsPlus: 6,
   sm: 8,
   md: 12,
   mdPlus: 14,
@@ -18,15 +21,26 @@ export const spacing = {
 
 /** Figma 변수(radius/*). */
 export const radius = {
+  sm: 10,
+  md: 16,
   lg: 22,
+  xl: 26,
+  '2xl': 32,
   full: 999,
   logoMark: 40,
+  /** 탭바 위쪽 모서리 */
+  tabBar: 20,
 } as const;
 
 export const size = {
   buttonL: 56,
+  buttonM: 40,
   /** 버튼 안 아이콘 */
   iconM: 22,
+  iconButton: 40,
+  topBar: 56,
+  tabPillWidth: 56,
+  tabPillHeight: 30,
   logoMark: 130,
   logoRing: 160,
 } as const;
@@ -49,6 +63,18 @@ export const shadow = {
         blurRadius: 16,
         spreadDistance: -4,
         color: 'rgba(15, 23, 41, 0.04)',
+      },
+    ],
+  },
+  /** Shadow/Float-Up — 하단 탭바 */
+  floatUp: {
+    boxShadow: [
+      {
+        offsetX: 0,
+        offsetY: -4,
+        blurRadius: 20,
+        spreadDistance: 0,
+        color: 'rgba(15, 23, 41, 0.08)',
       },
     ],
   },
