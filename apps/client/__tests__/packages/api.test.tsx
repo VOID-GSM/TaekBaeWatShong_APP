@@ -104,6 +104,22 @@ describe('fetchMyParcels', () => {
     await expect(fetchMyParcels()).rejects.toBeInstanceOf(ApiError);
     expect(onUnauthorized).toHaveBeenCalledTimes(1);
   });
+
+  it('로그인 페이지로 리다이렉트된 HTML 응답은 인증 실패로 본다', async () => {
+    adapter.mockImplementationOnce(async (config: InternalAxiosRequestConfig) => ({
+      data: '<!DOCTYPE html><html></html>',
+      status: 200,
+      statusText: 'OK',
+      headers: { 'content-type': 'text/html;charset=UTF-8' },
+      config,
+    }));
+
+    await expect(fetchMyParcels()).rejects.toMatchObject({
+      message: '로그인이 만료되었습니다. 다시 로그인해 주세요.',
+      status: 401,
+    });
+    expect(onUnauthorized).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('useCreateReportMutation', () => {

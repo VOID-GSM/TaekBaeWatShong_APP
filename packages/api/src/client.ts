@@ -1,4 +1,4 @@
-import axios, { type AxiosError, type AxiosInstance } from 'axios';
+import axios, { type AxiosError, AxiosHeaders, type AxiosInstance } from 'axios';
 
 export interface ApiConfig {
   baseURL: string;
@@ -30,7 +30,15 @@ export function configureApi(config: ApiConfig) {
   });
 
   instance.interceptors.response.use(
-    (res) => res,
+    (res) => {
+      // 서버는 토큰이 없거나 만료되면 401 대신 302 로 로그인 페이지(HTML)를 돌려준다.
+      // 리다이렉트를 따라간 200 HTML 응답은 인증 실패로 본다.
+      if (isHtmlResponse(res.headers)) {
+        config.onUnauthorized?.();
+        return Promise.reject(new ApiError('로그인이 만료되었습니다. 다시 로그인해 주세요.', 401));
+      }
+      return res;
+    },
     (error: AxiosError<unknown>) => {
       const status = error.response?.status;
       if (status === 401) config.onUnauthorized?.();
@@ -38,6 +46,14 @@ export function configureApi(config: ApiConfig) {
       return Promise.reject(new ApiError(getErrorMessage(error, body), status, body.code));
     },
   );
+}
+
+function isHtmlResponse(headers: unknown): boolean {
+  const contentType =
+    headers instanceof AxiosHeaders
+      ? headers.getContentType()
+      : (headers as Record<string, unknown> | undefined)?.['content-type'];
+  return typeof contentType === 'string' && contentType.includes('text/html');
 }
 
 function readErrorBody(data: unknown): { message?: string; code?: string } {
