@@ -5,6 +5,7 @@ export * from './gradient-view';
 export * from './icon';
 export * from './icon-button';
 export * from './logo-mark';
+export * from './select-menu';
 export * from './tab-bar';
 export * from './theme';
 export * from './top-bar';

@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { type ColorToken, makeStyles } from '../theme';
 import { Typography } from '../typography';
 
-export type BadgeTone = 'brand' | 'success' | 'danger';
+export type BadgeTone = 'brand' | 'success' | 'danger' | 'neutral';
 
 export interface BadgeProps {
   label: string;
@@ -12,11 +12,12 @@ export interface BadgeProps {
 
 const toneColors: Record<
   BadgeTone,
-  { bg: 'bgBrandSoft' | 'bgSuccessSoft' | 'bgDangerSoft'; text: ColorToken }
+  { bg: 'bgBrandSoft' | 'bgSuccessSoft' | 'bgDangerSoft' | 'bgNeutralSoft'; text: ColorToken }
 > = {
   brand: { bg: 'bgBrandSoft', text: 'textBrand' },
   success: { bg: 'bgSuccessSoft', text: 'textSuccess' },
   danger: { bg: 'bgDangerSoft', text: 'textDanger' },
+  neutral: { bg: 'bgNeutralSoft', text: 'textSecondary' },
 };
 
 export function Badge({ label, tone = 'brand' }: BadgeProps) {
@@ -43,4 +44,5 @@ const useStyles = makeStyles(({ colors, radius, spacing }) => ({
   bgBrandSoft: { backgroundColor: colors.bgBrandSoft },
   bgSuccessSoft: { backgroundColor: colors.bgSuccessSoft },
   bgDangerSoft: { backgroundColor: colors.bgDangerSoft },
+  bgNeutralSoft: { backgroundColor: colors.bgNeutralSoft },
 }));

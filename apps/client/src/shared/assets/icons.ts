@@ -133,6 +133,21 @@ export const icons = {
 <circle id="Step dot" cx="5" cy="5" r="5" fill="#CDD2E6"/>
 </svg>`,
   },
+  // 아래 두 아이콘은 시안에 없어 선택 메뉴용으로 직접 그렸다.
+  chevronDown: {
+    width: 16,
+    height: 16,
+    xml: `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 6L8 10L12 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="#9AA1BF"/>
+</svg>`,
+  },
+  check: {
+    width: 16,
+    height: 16,
+    xml: `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M3.33333 8.33333L6.33333 11.3333L12.6667 5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="#4352CF"/>
+</svg>`,
+  },
 } as const;
 
 export type IconName = keyof typeof icons;
