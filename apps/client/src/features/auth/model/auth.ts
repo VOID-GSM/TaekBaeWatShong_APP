@@ -96,6 +96,16 @@ export async function getAppAccessToken(): Promise<string | null> {
   return session?.accessToken ?? null;
 }
 
+/** API 요청마다 불린다 — 인증 스토어를 건드리지 않고 저장된 토큰만 읽는다. */
+export async function readAppAccessToken(): Promise<string | null> {
+  try {
+    const session = await readStoredAppSession();
+    return session && session.expiresAt > Date.now() ? session.accessToken : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function logout(): Promise<void> {
   try {
     await clearStoredAppSession();
