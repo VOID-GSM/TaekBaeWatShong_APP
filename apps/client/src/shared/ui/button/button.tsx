@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -7,7 +7,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { BrandGradient } from '../brand-surface';
+import { useBrandBackground } from '../brand-surface';
 import { type ColorToken, makeStyles, type TypographyVariant, useTheme } from '../theme';
 import { Typography } from '../typography';
 
@@ -48,7 +48,11 @@ export function Button({
 }: ButtonProps) {
   const styles = useStyles();
   const { colors } = useTheme();
-  const [layout, setLayout] = useState({ width: 0, height: 0 });
+  const background = useBrandBackground({
+    angle: BRAND_ANGLE,
+    enabled: variant === 'brand',
+    onLayout,
+  });
   const isDisabled = disabled === true || loading;
   const labelColor = LABEL_COLOR[variant];
 
@@ -59,26 +63,17 @@ export function Button({
       accessibilityState={{ disabled: isDisabled, busy: loading }}
       {...props}
       disabled={isDisabled}
-      onLayout={(event) => {
-        if (variant === 'brand') {
-          const { width, height } = event.nativeEvent.layout;
-          setLayout((prev) =>
-            prev.width === width && prev.height === height ? prev : { width, height },
-          );
-        }
-        onLayout?.(event);
-      }}
+      onLayout={background.onLayout}
       style={({ pressed }) => [
         styles.container,
         styles[variant],
+        background.style,
         pressed && styles.pressed,
         isDisabled && styles.disabled,
         style,
       ]}
     >
-      {variant === 'brand' && layout.width > 0 && (
-        <BrandGradient width={layout.width} height={layout.height} angle={BRAND_ANGLE} />
-      )}
+      {background.gradient}
       {loading ? <ActivityIndicator color={colors[labelColor]} style={styles.icon} /> : leftIcon}
       <Typography variant={labelVariant} color={labelColor} numberOfLines={1}>
         {label}
@@ -99,8 +94,8 @@ const useStyles = makeStyles(({ borderWidth, colors, opacity, radius, shadow, si
     borderRadius: radius.lg,
   },
   navy: { backgroundColor: colors.bgNavy, ...shadow.card },
-  // 첫 레이아웃 전에는 끝 색 단색. zIndex 0 으로 쌓임 맥락을 만들어 그라디언트(zIndex -1)가 배경 밑으로 빠지지 않게 한다.
-  brand: { backgroundColor: colors.bgBrandEnd, overflow: 'hidden', zIndex: 0 },
+  // 배경·그라디언트는 useBrandBackground 가 맡는다.
+  brand: {},
   outline: {
     backgroundColor: colors.bgSurface,
     borderWidth: borderWidth.thin,
