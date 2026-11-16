@@ -28,7 +28,7 @@ export function HomePage() {
             안녕하세요 👋
           </Typography>
           <Typography variant="titlePage" accessibilityRole="header">
-            {userName ?? '김민준'}님
+            {userName ?? '회원'}님
           </Typography>
         </View>
         <IconButton icon="bell" accessibilityLabel="알림" />
