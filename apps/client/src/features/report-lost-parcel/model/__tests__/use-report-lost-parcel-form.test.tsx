@@ -119,6 +119,15 @@ describe('useReportLostParcelForm', () => {
     expect(rendered.result.current.form.submitError).toBe('이미 분실 신고된 택배입니다.');
   });
 
+  it('403 은 본인 택배가 아니라는 문구로 보여준다', async () => {
+    mockMutation({ error: new ApiError('요청을 처리하지 못했습니다. (HTTP 403)', 403) });
+    const rendered = await setup();
+
+    expect(rendered.result.current.form.submitError).toBe(
+      '본인이 등록한 택배만 분실 신고할 수 있어요.',
+    );
+  });
+
   it('신고 중에는 isSubmitting 이 true', async () => {
     mockMutation({ isPending: true });
     const rendered = await setup();

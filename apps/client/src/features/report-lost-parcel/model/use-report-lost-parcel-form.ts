@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCreateReportMutation } from '@taekbae/api';
+import { type ApiError, useCreateReportMutation } from '@taekbae/api';
 import type { Report } from '@taekbae/types';
 import { formatDateTimeInput, parseDateTimeInput } from '@taekbae/utils';
 import { type Control, useForm } from 'react-hook-form';
@@ -54,8 +54,14 @@ export function useReportLostParcelForm({
     control: form.control,
     submit: () => void handleSubmit(),
     isSubmitting: form.formState.isSubmitting || mutation.isPending,
-    submitError: mutation.error?.message ?? null,
+    submitError: mutation.error ? getSubmitErrorMessage(mutation.error) : null,
   };
+}
+
+function getSubmitErrorMessage(error: ApiError): string {
+  // 403 은 서버가 message 없는 기본 에러 바디로 응답한다.
+  if (error.status === 403) return '본인이 등록한 택배만 분실 신고할 수 있어요.';
+  return error.message;
 }
 
 function createDefaultValues(): ReportLostParcelFormValues {
