@@ -45,7 +45,9 @@ describe('parseDateTimeInput', () => {
     '2026. 04. 31 10:00',
     '2026. 07. 06 24:00',
     '2026. 07. 06 12:60',
-  ])('형식이 다르거나 없는 날짜면 null (%s)', (input) => {
+    '0026. 07. 06 15:30',
+    '1999. 12. 31 23:59',
+  ])('형식이 다르거나 없는 날짜·2000년 이전이면 null (%s)', (input) => {
     expect(parseDateTimeInput(input)).toBeNull();
   });
 

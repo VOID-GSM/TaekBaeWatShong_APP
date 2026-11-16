@@ -10,9 +10,12 @@ export function formatDateTimeInput(date: Date): string {
 
 const DATE_TIME_INPUT_PATTERN = /^(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})\s+(\d{1,2}):(\d{2})$/;
 
+/** 입력받는 가장 이른 연도. `Date` 는 0–99 년을 1900+year 로 해석하므로 그보다 크게 잡는다. */
+const MIN_YEAR = 2000;
+
 /**
  * 입력 칸 형식(`2026. 07. 06 15:30`)을 서버 `LocalDateTime` 문자열(`2026-07-06T15:30:00`)로 바꾼다.
- * 형식이 다르거나 실제로 없는 날짜·시각(2월 30일, 24시 등)이면 `null`.
+ * 형식이 다르거나, 실제로 없는 날짜·시각(2월 30일, 24시 등)이거나, 2000년 이전이면 `null`.
  */
 export function parseDateTimeInput(text: string): string | null {
   const match = DATE_TIME_INPUT_PATTERN.exec(text.trim());
@@ -25,7 +28,7 @@ export function parseDateTimeInput(text: string): string | null {
     number,
     number,
   ];
-  if (month < 1 || month > 12 || hour > 23 || minute > 59) return null;
+  if (year < MIN_YEAR || month < 1 || month > 12 || hour > 23 || minute > 59) return null;
 
   const daysInMonth = new Date(year, month, 0).getDate();
   if (day < 1 || day > daysInMonth) return null;
