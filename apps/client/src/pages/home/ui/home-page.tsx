@@ -1,15 +1,24 @@
+import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ParcelCard, ParcelSummaryCard } from '@/entities/parcel';
+import {
+  filterParcels,
+  PARCEL_FILTERS,
+  ParcelCard,
+  type ParcelFilter,
+  ParcelSummaryCard,
+} from '@/entities/parcel';
 import { useAuthStore } from '@/features/auth';
-import { IconButton, makeStyles, Typography } from '@/shared/ui';
+import { IconButton, makeStyles, SelectMenu, Typography } from '@/shared/ui';
 
 import { MOCK_PARCELS, MOCK_SUMMARY } from '../model/mock';
 
 export function HomePage() {
   const styles = useStyles();
   const userName = useAuthStore((state) => state.user?.name);
+  const [filter, setFilter] = useState<ParcelFilter>('latest');
+  const parcels = filterParcels(MOCK_PARCELS, filter);
 
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>
@@ -32,18 +41,32 @@ export function HomePage() {
           <Typography variant="bodyMStrong" style={styles.flex}>
             내 택배
           </Typography>
-          <Typography variant="bodyMStrong" color="textTertiary">
-            최신순
-          </Typography>
+          <SelectMenu
+            value={filter}
+            options={PARCEL_FILTERS}
+            onChange={setFilter}
+            accessibilityLabel="내 택배 필터"
+          />
         </View>
 
-        {MOCK_PARCELS.map((parcel) => (
-          <ParcelCard key={parcel.id} parcel={parcel} />
-        ))}
+        {parcels.length === 0 ? (
+          <Typography variant="bodyMStrong" color="textTertiary" align="center">
+            {emptyMessage[filter]}
+          </Typography>
+        ) : (
+          parcels.map((parcel) => <ParcelCard key={parcel.id} parcel={parcel} />)
+        )}
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+const emptyMessage: Record<ParcelFilter, string> = {
+  latest: '아직 등록된 택배가 없어요.',
+  claimed: '최근 수령한 택배가 없어요.',
+  arrived: '보관 중인 택배가 없어요.',
+  pending: '도착 예정인 택배가 없어요.',
+};
 
 const useStyles = makeStyles(({ colors, spacing }) => ({
   screen: { flex: 1, backgroundColor: colors.bgApp },
