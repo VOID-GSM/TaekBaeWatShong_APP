@@ -57,7 +57,7 @@ const PARCEL: NonNullable<UseMyParcelResult['parcel']> = {
 function mockParcel(result: Partial<UseMyParcelResult>) {
   jest.mocked(useMyParcel).mockReturnValue({
     parcel: undefined,
-    isLoading: false,
+    isPending: false,
     error: null,
     refetch: jest.fn(),
     ...result,
@@ -144,7 +144,7 @@ describe('ReportLostParcelPage', () => {
   });
 
   it('불러오는 중에는 인디케이터만 보여준다', async () => {
-    mockParcel({ isLoading: true });
+    mockParcel({ isPending: true });
     await render(<ReportLostParcelPage invoiceNumber="604122378890" />);
 
     expect(screen.getByLabelText('택배 정보를 불러오는 중')).toBeOnTheScreen();
@@ -168,5 +168,13 @@ describe('ReportLostParcelPage', () => {
     await fireEvent.press(screen.getByRole('button', { name: '다시 시도' }));
 
     expect(refetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('재조회가 실패해도 이미 받은 택배가 있으면 폼을 유지한다', async () => {
+    mockParcel({ parcel: PARCEL, error: new ApiError('네트워크 연결을 확인해 주세요.') });
+    await render(<ReportLostParcelPage invoiceNumber="604122378890" />);
+
+    expect(screen.getByRole('button', { name: '분실 신고 제출' })).toBeOnTheScreen();
+    expect(screen.queryByText('택배 정보를 불러오지 못했어요.')).toBeNull();
   });
 });

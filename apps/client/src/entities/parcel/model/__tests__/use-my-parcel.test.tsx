@@ -44,7 +44,7 @@ describe('useMyParcel', () => {
     const { result } = await setup('111122223333');
 
     expect(result.current.parcel?.alias).toBe('책');
-    expect(result.current.isLoading).toBe(false);
+    expect(result.current.isPending).toBe(false);
     expect(result.current.error).toBeNull();
   });
 
@@ -52,6 +52,6 @@ describe('useMyParcel', () => {
     const { result } = await setup('999');
 
     expect(result.current.parcel).toBeUndefined();
-    expect(result.current.isLoading).toBe(false);
+    expect(result.current.isPending).toBe(false);
   });
 });

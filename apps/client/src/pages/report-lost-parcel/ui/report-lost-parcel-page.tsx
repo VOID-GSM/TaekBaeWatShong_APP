@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ParcelSummaryCard, useMyParcel } from '@/entities/parcel';
@@ -25,14 +25,15 @@ export function ReportLostParcelPage({ invoiceNumber }: ReportLostParcelPageProp
     }
   };
 
-  const { parcel, isLoading, error, refetch } = useMyParcel(invoiceNumber);
+  const { parcel, isPending, error, refetch } = useMyParcel(invoiceNumber);
   const { control, submit, isSubmitting, submitError } = useReportLostParcelForm({
     invoiceNumber,
     onSuccess: goBack,
   });
 
   const renderBody = () => {
-    if (isLoading) {
+    // 백그라운드 재조회가 실패해도 react-query 는 기존 데이터를 유지한다 — 택배가 있으면 폼을 우선 보여준다.
+    if (parcel === undefined && error === null && isPending) {
       return (
         <View style={styles.center}>
           <ActivityIndicator
@@ -43,7 +44,7 @@ export function ReportLostParcelPage({ invoiceNumber }: ReportLostParcelPageProp
       );
     }
 
-    if (error !== null || parcel === undefined) {
+    if (parcel === undefined) {
       return (
         <View style={[styles.center, styles.message]}>
           <Typography variant="bodyMStrong" align="center" accessibilityRole="alert">
@@ -79,7 +80,8 @@ export function ReportLostParcelPage({ invoiceNumber }: ReportLostParcelPageProp
     return (
       <KeyboardAvoidingView
         style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        // Android 도 edge-to-edge 가 강제라 adjustResize 로 창이 줄지 않는다 — 두 플랫폼 모두 padding.
+        behavior="padding"
       >
         <ScrollView
           style={styles.flex}
