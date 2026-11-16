@@ -21,6 +21,8 @@ export const radius = {
   lg: 22,
   /** 하단 탭 바 위쪽 모서리. Figma 에 변수 없이 쓰인 값. */
   sheet: 20,
+  /** 입력 카드(분실 신고 C9). 스크린샷에서 추정한 값 — 디자이너 확인 필요. */
+  md: 16,
   full: 999,
   logoMark: 40,
 } as const;
@@ -34,9 +36,22 @@ export const size = {
   tabPillHeight: 30,
   logoMark: 130,
   logoRing: 160,
+  /** 화면 상단 헤더(뒤로가기 + 제목) 높이. C9 스크린샷 추정 — 디자이너 확인 필요. */
+  header: 56,
+  /** 최소 터치 영역 */
+  touchTarget: 44,
+  /** 한 줄 입력 카드 높이. C9 스크린샷 추정(약 49) — 디자이너 확인 필요. */
+  inputM: 48,
+  /** 여러 줄 입력 카드 최소 높이. C9 스크린샷 추정(약 133) — 디자이너 확인 필요. */
+  inputMultiline: 132,
+  /** 하단 고정 버튼(취소·제출) 높이. C9 스크린샷 추정(약 49) — 디자이너 확인 필요. */
+  buttonM: 50,
 } as const;
 
 export const opacity = { pressed: 0.85, disabled: 0.6 } as const;
+
+/** 테두리 두께 */
+export const borderWidth = { thin: 1 } as const;
 
 export const motion = { fast: 150, normal: 250, slow: 400 } as const;
 
