@@ -1,9 +1,9 @@
 import {
   ApiError,
   configureApi,
+  createSessionExpiredError,
   fetchMyParcels,
   parcelKeys,
-  reportKeys,
   useCreateReportMutation,
 } from '@taekbae/api';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -105,14 +105,19 @@ describe('fetchMyParcels', () => {
     expect(onUnauthorized).toHaveBeenCalledTimes(1);
   });
 
-  it('로그인 페이지로 리다이렉트된 HTML 응답은 인증 실패로 본다', async () => {
+  function respondHtml(responseURL: string) {
     adapter.mockImplementationOnce(async (config: InternalAxiosRequestConfig) => ({
       data: '<!DOCTYPE html><html></html>',
       status: 200,
       statusText: 'OK',
       headers: { 'content-type': 'text/html;charset=UTF-8' },
       config,
+      request: { responseURL },
     }));
+  }
+
+  it('로그인 페이지로 리다이렉트된 HTML 응답은 인증 실패로 본다', async () => {
+    respondHtml('https://api.example.test/login?redirect=1');
 
     await expect(fetchMyParcels()).rejects.toMatchObject({
       message: '로그인이 만료되었습니다. 다시 로그인해 주세요.',
@@ -120,10 +125,36 @@ describe('fetchMyParcels', () => {
     });
     expect(onUnauthorized).toHaveBeenCalledTimes(1);
   });
+
+  it('로그인 페이지가 아닌 HTML(캡티브 포털 등)은 로그아웃시키지 않는다', async () => {
+    respondHtml('http://captive.portal.test/welcome');
+
+    await expect(fetchMyParcels()).rejects.toMatchObject({
+      message: '서버 응답 형식이 올바르지 않습니다.',
+    });
+    expect(onUnauthorized).not.toHaveBeenCalled();
+  });
+
+  it('토큰이 만료됐으면 요청을 보내지 않고 onUnauthorized 를 부른다', async () => {
+    configureApi({
+      baseURL: 'https://api.example.test',
+      getAccessToken: async () => {
+        throw createSessionExpiredError();
+      },
+      onUnauthorized,
+    });
+
+    await expect(fetchMyParcels()).rejects.toMatchObject({
+      message: '로그인이 만료되었습니다. 다시 로그인해 주세요.',
+      status: 401,
+    });
+    expect(adapter).not.toHaveBeenCalled();
+    expect(onUnauthorized).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('useCreateReportMutation', () => {
-  it('POST /report 후 report·parcel 쿼리를 invalidate 한다', async () => {
+  it('POST /report 후 parcel 쿼리를 invalidate 한다', async () => {
     respond(201, report);
     const queryClient = new QueryClient({
       defaultOptions: {
@@ -150,7 +181,6 @@ describe('useCreateReportMutation', () => {
     expect(config?.method).toBe('post');
     expect(config?.url).toBe('/report');
     expect(JSON.parse(String(config?.data))).toEqual(request);
-    expect(invalidate).toHaveBeenCalledWith({ queryKey: reportKeys.all });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: parcelKeys.all });
   });
 });
