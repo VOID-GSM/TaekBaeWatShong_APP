@@ -32,7 +32,7 @@ export function RegisterParcelForm({ onSubmit }: RegisterParcelFormProps) {
               placeholder="숫자만 입력해 주세요"
               keyboardType="number-pad"
               autoComplete="off"
-              returnKeyType="next"
+              returnKeyType="done"
             />
           )}
         />
