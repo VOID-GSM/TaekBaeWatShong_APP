@@ -14,7 +14,7 @@ export function LostReportsPage({ onOpenChat }: LostReportsPageProps) {
   // TODO: 분실 신고 API 가 생기면 쿼리 결과로 바꾼다.
   const reports = sampleLostReports;
   const newCount = reports.filter((report) => report.status === 'NEW').length;
-  const chatRequestedCount = reports.length - newCount;
+  const chatRequestedCount = reports.filter((report) => report.status === 'CHAT_REQUESTED').length;
 
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>
