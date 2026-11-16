@@ -1,33 +1,39 @@
-import { type BottomTabBarProps, Tabs } from 'expo-router/js-tabs';
+import { TabList, Tabs, TabSlot, TabTrigger } from 'expo-router/ui';
 
-import { ClientTabBar, type ClientTabKey } from '@/widgets/client-tab-bar';
-
-/** 라우트 이름 → 탭. 구역 화면(zone)은 홈 탭 아래 화면이라 홈이 활성으로 보인다. */
-const ROUTE_TAB: Record<string, ClientTabKey> = { index: 'home', zone: 'home' };
-/** 아직 화면이 없는 탭(등록·회수·알림·채팅)은 라우트가 생기면 여기에 추가한다. */
-const TAB_ROUTE: Partial<Record<ClientTabKey, string>> = { home: 'index' };
-
-function TabBar({ state, navigateToTab }: BottomTabBarProps) {
-  const routeName = state.routes[state.index]?.name ?? 'index';
-
-  return (
-    <ClientTabBar
-      activeTab={ROUTE_TAB[routeName] ?? 'home'}
-      onTabPress={(key) => {
-        const target = state.routes.find((route) => route.name === TAB_ROUTE[key]);
-        if (target !== undefined) {
-          navigateToTab(target.key);
-        }
-      }}
-    />
-  );
-}
+import { bellXml } from '@/shared/assets/bell';
+import { chatXml } from '@/shared/assets/chat';
+import { homeXml } from '@/shared/assets/home';
+import { packagePlusXml } from '@/shared/assets/package-plus';
+import { scanBarcodeXml } from '@/shared/assets/scan-barcode';
+import { MainTabBar, MainTabButton } from '@/widgets/main-tab-bar';
 
 export default function TabsLayout() {
+  // TODO: 알림 API 가 생기면 읽지 않은 알림 여부로 바꾼다.
+  const hasUnreadNotifications = false;
+
   return (
-    <Tabs screenOptions={{ headerShown: false }} tabBar={(props) => <TabBar {...props} />}>
-      <Tabs.Screen name="index" />
-      <Tabs.Screen name="zone" options={{ href: null }} />
+    <Tabs style={{ flex: 1 }}>
+      <TabSlot />
+      <TabList asChild>
+        <MainTabBar>
+          <TabTrigger name="index" href="/" asChild>
+            <MainTabButton icon={homeXml} label="홈" />
+          </TabTrigger>
+          <TabTrigger name="register" href="/register" asChild>
+            <MainTabButton icon={packagePlusXml} label="택배 등록" />
+          </TabTrigger>
+          <TabTrigger name="pickup" href="/pickup" asChild>
+            <MainTabButton icon={scanBarcodeXml} label="택배 회수" />
+          </TabTrigger>
+          <TabTrigger name="notifications" href="/notifications" asChild>
+            <MainTabButton icon={bellXml} label="알림" showDot={hasUnreadNotifications} />
+          </TabTrigger>
+          {/* 구역 약도·TOP3(/zone)는 탭 버튼 없이 이동만 되게 숨겨서 등록한다. */}
+          <TabTrigger name="zone" href="/zone" style={{ display: 'none' }} />
+          {/* 채팅 화면이 머지되면 탭이 아닌 스택 화면(/chat)으로 연결한다. */}
+          <MainTabButton icon={chatXml} label="채팅" disabled />
+        </MainTabBar>
+      </TabList>
     </Tabs>
   );
 }

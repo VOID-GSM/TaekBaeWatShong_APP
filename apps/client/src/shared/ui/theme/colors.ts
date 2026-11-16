@@ -16,6 +16,8 @@ const palette = {
   slate300: '#cdd2e6',
   slate400: '#9aa1bf',
   slate500: '#6e7595',
+  indigo500: '#4f5ed8',
+  indigo700: '#3a47be',
   red100: '#fee2e2',
   red600: '#dc2626',
   green100: '#dcfce7',
@@ -36,6 +38,9 @@ export const lightColors = {
   bgDangerSoft: palette.red100,
   bgSuccessSoft: palette.green100,
   bgWarningSoft: palette.amber100,
+  /** 브랜드 그라디언트 시작·끝 (Figma 브랜드 채움) */
+  bgBrandStart: palette.indigo500,
+  bgBrandEnd: palette.indigo700,
 
   textPrimary: palette.navy900,
   textSecondary: palette.slate500,

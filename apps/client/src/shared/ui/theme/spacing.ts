@@ -26,10 +26,10 @@ export const radius = {
   lg: 22,
   xl: 26,
   '2xl': 32,
+  /** 하단 탭 바 위쪽 모서리. Figma 에 변수 없이 쓰인 값. */
+  sheet: 20,
   full: 999,
   logoMark: 40,
-  /** 탭바 위쪽 모서리 */
-  tabBar: 20,
 } as const;
 
 export const size = {
@@ -39,6 +39,7 @@ export const size = {
   iconM: 22,
   iconButton: 40,
   topBar: 56,
+  /** 하단 탭 바 항목의 알약 모양 배경 */
   tabPillWidth: 56,
   tabPillHeight: 30,
   logoMark: 130,
@@ -66,7 +67,7 @@ export const shadow = {
       },
     ],
   },
-  /** Shadow/Float-Up — 하단 탭바 */
+  /** Figma `Shadow/Float-Up` — 하단 탭 바처럼 화면 아래에 붙은 면 */
   floatUp: {
     boxShadow: [
       {
