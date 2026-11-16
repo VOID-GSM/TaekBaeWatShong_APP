@@ -67,7 +67,14 @@ export function SelectMenu<T extends string>({
         <Icon name="chevronDown" />
       </Pressable>
 
-      <Modal visible={anchor !== null} transparent animationType="fade" onRequestClose={close}>
+      {/* measureInWindow 는 상태 표시줄을 포함한 좌표라, Android Modal 도 상태 표시줄부터 그리게 맞춘다. */}
+      <Modal
+        visible={anchor !== null}
+        transparent
+        statusBarTranslucent
+        animationType="fade"
+        onRequestClose={close}
+      >
         {/* 배경은 메뉴의 형제로 둔다. 메뉴를 감싸면 iOS VoiceOver 가 하나로 묶어 항목에 못 간다. */}
         <Pressable
           style={StyleSheet.absoluteFill}
