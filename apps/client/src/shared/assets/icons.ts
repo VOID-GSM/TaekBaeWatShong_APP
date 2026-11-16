@@ -12,56 +12,6 @@ export const icons = {
 </g>
 </svg>`,
   },
-  bellBadge: {
-    width: 56,
-    height: 30,
-    xml: `<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="56" height="30" viewBox="0 0 56 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="Pill">
-<g id="icon/bell">
-<path id="Vector" d="M26.4417 23.25C26.5951 23.5291 26.8207 23.7618 27.0948 23.9239C27.3689 24.086 27.6815 24.1716 28 24.1716C28.3185 24.1716 28.6311 24.086 28.9052 23.9239C29.1793 23.7618 29.4049 23.5291 29.5583 23.25M22.5 11.3333C22.5 9.87464 23.0795 8.4757 24.1109 7.44425C25.1424 6.4128 26.5413 5.83333 28 5.83333C29.4587 5.83333 30.8576 6.4128 31.8891 7.44425C32.9205 8.4757 33.5 9.87464 33.5 11.3333C33.5 17.75 36.25 19.5833 36.25 19.5833H19.75C19.75 19.5833 22.5 17.75 22.5 11.3333Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="#9AA1BF"/>
-</g>
-<circle id="Dot" cx="37.5" cy="6.5" r="3.5" fill="#DC2626" stroke-width="2" stroke="white"/>
-</g>
-</svg>`,
-  },
-  home: {
-    width: 22,
-    height: 22,
-    xml: `<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="icon/home">
-<path id="Vector" d="M2.75 9.625L11 2.75L19.25 9.625V18.3333C19.25 18.5764 19.1534 18.8096 18.9815 18.9815C18.8096 19.1534 18.5764 19.25 18.3333 19.25H13.75V13.75H8.25V19.25H3.66667C3.42355 19.25 3.19039 19.1534 3.01849 18.9815C2.84658 18.8096 2.75 18.5764 2.75 18.3333V9.625Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="white"/>
-</g>
-</svg>`,
-  },
-  packagePlus: {
-    width: 22,
-    height: 22,
-    xml: `<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="icon/package-plus">
-<path id="Vector" d="M14.6667 14.6667H17.4167M17.4167 14.6667H20.1667M17.4167 14.6667V11.9167M17.4167 14.6667V17.4167" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="#9AA1BF"/>
-<path id="Vector_2" d="M19.25 9.16667V7.33333C19.2497 7.01184 19.1648 6.69608 19.0039 6.41773C18.843 6.13939 18.6118 5.90825 18.3333 5.7475L11.9167 2.08083C11.638 1.91992 11.3218 1.83521 11 1.83521C10.6782 1.83521 10.362 1.91992 10.0833 2.08083L3.66667 5.7475C3.38824 5.90825 3.15698 6.13939 2.99609 6.41773C2.8352 6.69608 2.75033 7.01184 2.75 7.33333V14.6667C2.75033 14.9882 2.8352 15.3039 2.99609 15.5823C3.15698 15.8606 3.38824 16.0918 3.66667 16.2525L10.0833 19.9192C10.362 20.0801 10.6782 20.1648 11 20.1648C11.3218 20.1648 11.638 20.0801 11.9167 19.9192L13.75 18.8742" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="#9AA1BF"/>
-<path id="Vector_3" d="M3.025 6.41667L11 11M11 11L18.975 6.41667M11 11V20.1667" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="#9AA1BF"/>
-</g>
-</svg>`,
-  },
-  scanBarcode: {
-    width: 22,
-    height: 22,
-    xml: `<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="icon/scan-barcode">
-<path id="Vector" d="M2.75 6.41667V4.58333C2.75 4.0971 2.94315 3.63079 3.28697 3.28697C3.63079 2.94315 4.0971 2.75 4.58333 2.75H6.41667M15.5833 2.75H17.4167C17.9029 2.75 18.3692 2.94315 18.713 3.28697C19.0568 3.63079 19.25 4.0971 19.25 4.58333V6.41667M19.25 15.5833V17.4167C19.25 17.9029 19.0568 18.3692 18.713 18.713C18.3692 19.0568 17.9029 19.25 17.4167 19.25H15.5833M6.41667 19.25H4.58333C4.0971 19.25 3.63079 19.0568 3.28697 18.713C2.94315 18.3692 2.75 17.9029 2.75 17.4167V15.5833M7.33333 6.41667V15.5833M11 6.41667V15.5833M14.6667 6.41667V15.5833" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="#9AA1BF"/>
-</g>
-</svg>`,
-  },
-  chat: {
-    width: 22,
-    height: 22,
-    xml: `<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="icon/chat">
-<path id="Vector" d="M7.24167 18.3333C8.9912 19.2308 11.0037 19.4739 12.9166 19.0188C14.8295 18.5637 16.517 17.4403 17.6749 15.8512C18.8329 14.262 19.3851 12.3115 19.2322 10.3511C19.0793 8.39081 18.2312 6.54956 16.8408 5.15918C15.4504 3.7688 13.6092 2.92073 11.6489 2.7678C9.68852 2.61487 7.73802 3.16713 6.14884 4.32506C4.55965 5.48299 3.4363 7.17045 2.9812 9.08335C2.52611 10.9963 2.7692 13.0088 3.66667 14.7583L1.83333 20.1667L7.24167 18.3333Z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke="#9AA1BF"/>
-</g>
-</svg>`,
-  },
   info: {
     width: 16,
     height: 16,
