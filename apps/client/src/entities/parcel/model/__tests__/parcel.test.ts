@@ -26,7 +26,7 @@ describe('filterParcels', () => {
     expect(ids('latest')).toEqual(['4', '2', '3', '1']);
   });
 
-  it('상태별로 고른다 — 배송중은 방치를 포함한다', () => {
+  it('상태별로 고른다 — 도착은 방치를 포함한다', () => {
     expect(ids('claimed')).toEqual(['3']);
     expect(ids('arrived')).toEqual(['4', '2']);
     expect(ids('pending')).toEqual(['1']);

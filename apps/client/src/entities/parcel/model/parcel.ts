@@ -27,17 +27,17 @@ export interface Parcel {
   claimedAt?: string;
 }
 
-/** 홈 '내 택배' 목록 필터. 최신순은 전체를 보여준다. */
+/** 홈 '내 택배' 목록 필터. 최신순은 전체, 나머지는 카드 상태 배지와 같은 이름이다. */
 export type ParcelFilter = 'latest' | 'claimed' | 'arrived' | 'pending';
 
 export const PARCEL_FILTERS: readonly { value: ParcelFilter; label: string }[] = [
   { value: 'latest', label: '최신순' },
-  { value: 'claimed', label: '배송완료' },
-  { value: 'arrived', label: '배송중' },
-  { value: 'pending', label: '배송전' },
+  { value: 'claimed', label: '수령 완료' },
+  { value: 'arrived', label: '도착' },
+  { value: 'pending', label: '배송중' },
 ];
 
-/** 필터별로 보여줄 상태. 배송중은 도착해서 보관 중인 택배(방치 포함)다. */
+/** 필터별로 보여줄 상태. 도착은 방치 경고 택배도 포함한다. */
 const filterStatuses: Record<Exclude<ParcelFilter, 'latest'>, readonly ParcelStatus[]> = {
   claimed: ['claimed'],
   arrived: ['arrived', 'overdue'],
