@@ -1,4 +1,4 @@
-import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { KeyboardAvoidingView, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { RegisterParcelForm, type RegisterParcelValues } from '@/features/register-parcel';
@@ -15,10 +15,8 @@ export function ParcelRegisterPage({ onSubmit }: ParcelRegisterPageProps) {
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>
       <TopBar title="택배 등록" />
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+      {/* Android 는 edge-to-edge 라 창 리사이즈에 기댈 수 없어 iOS 와 같은 방식으로 피한다. */}
+      <KeyboardAvoidingView style={styles.flex} behavior="padding">
         <ScrollView
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
