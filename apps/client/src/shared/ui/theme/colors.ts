@@ -2,8 +2,10 @@
 const palette = {
   white: '#ffffff',
   white75: 'rgba(255, 255, 255, 0.75)',
+  navy600: '#272e6e',
   navy700: '#20265a',
   navy900: '#1a1f4b',
+  navy950: '#161a42',
   indigo50: '#eef0ff',
   indigo100: '#e1e5ff',
   indigo300: '#a5aef2',
@@ -79,8 +81,14 @@ export const darkColors: ColorTokens = lightColors;
 
 /** Figma 그라데이션 채우기. 좌상단 → 우하단(navy 는 위 → 아래). */
 export const gradients = {
-  brand: { from: '#4f5ed8', to: '#3a47be', start: 0.14184, end: 0.85106, direction: 'diagonal' },
-  navy: { from: '#272e6e', to: '#161a42', start: 0, end: 1, direction: 'vertical' },
+  brand: {
+    from: palette.indigo500,
+    to: palette.indigo700,
+    start: 0.14184,
+    end: 0.85106,
+    direction: 'diagonal',
+  },
+  navy: { from: palette.navy600, to: palette.navy950, start: 0, end: 1, direction: 'vertical' },
 } as const;
 
 export type GradientToken = keyof typeof gradients;
