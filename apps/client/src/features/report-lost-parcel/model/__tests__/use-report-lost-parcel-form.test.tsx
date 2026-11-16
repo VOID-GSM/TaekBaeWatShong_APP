@@ -128,10 +128,31 @@ describe('useReportLostParcelForm', () => {
     );
   });
 
-  it('신고 중에는 isSubmitting 이 true', async () => {
-    mockMutation({ isPending: true });
+  it('신고 요청이 끝날 때까지 isSubmitting 이 true', async () => {
+    let resolve: (value: Report) => void = () => {};
+    mutateAsync.mockReturnValue(new Promise<Report>((r) => (resolve = r)));
     const rendered = await setup();
+    await fill(rendered, { content: '내용' });
 
-    expect(rendered.result.current.form.isSubmitting).toBe(true);
+    await act(async () => rendered.result.current.form.submit());
+    await waitFor(() => expect(rendered.result.current.form.isSubmitting).toBe(true));
+
+    await act(async () => resolve(report));
+    await waitFor(() => expect(rendered.result.current.form.isSubmitting).toBe(false));
+  });
+
+  it('제출 중에 화면을 떠나면 성공해도 onSuccess 를 부르지 않는다', async () => {
+    let resolve: (value: Report) => void = () => {};
+    mutateAsync.mockReturnValue(new Promise<Report>((r) => (resolve = r)));
+    const onSuccess = jest.fn();
+    const rendered = await setup(onSuccess);
+    await fill(rendered, { content: '내용' });
+
+    await act(async () => rendered.result.current.form.submit());
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
+    await act(async () => rendered.unmount());
+    await act(async () => resolve(report));
+
+    expect(onSuccess).not.toHaveBeenCalled();
   });
 });
