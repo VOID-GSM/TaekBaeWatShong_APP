@@ -2,7 +2,7 @@ import * as Linking from 'expo-linking';
 import * as SecureStore from 'expo-secure-store';
 import * as WebBrowser from 'expo-web-browser';
 
-import { getAppAccessToken, loginWithDataGsm, logout } from '../auth';
+import { getAppAccessToken, loginWithDataGsm, logout, readAppAccessToken } from '../auth';
 import { useAuthStore } from '../auth-store';
 
 jest.mock('expo-secure-store', () => ({
@@ -144,5 +144,41 @@ describe('client DataGSM login', () => {
 
     expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith(SESSION_KEY);
     expect(useAuthStore.getState()).toMatchObject({ status: 'unauthenticated', user: null });
+  });
+
+  describe('readAppAccessToken', () => {
+    async function login(): Promise<string> {
+      const token = createJwt(EXPIRES_AT_SECONDS);
+      mockCallback('code=one-time-code');
+      fetchMock
+        .mockResolvedValueOnce(jsonResponse({ token }))
+        .mockResolvedValueOnce(
+          jsonResponse({ id: 1, email: 's25048@gsm.hs.kr', name: '홍길동', role: 'STUDENT' }),
+        );
+      await loginWithDataGsm();
+      return token;
+    }
+
+    it('reads the token from memory without touching SecureStore', async () => {
+      const token = await login();
+
+      await expect(readAppAccessToken()).resolves.toBe(token);
+      expect(SecureStore.getItemAsync).not.toHaveBeenCalled();
+    });
+
+    it('throws a session expired error once the token has expired', async () => {
+      await login();
+      jest.spyOn(Date, 'now').mockReturnValue(EXPIRES_AT_SECONDS * 1000 + 1);
+
+      await expect(readAppAccessToken()).rejects.toMatchObject({ status: 401 });
+      jest.mocked(Date.now).mockRestore();
+    });
+
+    it('returns null after logout', async () => {
+      await login();
+      await logout();
+
+      await expect(readAppAccessToken()).resolves.toBeNull();
+    });
   });
 });
