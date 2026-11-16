@@ -32,7 +32,7 @@ export function ZoneMapCard({ leftShelf, rightShelf }: ZoneMapCardProps) {
       </View>
 
       <View style={styles.note}>
-        <Icon name="infoMuted" />
+        <Icon name="info" size={14} color="iconMuted" />
         <Typography variant="bodyMStrong" color="textTertiary" style={styles.flex}>
           3층 선반 · 위칸부터 {shelfOrder}
         </Typography>

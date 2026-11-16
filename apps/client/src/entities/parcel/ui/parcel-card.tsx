@@ -32,7 +32,7 @@ export function ParcelCard({ parcel, onRetrieve, onReportLost }: ParcelCardProps
 
       {parcel.status === 'claimed' ? (
         <View style={[styles.note, styles.noteMuted]}>
-          <Icon name="infoMuted" />
+          <Icon name="info" size={14} color="iconMuted" />
           <Typography variant="bodyMStrong" color="textSecondary" style={styles.flex}>
             {parcel.claimedAt ? `${parcel.claimedAt}에 수령했어요.` : '수령을 완료했어요.'}
           </Typography>
