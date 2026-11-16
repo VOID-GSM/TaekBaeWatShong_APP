@@ -4,7 +4,7 @@ import { type PropsWithChildren, useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { initializeAuthSession, logout, readAppAccessToken } from '@/features/auth';
+import { initializeAuthSession, logout, readAppAccessToken, useAuthStore } from '@/features/auth';
 
 let isApiConfigured = false;
 
@@ -49,6 +49,15 @@ export function AppProviders({ children }: PropsWithChildren) {
   useEffect(() => {
     void initializeAuthSession().catch(() => {});
   }, []);
+
+  // 로그아웃(만료 포함)하면 이전 사용자의 응답이 다음 사용자에게 보이지 않도록 캐시를 비운다.
+  useEffect(
+    () =>
+      useAuthStore.subscribe((state, prev) => {
+        if (prev.user !== null && state.user === null) queryClient.clear();
+      }),
+    [queryClient],
+  );
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
