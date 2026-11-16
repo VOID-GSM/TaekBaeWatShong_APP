@@ -25,8 +25,7 @@ jest.mock('react-native-safe-area-context', () => {
 });
 
 jest.mock('@/entities/parcel', () => ({
-  ParcelSummaryCard: jest.requireActual('@/entities/parcel/ui/parcel-summary-card')
-    .ParcelSummaryCard,
+  ParcelInfoCard: jest.requireActual('@/entities/parcel/ui/parcel-info-card').ParcelInfoCard,
   useMyParcel: jest.fn(),
 }));
 

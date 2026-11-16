@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { ActivityIndicator, KeyboardAvoidingView, ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ParcelSummaryCard, useMyParcel } from '@/entities/parcel';
+import { ParcelInfoCard, useMyParcel } from '@/entities/parcel';
 import { ReportLostParcelForm, useReportLostParcelForm } from '@/features/report-lost-parcel';
 import { Button, makeStyles, ScreenHeader, Typography, useTheme } from '@/shared/ui';
 
@@ -89,7 +89,7 @@ export function ReportLostParcelPage({ invoiceNumber }: ReportLostParcelPageProp
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="interactive"
         >
-          <ParcelSummaryCard
+          <ParcelInfoCard
             label="신고 대상 택배"
             alias={parcel.alias}
             deliveryCompany={parcel.deliveryCompany}
@@ -159,7 +159,7 @@ const useStyles = makeStyles(({ colors, size, spacing }) => ({
     backgroundColor: colors.bgApp,
   },
   footerRow: { flexDirection: 'row', gap: spacing.sm },
-  footerButton: { height: size.buttonM },
+  footerButton: { height: size.buttonFooter },
   // 시안 폭 비율 취소 약 128 : 제출 약 207 (스크린샷 추정) — 디자이너 확인 필요.
   cancel: { flex: 5 },
   submit: { flex: 8 },

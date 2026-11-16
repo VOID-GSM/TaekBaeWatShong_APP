@@ -7,7 +7,14 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { type ColorToken, type ColorTokens, darkColors, lightColors } from './colors';
+import {
+  type ColorToken,
+  type ColorTokens,
+  darkColors,
+  gradients,
+  type GradientToken,
+  lightColors,
+} from './colors';
 import { fontAssets, fontFamily } from './fonts';
 import { borderWidth, motion, opacity, radius, shadow, size, spacing } from './spacing';
 import { typography, type TypographyVariant } from './typography';
@@ -18,6 +25,7 @@ export function useTheme() {
   return useMemo(
     () => ({
       colors: scheme === 'dark' ? darkColors : lightColors,
+      gradients,
       typography,
       spacing,
       radius,
@@ -50,6 +58,8 @@ export {
   type ColorTokens,
   fontAssets,
   fontFamily,
+  gradients,
+  type GradientToken,
   motion,
   opacity,
   radius,

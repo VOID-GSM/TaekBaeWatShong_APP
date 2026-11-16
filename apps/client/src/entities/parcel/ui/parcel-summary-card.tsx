@@ -1,51 +1,52 @@
-import { formatInvoiceNumber } from '@taekbae/utils';
-import { type StyleProp, View, type ViewStyle } from 'react-native';
+import { View } from 'react-native';
 
-import { makeStyles, Typography } from '@/shared/ui';
+import { BrandSurface, makeStyles, Typography } from '@/shared/ui';
 
-export interface ParcelSummaryCardProps {
-  /** 카드 맨 위 브랜드 색 문구 (예: "신고 대상 택배") */
-  label: string;
-  alias: string;
-  deliveryCompany: string;
-  invoiceNumber: string;
-  style?: StyleProp<ViewStyle>;
-}
+import type { ParcelSummary } from '../model/parcel';
 
-/** 택배 별칭·택배사·운송장 번호를 보여주는 연한 브랜드 카드 (시안 C9). */
-export function ParcelSummaryCard({
-  label,
-  alias,
-  deliveryCompany,
-  invoiceNumber,
-  style,
-}: ParcelSummaryCardProps) {
+export function ParcelSummaryCard({ summary }: { summary: ParcelSummary }) {
   const styles = useStyles();
-  const formattedInvoiceNumber = formatInvoiceNumber(invoiceNumber);
 
   return (
-    <View
-      accessible
-      accessibilityLabel={`${label}, ${alias}, ${deliveryCompany} 운송장 번호 ${formattedInvoiceNumber}`}
-      style={[styles.card, style]}
-    >
-      <Typography variant="bodyMStrong" color="textBrand">
+    <BrandSurface angle={161.08} style={styles.container}>
+      <View style={styles.total}>
+        <Typography variant="bodyM" color="textOnBrandMuted">
+          내 택배
+        </Typography>
+        <Typography variant="displayNumber" color="textOnBrand">
+          {summary.total}개
+        </Typography>
+      </View>
+      <Stat value={summary.arrived} label="도착" />
+      <Stat value={summary.overdue} label="방치" />
+    </BrandSurface>
+  );
+}
+
+function Stat({ value, label }: { value: number; label: string }) {
+  const styles = useStyles();
+
+  return (
+    <View style={styles.stat} accessible accessibilityLabel={`${label} ${value}개`}>
+      <Typography variant="titlePage" color="textOnBrand">
+        {value}
+      </Typography>
+      <Typography variant="caption" color="textOnBrandMuted">
         {label}
-      </Typography>
-      <Typography variant="bodyMStrong" numberOfLines={1}>
-        {alias}
-      </Typography>
-      <Typography variant="bodyMStrong" color="textSecondary" numberOfLines={1}>
-        {`${deliveryCompany} · ${formattedInvoiceNumber}`}
       </Typography>
     </View>
   );
 }
 
-const useStyles = makeStyles(({ colors, radius, spacing }) => ({
-  card: {
-    padding: spacing.lg,
-    borderRadius: radius.lg,
-    backgroundColor: colors.bgBrandSoft,
+const useStyles = makeStyles(({ radius, spacing }) => ({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.lg,
+    paddingHorizontal: spacing['2xl'],
+    paddingVertical: 22,
+    borderRadius: radius['2xl'],
   },
+  total: { flex: 1, gap: spacing['2xs'] },
+  stat: { alignItems: 'center', gap: spacing['2xs'] },
 }));

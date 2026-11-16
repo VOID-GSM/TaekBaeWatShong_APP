@@ -4,19 +4,23 @@ import {
   Pressable,
   type PressableProps,
   type StyleProp,
+  StyleSheet,
   type ViewStyle,
 } from 'react-native';
 
-import { useBrandBackground } from '../brand-surface';
+import { BrandSurface } from '../brand-surface';
 import { type ColorToken, makeStyles, type TypographyVariant, useTheme } from '../theme';
 import { Typography } from '../typography';
 
-export type ButtonVariant = 'navy' | 'brand' | 'outline';
+/** navy: 로그인 등 주 버튼 · brand: 브랜드 그라데이션 · dangerSoft: 연한 빨강(분실 신고 등) · outline: 흰 배경 + 테두리(취소 등 보조) */
+export type ButtonVariant = 'navy' | 'brand' | 'dangerSoft' | 'outline';
+/** l: 높이 56 · m: 높이 40(카드 안 버튼) */
+export type ButtonSize = 'l' | 'm';
 
 export interface ButtonProps extends Omit<PressableProps, 'children' | 'style'> {
   label: string;
-  /** 배경 종류. navy(기본) 남색 단색, brand 브랜드 그라디언트, outline 흰 배경 + 테두리. */
   variant?: ButtonVariant;
+  size?: ButtonSize;
   /** 라벨 왼쪽 아이콘. 로딩 중에는 인디케이터로 바뀐다. */
   leftIcon?: ReactNode;
   /** 라벨 타이포. 시안마다 버튼 글자 스타일이 달라 열어 둔다. */
@@ -25,36 +29,29 @@ export interface ButtonProps extends Omit<PressableProps, 'children' | 'style'> 
   style?: StyleProp<ViewStyle>;
 }
 
-const LABEL_COLOR: Record<ButtonVariant, ColorToken> = {
+const labelColors: Record<ButtonVariant, ColorToken> = {
   navy: 'textOnNavy',
   brand: 'textOnBrand',
+  dangerSoft: 'textDanger',
   outline: 'textPrimary',
 };
-
-/** 브랜드 버튼(C9 "분실 신고 제출")의 그라디언트 각도. 스크린샷 추정 — 디자이너 확인 필요. */
-const BRAND_ANGLE = 135;
 
 export function Button({
   label,
   variant = 'navy',
+  size = 'l',
   leftIcon,
-  labelVariant = 'buttonL',
+  labelVariant = size === 'm' ? 'bodyMStrong' : 'buttonL',
   loading = false,
   disabled,
   accessibilityLabel,
-  onLayout,
   style,
   ...props
 }: ButtonProps) {
   const styles = useStyles();
   const { colors } = useTheme();
-  const background = useBrandBackground({
-    angle: BRAND_ANGLE,
-    enabled: variant === 'brand',
-    onLayout,
-  });
   const isDisabled = disabled === true || loading;
-  const labelColor = LABEL_COLOR[variant];
+  const labelColor = labelColors[variant];
 
   return (
     <Pressable
@@ -63,17 +60,17 @@ export function Button({
       accessibilityState={{ disabled: isDisabled, busy: loading }}
       {...props}
       disabled={isDisabled}
-      onLayout={background.onLayout}
       style={({ pressed }) => [
         styles.container,
+        styles[size],
         styles[variant],
-        background.style,
         pressed && styles.pressed,
         isDisabled && styles.disabled,
         style,
       ]}
     >
-      {background.gradient}
+      {/* 각도는 Figma 카드 버튼 값 */}
+      {variant === 'brand' && <BrandSurface angle={164} style={StyleSheet.absoluteFill} />}
       {loading ? <ActivityIndicator color={colors[labelColor]} style={styles.icon} /> : leftIcon}
       <Typography variant={labelVariant} color={labelColor} numberOfLines={1}>
         {label}
@@ -89,13 +86,21 @@ const useStyles = makeStyles(({ borderWidth, colors, opacity, radius, shadow, si
     justifyContent: 'center',
     alignSelf: 'stretch',
     gap: spacing.md,
+    overflow: 'hidden',
+  },
+  l: {
     height: size.buttonL,
     paddingHorizontal: spacing.lg,
     borderRadius: radius.lg,
   },
+  m: {
+    height: size.buttonM,
+    paddingHorizontal: spacing['2xl'],
+    borderRadius: radius.md,
+  },
   navy: { backgroundColor: colors.bgNavy, ...shadow.card },
-  // 배경·그라디언트는 useBrandBackground 가 맡는다.
   brand: {},
+  dangerSoft: { backgroundColor: colors.bgDangerSoft },
   outline: {
     backgroundColor: colors.bgSurface,
     borderWidth: borderWidth.thin,
