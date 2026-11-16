@@ -70,9 +70,17 @@ export function Button({
   const labelColor = LABEL_COLOR[variant];
 
   // '동작 줄이기'를 켠 사용자에게는 크기 변화 대신 투명도로만 눌림을 보여 준다.
+  // 이 스타일이 배열 맨 뒤에서 opacity 를 덮어쓰므로, 비활성 투명도도 여기서 같이 계산한다.
+  const baseOpacity = isDisabled ? opacity.disabled : 1;
   const pressStyle = useAnimatedStyle(() =>
     reduceMotion
-      ? { opacity: interpolate(pressProgress.get(), [0, 1], [1, opacity.pressed]) }
+      ? {
+          opacity: interpolate(
+            pressProgress.get(),
+            [0, 1],
+            [baseOpacity, baseOpacity * opacity.pressed],
+          ),
+        }
       : { transform: [{ scale: interpolate(pressProgress.get(), [0, 1], [1, PRESSED_SCALE]) }] },
   );
 
