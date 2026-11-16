@@ -4,7 +4,7 @@ import type { LostReport } from './lost-report';
 export const sampleLostReports: LostReport[] = [
   {
     id: 1,
-    status: 'new',
+    status: 'NEW',
     reporter: { name: '김민준', role: 'STUDENT', studentNumber: '20614' },
     productName: '겨울 패딩',
     carrier: 'CJ대한통운',
@@ -14,7 +14,7 @@ export const sampleLostReports: LostReport[] = [
   },
   {
     id: 2,
-    status: 'chatRequested',
+    status: 'CHAT_REQUESTED',
     reporter: { name: '이선생님', role: 'TEACHER' },
     productName: '교재 세트',
     carrier: '롯데택배',

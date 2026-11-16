@@ -13,7 +13,7 @@ export function LostReportsPage({ onOpenChat }: LostReportsPageProps) {
   const styles = useStyles();
   // TODO: 분실 신고 API 가 생기면 쿼리 결과로 바꾼다.
   const reports = sampleLostReports;
-  const newCount = reports.filter((report) => report.status === 'new').length;
+  const newCount = reports.filter((report) => report.status === 'NEW').length;
   const chatRequestedCount = reports.length - newCount;
 
   return (
@@ -31,7 +31,7 @@ export function LostReportsPage({ onOpenChat }: LostReportsPageProps) {
           </View>
         }
         renderItem={({ item }) => {
-          const isChatRequested = item.status === 'chatRequested';
+          const isChatRequested = item.status === 'CHAT_REQUESTED';
 
           return (
             <LostReportCard

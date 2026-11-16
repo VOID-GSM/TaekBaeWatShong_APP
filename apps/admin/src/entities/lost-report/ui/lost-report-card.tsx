@@ -15,7 +15,7 @@ export interface LostReportCardProps {
 /** 분실 신고 한 건 (Figma `ReportCard`). */
 export function LostReportCard({ report, action }: LostReportCardProps) {
   const styles = useStyles();
-  const isChatRequested = report.status === 'chatRequested';
+  const isChatRequested = report.status === 'CHAT_REQUESTED';
 
   return (
     <View style={styles.card}>
