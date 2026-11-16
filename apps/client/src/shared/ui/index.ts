@@ -4,4 +4,5 @@ export * from './chip';
 export * from './logo-mark';
 export * from './text-field';
 export * from './theme';
+export * from './top-bar';
 export * from './typography';
