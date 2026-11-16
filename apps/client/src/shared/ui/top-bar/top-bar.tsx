@@ -7,13 +7,18 @@ export interface TopBarProps {
   title: string;
 }
 
-/** 탭 첫 화면의 왼쪽 제목 (Figma `TopBar/Title`). */
+/** 화면 제목 바(높이 56). */
 export function TopBar({ title }: TopBarProps) {
   const styles = useStyles();
 
   return (
     <View style={styles.container}>
-      <Typography variant="bodyMStrong" numberOfLines={1} accessibilityRole="header">
+      <Typography
+        variant="titlePage"
+        accessibilityRole="header"
+        numberOfLines={1}
+        style={styles.title}
+      >
         {title}
       </Typography>
     </View>
@@ -22,8 +27,10 @@ export function TopBar({ title }: TopBarProps) {
 
 const useStyles = makeStyles(({ size, spacing }) => ({
   container: {
-    justifyContent: 'center',
     height: size.topBar,
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: spacing.xl,
   },
+  title: { flex: 1 },
 }));

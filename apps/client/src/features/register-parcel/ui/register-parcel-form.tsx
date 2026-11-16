@@ -91,13 +91,14 @@ export function RegisterParcelForm({ onSubmit }: RegisterParcelFormProps) {
         label="택배 등록하기"
         labelVariant="bodyMStrong"
         loading={isSubmitting}
+        style={styles.submit}
         onPress={() => void handleSubmit()}
       />
     </View>
   );
 }
 
-const useStyles = makeStyles(({ colors, radius, shadow, spacing }) => ({
+const useStyles = makeStyles(({ colors, radius, shadow, size, spacing }) => ({
   container: { flexGrow: 1, gap: spacing.lg },
   card: {
     gap: spacing.xl,
@@ -109,4 +110,6 @@ const useStyles = makeStyles(({ colors, radius, shadow, spacing }) => ({
   field: { gap: spacing.sm },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   spacer: { flexGrow: 1 },
+  // Figma 시안상 입력칸과 같은 높이(52)
+  submit: { height: size.field },
 }));
