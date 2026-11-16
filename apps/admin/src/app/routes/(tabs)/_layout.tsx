@@ -1,4 +1,5 @@
 import { TabList, Tabs, TabSlot, TabTrigger } from 'expo-router/ui';
+import { StyleSheet } from 'react-native';
 
 import { chatXml } from '@/shared/assets/chat';
 import { flagXml } from '@/shared/assets/flag';
@@ -13,7 +14,8 @@ export default function TabsLayout() {
 
   return (
     <Tabs style={{ flex: 1 }}>
-      <TabSlot />
+      {/* TabSlot 기본 스타일은 줄어들지 않아(flexShrink: 0) 내용이 길면 탭 바가 화면 밖으로 밀린다. */}
+      <TabSlot style={styles.slot} />
       <TabList asChild>
         <MainTabBar>
           <TabTrigger name="index" href="/" asChild>
@@ -35,3 +37,9 @@ export default function TabsLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  // 탭 바를 뺀 나머지 높이만 차지하게 해서, 넘치는 내용은 각 화면의 ScrollView 가 스크롤한다.
+  // TabSlot 기본값(flexShrink: 0)을 덮어쓰려면 flex 축약형이 아니라 개별 속성으로 줘야 한다.
+  slot: { flexGrow: 1, flexShrink: 1, flexBasis: 0, minHeight: 0 },
+});
