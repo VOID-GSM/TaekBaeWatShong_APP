@@ -1,7 +1,10 @@
 export {
   DELIVERY_STEPS,
+  filterParcels,
   type OverdueRank,
   type Parcel,
+  PARCEL_FILTERS,
+  type ParcelFilter,
   type ParcelStatus,
   type ParcelSummary,
 } from './model/parcel';

@@ -30,7 +30,14 @@ export function ParcelCard({ parcel, onRetrieve, onReportLost }: ParcelCardProps
         <ParcelStatusBadge status={parcel.status} />
       </View>
 
-      {parcel.status === 'inTransit' ? (
+      {parcel.status === 'claimed' ? (
+        <View style={[styles.note, styles.noteMuted]}>
+          <Icon name="infoMuted" />
+          <Typography variant="bodyMStrong" color="textSecondary" style={styles.flex}>
+            {parcel.claimedAt ? `${parcel.claimedAt}에 수령했어요.` : '수령을 완료했어요.'}
+          </Typography>
+        </View>
+      ) : parcel.status === 'inTransit' ? (
         <>
           <DeliveryStepper current={parcel.stepIndex ?? 0} />
           <View style={styles.note}>
@@ -119,5 +126,6 @@ const useStyles = makeStyles(({ colors, radius, spacing }) => ({
     borderRadius: radius.md,
     backgroundColor: colors.bgBrandSoft,
   },
+  noteMuted: { backgroundColor: colors.bgSubtle },
   flex: { flex: 1 },
 }));
