@@ -1,5 +1,5 @@
 import { type ComponentRef, useRef, useState } from 'react';
-import { Modal, Pressable, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, View } from 'react-native';
 
 import { Icon } from '../icon';
 import { makeStyles } from '../theme';
@@ -68,36 +68,41 @@ export function SelectMenu<T extends string>({
       </Pressable>
 
       <Modal visible={anchor !== null} transparent animationType="fade" onRequestClose={close}>
-        <Pressable style={styles.backdrop} onPress={close} accessibilityLabel="메뉴 닫기">
-          {anchor !== null && (
-            <View
-              accessibilityRole="menu"
-              style={[styles.menu, { top: anchor.top, left: anchor.right }]}
-            >
-              {options.map((option) => {
-                const selected = option.value === value;
-                return (
-                  <Pressable
-                    key={option.value}
-                    accessibilityRole="menuitem"
-                    accessibilityState={{ selected }}
-                    onPress={() => select(option.value)}
-                    style={({ pressed }) => [styles.item, pressed && styles.itemPressed]}
+        {/* 배경은 메뉴의 형제로 둔다. 메뉴를 감싸면 iOS VoiceOver 가 하나로 묶어 항목에 못 간다. */}
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPress={close}
+          accessibilityRole="button"
+          accessibilityLabel="메뉴 닫기"
+        />
+        {anchor !== null && (
+          <View
+            accessibilityRole="menu"
+            style={[styles.menu, { top: anchor.top, left: anchor.right }]}
+          >
+            {options.map((option) => {
+              const selected = option.value === value;
+              return (
+                <Pressable
+                  key={option.value}
+                  accessibilityRole="menuitem"
+                  accessibilityState={{ selected }}
+                  onPress={() => select(option.value)}
+                  style={({ pressed }) => [styles.item, pressed && styles.itemPressed]}
+                >
+                  <Typography
+                    variant="bodyMStrong"
+                    color={selected ? 'textBrand' : 'textPrimary'}
+                    style={styles.flex}
                   >
-                    <Typography
-                      variant="bodyMStrong"
-                      color={selected ? 'textBrand' : 'textPrimary'}
-                      style={styles.flex}
-                    >
-                      {option.label}
-                    </Typography>
-                    {selected && <Icon name="check" />}
-                  </Pressable>
-                );
-              })}
-            </View>
-          )}
-        </Pressable>
+                    {option.label}
+                  </Typography>
+                  {selected && <Icon name="check" />}
+                </Pressable>
+              );
+            })}
+          </View>
+        )}
       </Modal>
     </>
   );
@@ -108,7 +113,6 @@ const MENU_WIDTH = 148;
 const useStyles = makeStyles(({ colors, opacity, radius, shadow, spacing }) => ({
   trigger: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   pressed: { opacity: opacity.pressed },
-  backdrop: { flex: 1 },
   menu: {
     position: 'absolute',
     width: MENU_WIDTH,
