@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 
-import { Card, GradientView, makeStyles, Typography } from '@/shared/ui';
+import { BrandSurface, Card, makeStyles, Typography } from '@/shared/ui';
 
 import type { OverdueRank } from '../model/parcel';
 
@@ -41,9 +41,14 @@ function RankCircle({ rank }: { rank: number }) {
 
   if (rank <= 2) {
     return (
-      <GradientView gradient={rank === 1 ? 'navy' : 'brand'} style={styles.rank}>
+      // navy 는 위 → 아래, brand 는 Figma 원형 배지 각도
+      <BrandSurface
+        gradient={rank === 1 ? 'navy' : 'brand'}
+        angle={rank === 1 ? 180 : 131.35}
+        style={styles.rank}
+      >
         {label}
-      </GradientView>
+      </BrandSurface>
     );
   }
   return <View style={[styles.rank, styles.rankSoft]}>{label}</View>;

@@ -8,7 +8,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { GradientView } from '../gradient-view';
+import { BrandSurface } from '../brand-surface';
 import { type ColorToken, makeStyles, type TypographyVariant, useTheme } from '../theme';
 import { Typography } from '../typography';
 
@@ -68,7 +68,8 @@ export function Button({
         style,
       ]}
     >
-      {variant === 'brand' && <GradientView gradient="brand" style={StyleSheet.absoluteFill} />}
+      {/* 각도는 Figma 카드 버튼 값 */}
+      {variant === 'brand' && <BrandSurface angle={164} style={StyleSheet.absoluteFill} />}
       {loading ? <ActivityIndicator color={colors[labelColor]} style={styles.icon} /> : leftIcon}
       <Typography variant={labelVariant} color={labelColor} numberOfLines={1}>
         {label}

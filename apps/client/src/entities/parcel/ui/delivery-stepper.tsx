@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
 import { View } from 'react-native';
 
-import { GradientView, Icon, makeStyles, Typography } from '@/shared/ui';
+import { BrandSurface, Icon, makeStyles, Typography } from '@/shared/ui';
 
 import { DELIVERY_STEPS } from '../model/parcel';
 
@@ -24,7 +24,7 @@ export function DeliveryStepper({ current }: DeliveryStepperProps) {
           <Fragment key={step}>
             {index > 0 &&
               (index <= current ? (
-                <GradientView gradient="brand" style={styles.line} />
+                <BrandSurface angle={177.92} style={styles.line} />
               ) : (
                 <View style={[styles.line, styles.lineTodo]} />
               ))}

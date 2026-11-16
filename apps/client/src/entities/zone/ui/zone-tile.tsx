@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 
-import { GradientView, makeStyles, Typography } from '@/shared/ui';
+import { BrandSurface, makeStyles, Typography } from '@/shared/ui';
 
 import type { Zone } from '../model/zone';
 
@@ -23,9 +23,7 @@ export function ZoneTile({ zone }: { zone: Zone }) {
       {isEmpty ? (
         <View style={[styles.letterBox, styles.letterBoxEmpty]}>{letter}</View>
       ) : (
-        <GradientView gradient="brand" style={styles.letterBox}>
-          {letter}
-        </GradientView>
+        <BrandSurface style={styles.letterBox}>{letter}</BrandSurface>
       )}
       <View style={styles.col}>
         <Typography variant="bodyMStrong" color="textTertiary">

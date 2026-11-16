@@ -79,16 +79,10 @@ export type ColorToken = keyof ColorTokens;
 /** 다크 시안이 아직 없어 라이트와 같은 값을 쓴다. 시안이 나오면 여기 값만 바꾼다. */
 export const darkColors: ColorTokens = lightColors;
 
-/** Figma 그라데이션 채우기. 좌상단 → 우하단(navy 는 위 → 아래). */
+/** Figma 그라데이션 채우기 색·정지점. 방향(각도)은 요소마다 달라 `BrandSurface` 의 angle 로 넘긴다. */
 export const gradients = {
-  brand: {
-    from: palette.indigo500,
-    to: palette.indigo700,
-    start: 0.14184,
-    end: 0.85106,
-    direction: 'diagonal',
-  },
-  navy: { from: palette.navy600, to: palette.navy950, start: 0, end: 1, direction: 'vertical' },
+  brand: { from: palette.indigo500, to: palette.indigo700, start: 0.14184, end: 0.85106 },
+  navy: { from: palette.navy600, to: palette.navy950, start: 0, end: 1 },
 } as const;
 
 export type GradientToken = keyof typeof gradients;

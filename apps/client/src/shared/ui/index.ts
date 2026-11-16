@@ -2,7 +2,6 @@ export * from './badge';
 export * from './brand-surface';
 export * from './button';
 export * from './card';
-export * from './gradient-view';
 export * from './icon';
 export * from './icon-button';
 export * from './logo-mark';

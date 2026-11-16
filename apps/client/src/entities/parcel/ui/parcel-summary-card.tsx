@@ -1,6 +1,6 @@
 import { View } from 'react-native';
 
-import { GradientView, makeStyles, Typography } from '@/shared/ui';
+import { BrandSurface, makeStyles, Typography } from '@/shared/ui';
 
 import type { ParcelSummary } from '../model/parcel';
 
@@ -8,7 +8,7 @@ export function ParcelSummaryCard({ summary }: { summary: ParcelSummary }) {
   const styles = useStyles();
 
   return (
-    <GradientView gradient="brand" style={styles.container}>
+    <BrandSurface angle={161.08} style={styles.container}>
       <View style={styles.total}>
         <Typography variant="bodyM" color="textOnBrandMuted">
           내 택배
@@ -19,7 +19,7 @@ export function ParcelSummaryCard({ summary }: { summary: ParcelSummary }) {
       </View>
       <Stat value={summary.arrived} label="도착" />
       <Stat value={summary.overdue} label="방치" />
-    </GradientView>
+    </BrandSurface>
   );
 }
 
