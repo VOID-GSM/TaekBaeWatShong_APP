@@ -23,6 +23,8 @@ export const lightColors = {
   bgBrandStart: palette.indigo500,
   bgBrandEnd: palette.indigo700,
   borderDefault: palette.grey200,
+  /** 입력칸에 초점이 갔을 때 테두리 */
+  borderFocus: palette.indigo600,
   textPrimary: palette.navy900,
   textSecondary: palette.slate500,
   textTertiary: palette.slate400,

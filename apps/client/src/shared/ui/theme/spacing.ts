@@ -18,7 +18,9 @@ export const spacing = {
 
 /** Figma 변수(radius/*). */
 export const radius = {
+  md: 16,
   lg: 22,
+  xl: 26,
   /** 하단 탭 바 위쪽 모서리. Figma 에 변수 없이 쓰인 값. */
   sheet: 20,
   full: 999,
@@ -27,6 +29,11 @@ export const radius = {
 
 export const size = {
   buttonL: 56,
+  /** 브랜드 버튼 높이 */
+  buttonM: 52,
+  /** 입력칸 높이 */
+  field: 52,
+  topBar: 56,
   /** 버튼 안 아이콘 */
   iconM: 22,
   /** 하단 탭 바 항목의 알약 모양 배경 */
