@@ -28,10 +28,23 @@ describe('LostReportsPage', () => {
     const onOpenChat = jest.fn();
     await render(<LostReportsPage onOpenChat={onOpenChat} />);
 
-    await fireEvent.press(screen.getByRole('button', { name: '1:1 채팅 시작' }));
-    await fireEvent.press(screen.getByRole('button', { name: '채팅방 열기' }));
+    await fireEvent.press(
+      screen.getByRole('button', { name: '김민준 겨울 패딩 신고, 1:1 채팅 시작' }),
+    );
+    await fireEvent.press(
+      screen.getByRole('button', { name: '이선생님 교재 세트 신고, 채팅방 열기' }),
+    );
 
     expect(onOpenChat).toHaveBeenNthCalledWith(1, sampleLostReports[0]);
     expect(onOpenChat).toHaveBeenNthCalledWith(2, sampleLostReports[1]);
+  });
+
+  it('채팅 버튼 이름에 신고자와 물품을 넣어 카드끼리 구분된다', async () => {
+    await render(<LostReportsPage />);
+
+    expect(screen.queryByRole('button', { name: '1:1 채팅 시작' })).toBeNull();
+    expect(
+      screen.getByRole('button', { name: '김민준 겨울 패딩 신고, 1:1 채팅 시작' }),
+    ).toBeOnTheScreen();
   });
 });

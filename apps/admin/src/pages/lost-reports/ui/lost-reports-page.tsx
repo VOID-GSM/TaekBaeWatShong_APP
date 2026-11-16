@@ -32,6 +32,7 @@ export function LostReportsPage({ onOpenChat }: LostReportsPageProps) {
         }
         renderItem={({ item }) => {
           const isChatRequested = item.status === 'CHAT_REQUESTED';
+          const actionLabel = isChatRequested ? '채팅방 열기' : '1:1 채팅 시작';
 
           return (
             <LostReportCard
@@ -40,7 +41,9 @@ export function LostReportsPage({ onOpenChat }: LostReportsPageProps) {
                 <Button
                   size="small"
                   variant={isChatRequested ? 'soft' : 'brand'}
-                  label={isChatRequested ? '채팅방 열기' : '1:1 채팅 시작'}
+                  label={actionLabel}
+                  // 카드마다 라벨이 같아서, 버튼만 골라 탐색해도 어느 신고인지 알 수 있게 한다.
+                  accessibilityLabel={`${item.reporter.name} ${item.productName} 신고, ${actionLabel}`}
                   onPress={() => onOpenChat?.(item)}
                 />
               }
