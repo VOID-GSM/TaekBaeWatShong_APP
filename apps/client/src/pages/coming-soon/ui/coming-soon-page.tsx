@@ -2,7 +2,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { makeStyles, Typography } from '@/shared/ui';
 
-/** 시안이 아직 없는 탭(등록·회수·알림)의 임시 화면. */
+/** 시안이 아직 없는 탭(회수·알림)의 임시 화면. */
 export function ComingSoonPage({ title }: { title: string }) {
   const styles = useStyles();
 

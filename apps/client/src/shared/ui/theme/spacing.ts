@@ -36,6 +36,8 @@ export const radius = {
 export const size = {
   buttonL: 56,
   buttonM: 40,
+  /** 입력칸 높이 */
+  field: 52,
   /** 버튼 안 아이콘 */
   iconM: 22,
   iconButton: 40,

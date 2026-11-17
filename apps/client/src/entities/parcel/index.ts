@@ -1,3 +1,4 @@
+export { PARCEL_CARRIERS, type ParcelCarrier } from './model/carrier';
 export {
   DELIVERY_STEPS,
   filterParcels,
