@@ -5,17 +5,21 @@ import { View } from 'react-native';
 import { PARCEL_CARRIERS } from '@/entities/parcel';
 import { Button, Chip, makeStyles, TextField, Typography } from '@/shared/ui';
 
-import { ALIAS_MAX_LENGTH, type RegisterParcelValues } from '../model/register-parcel-schema';
-import { useRegisterParcelForm } from '../model/use-register-parcel-form';
+import { ALIAS_MAX_LENGTH } from '../model/register-parcel-schema';
+import {
+  useRegisterParcelForm,
+  type UseRegisterParcelFormOptions,
+} from '../model/use-register-parcel-form';
 
-export interface RegisterParcelFormProps {
-  onSubmit?: (values: RegisterParcelValues) => void | Promise<void>;
-}
+export type RegisterParcelFormProps = UseRegisterParcelFormOptions;
 
 /** 운송장 번호 · 택배사 · 상품명 입력 카드와 등록 버튼. 버튼은 화면 맨 아래에 붙는다. */
-export function RegisterParcelForm({ onSubmit }: RegisterParcelFormProps) {
+export function RegisterParcelForm({ onSuccess }: RegisterParcelFormProps) {
   const styles = useStyles();
-  const { form, onSubmit: handleSubmit, isSubmitting } = useRegisterParcelForm(onSubmit);
+  const { form, submit, isSubmitting, submitError, registered, clearRegistered } =
+    useRegisterParcelForm({
+      onSuccess,
+    });
 
   return (
     <View style={styles.container}>
@@ -28,7 +32,10 @@ export function RegisterParcelForm({ onSubmit }: RegisterParcelFormProps) {
               label="운송장 번호"
               required
               value={field.value}
-              onChangeText={(text) => field.onChange(formatInvoiceNumberInput(text))}
+              onChangeText={(text) => {
+                clearRegistered();
+                field.onChange(formatInvoiceNumberInput(text));
+              }}
               onBlur={field.onBlur}
               error={fieldState.error?.message}
               size="l"
@@ -63,7 +70,10 @@ export function RegisterParcelForm({ onSubmit }: RegisterParcelFormProps) {
                     key={carrier}
                     label={carrier}
                     selected={field.value === carrier}
-                    onPress={() => field.onChange(carrier)}
+                    onPress={() => {
+                      clearRegistered();
+                      field.onChange(carrier);
+                    }}
                   />
                 ))}
               </View>
@@ -84,14 +94,17 @@ export function RegisterParcelForm({ onSubmit }: RegisterParcelFormProps) {
               label="상품명 (선택)"
               helperText="내가 알아보기 쉬운 이름으로 저장돼요"
               value={field.value}
-              onChangeText={field.onChange}
+              onChangeText={(text) => {
+                clearRegistered();
+                field.onChange(text);
+              }}
               onBlur={field.onBlur}
               error={fieldState.error?.message}
               size="l"
               placeholder="예) 겨울 패딩"
               maxLength={ALIAS_MAX_LENGTH}
               returnKeyType="done"
-              onSubmitEditing={() => void handleSubmit()}
+              onSubmitEditing={submit}
             />
           )}
         />
@@ -99,13 +112,36 @@ export function RegisterParcelForm({ onSubmit }: RegisterParcelFormProps) {
 
       <View style={styles.spacer} />
 
+      {submitError !== null && (
+        <Typography
+          variant="bodyMStrong"
+          color="textDanger"
+          align="center"
+          accessibilityRole="alert"
+        >
+          {submitError}
+        </Typography>
+      )}
+      {/* 시안에 등록 완료 화면이 없어 버튼 위 문구로 알린다 — 디자이너 확인 필요. */}
+      {registered !== null && (
+        <Typography
+          variant="bodyMStrong"
+          color="textBrand"
+          align="center"
+          accessibilityLiveRegion="polite"
+          accessibilityRole="alert"
+        >
+          {`'${registered.alias}' 택배를 등록했어요`}
+        </Typography>
+      )}
+
       <Button
         variant="brand"
         label="택배 등록하기"
         labelVariant="bodyMStrong"
         loading={isSubmitting}
         style={styles.submit}
-        onPress={() => void handleSubmit()}
+        onPress={submit}
       />
     </View>
   );
