@@ -4,18 +4,26 @@ import {
   Pressable,
   type PressableProps,
   type StyleProp,
-  StyleSheet,
   type ViewStyle,
 } from 'react-native';
-import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
+import Animated, {
+  interpolate,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 
-import { makeStyles, type TypographyVariant, useTheme } from '../theme';
+import { BrandGradient } from '../brand-surface';
+import { type ColorToken, makeStyles, type TypographyVariant, useTheme } from '../theme';
 import { Typography } from '../typography';
 
 export interface ButtonProps extends Omit<PressableProps, 'children' | 'style'> {
   label: string;
-  /** navy: 단색 + 그림자(로그인), brand: 그라디언트(주요 액션). */
-  variant?: 'navy' | 'brand';
+  /** navy: 단색 + 그림자(로그인), brand: 그라디언트(주요 액션), soft: 연한 브랜드 배경(보조 액션). */
+  variant?: 'navy' | 'brand' | 'soft';
+  /** small: 카드 안에 들어가는 낮은 버튼. */
+  size?: 'regular' | 'small';
   /** 라벨 왼쪽 아이콘. 로딩 중에는 인디케이터로 바뀐다. */
   leftIcon?: ReactNode;
   /** 라벨 타이포. 시안마다 버튼 글자 스타일이 달라 열어 둔다. */
@@ -24,42 +32,28 @@ export interface ButtonProps extends Omit<PressableProps, 'children' | 'style'> 
   style?: StyleProp<ViewStyle>;
 }
 
-// Figma Button 채움: linear-gradient(170.63deg, start 14.184%, end 85.106%)
-const BRAND_GRADIENT_ANGLE = (170.63 * Math.PI) / 180;
-const BRAND_GRADIENT_STOPS = { start: 0.14184, end: 0.85106 };
+// Figma Button 채움 각도. 버튼 비율에 따라 시안 값이 다르다.
+const BRAND_GRADIENT_ANGLE = { regular: 170.63, small: 172.06 };
 
-/** CSS linear-gradient 와 같은 방향·길이의 그라디언트 선을 px 좌표로 구한다. */
-function BrandGradient({ width, height }: { width: number; height: number }) {
-  const { colors } = useTheme();
-  const dx = Math.sin(BRAND_GRADIENT_ANGLE);
-  const dy = -Math.cos(BRAND_GRADIENT_ANGLE);
-  const half = (Math.abs(width * dx) + Math.abs(height * dy)) / 2;
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-  return (
-    <Svg width={width} height={height} style={StyleSheet.absoluteFill}>
-      <Defs>
-        <LinearGradient
-          id="brand"
-          gradientUnits="userSpaceOnUse"
-          x1={width / 2 - dx * half}
-          y1={height / 2 - dy * half}
-          x2={width / 2 + dx * half}
-          y2={height / 2 + dy * half}
-        >
-          <Stop offset={BRAND_GRADIENT_STOPS.start} stopColor={colors.bgBrandStart} />
-          <Stop offset={BRAND_GRADIENT_STOPS.end} stopColor={colors.bgBrandEnd} />
-        </LinearGradient>
-      </Defs>
-      <Rect width={width} height={height} fill="url(#brand)" />
-    </Svg>
-  );
-}
+/** 누르는 동안 줄어드는 비율. 떼면 살짝 튕기며 돌아온다. */
+const PRESSED_SCALE = 0.97;
+const PRESS_IN_SPRING = { stiffness: 600, damping: 40, mass: 1 };
+const PRESS_OUT_SPRING = { stiffness: 400, damping: 18, mass: 1 };
+
+const LABEL_COLOR: Record<NonNullable<ButtonProps['variant']>, ColorToken> = {
+  navy: 'textOnNavy',
+  brand: 'textOnBrand',
+  soft: 'textBrand',
+};
 
 export function Button({
   label,
   variant = 'navy',
+  size = 'regular',
   leftIcon,
-  labelVariant = 'buttonL',
+  labelVariant = size === 'small' ? 'buttonM' : 'buttonL',
   loading = false,
   disabled,
   accessibilityLabel,
@@ -67,13 +61,31 @@ export function Button({
   ...props
 }: ButtonProps) {
   const styles = useStyles();
-  const { colors } = useTheme();
+  const { colors, opacity } = useTheme();
+  const reduceMotion = useReducedMotion();
+  const pressProgress = useSharedValue(0);
   const [layout, setLayout] = useState({ width: 0, height: 0 });
   const isDisabled = disabled === true || loading;
   const isBrand = variant === 'brand';
+  const labelColor = LABEL_COLOR[variant];
+
+  // '동작 줄이기'를 켠 사용자에게는 크기 변화 대신 투명도로만 눌림을 보여 준다.
+  // 이 스타일이 배열 맨 뒤에서 opacity 를 덮어쓰므로, 비활성 투명도도 여기서 같이 계산한다.
+  const baseOpacity = isDisabled ? opacity.disabled : 1;
+  const pressStyle = useAnimatedStyle(() =>
+    reduceMotion
+      ? {
+          opacity: interpolate(
+            pressProgress.get(),
+            [0, 1],
+            [baseOpacity, baseOpacity * opacity.pressed],
+          ),
+        }
+      : { transform: [{ scale: interpolate(pressProgress.get(), [0, 1], [1, PRESSED_SCALE]) }] },
+  );
 
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ disabled: isDisabled, busy: loading }}
@@ -82,35 +94,37 @@ export function Button({
       onLayout={(event) => {
         if (isBrand) {
           const { width, height } = event.nativeEvent.layout;
-          setLayout({ width, height });
+          setLayout((prev) =>
+            prev.width === width && prev.height === height ? prev : { width, height },
+          );
         }
         props.onLayout?.(event);
       }}
-      style={({ pressed }) => [
+      onPressIn={(event) => {
+        pressProgress.set(reduceMotion ? 1 : withSpring(1, PRESS_IN_SPRING));
+        props.onPressIn?.(event);
+      }}
+      onPressOut={(event) => {
+        pressProgress.set(reduceMotion ? 0 : withSpring(0, PRESS_OUT_SPRING));
+        props.onPressOut?.(event);
+      }}
+      style={[
         styles.container,
-        isBrand ? styles.brand : styles.navy,
-        pressed && styles.pressed,
+        styles[variant],
+        size === 'small' && styles.small,
         isDisabled && styles.disabled,
         style,
+        pressStyle,
       ]}
     >
-      {isBrand && layout.width > 0 && <BrandGradient {...layout} />}
-      {loading ? (
-        <ActivityIndicator
-          color={isBrand ? colors.textOnBrand : colors.textOnNavy}
-          style={styles.icon}
-        />
-      ) : (
-        leftIcon
+      {isBrand && layout.width > 0 && (
+        <BrandGradient {...layout} angle={BRAND_GRADIENT_ANGLE[size]} />
       )}
-      <Typography
-        variant={labelVariant}
-        color={isBrand ? 'textOnBrand' : 'textOnNavy'}
-        numberOfLines={1}
-      >
+      {loading ? <ActivityIndicator color={colors[labelColor]} style={styles.icon} /> : leftIcon}
+      <Typography variant={labelVariant} color={labelColor} numberOfLines={1}>
         {label}
       </Typography>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
@@ -135,8 +149,14 @@ const useStyles = makeStyles(({ colors, opacity, radius, shadow, size, spacing }
     paddingHorizontal: spacing['2xl'],
     backgroundColor: colors.bgBrandEnd,
     overflow: 'hidden',
+    zIndex: 0,
   },
-  pressed: { opacity: opacity.pressed },
+  soft: {
+    height: size.buttonM,
+    paddingHorizontal: spacing['2xl'],
+    backgroundColor: colors.bgBrandSoft,
+  },
+  small: { height: size.buttonS, borderRadius: radius.md },
   disabled: { opacity: opacity.disabled },
   icon: { width: size.iconM, height: size.iconM },
 }));

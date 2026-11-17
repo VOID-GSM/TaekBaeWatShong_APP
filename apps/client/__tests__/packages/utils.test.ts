@@ -1,7 +1,9 @@
 import {
   formatDateTimeInput,
   formatInvoiceNumber,
+  formatInvoiceNumberInput,
   localDateTimeToDate,
+  normalizeInvoiceNumber,
   parseDateTimeInput,
 } from '@taekbae/utils';
 
@@ -15,6 +17,23 @@ describe('formatInvoiceNumber', () => {
   it('숫자가 아닌 값은 그대로 둔다', () => {
     expect(formatInvoiceNumber('AB-1234')).toBe('AB-1234');
     expect(formatInvoiceNumber('')).toBe('');
+  });
+});
+
+describe('normalizeInvoiceNumber', () => {
+  it('숫자만 남긴다', () => {
+    expect(normalizeInvoiceNumber('6041-2237 8890')).toBe('604122378890');
+  });
+});
+
+describe('formatInvoiceNumberInput', () => {
+  it('입력값을 숫자만 남겨 4자리씩 띄운다', () => {
+    expect(formatInvoiceNumberInput('6041-2237 8890')).toBe('6041 2237 8890');
+    expect(formatInvoiceNumberInput('60412')).toBe('6041 2');
+  });
+
+  it('14자리를 넘는 숫자는 잘라낸다', () => {
+    expect(formatInvoiceNumberInput('1234567890123456')).toBe('1234 5678 9012 34');
   });
 });
 

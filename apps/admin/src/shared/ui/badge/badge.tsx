@@ -1,25 +1,28 @@
 import { type StyleProp, View, type ViewProps, type ViewStyle } from 'react-native';
 
-import { makeStyles } from '../theme';
+import { type ColorToken, makeStyles } from '../theme';
 import { Typography } from '../typography';
+
+type BadgeTone = 'brand' | 'success' | 'danger';
 
 export interface BadgeProps extends Omit<ViewProps, 'children' | 'style'> {
   label: string;
-  tone?: 'brand' | 'success';
+  tone?: BadgeTone;
   style?: StyleProp<ViewStyle>;
 }
 
+const LABEL_COLOR: Record<BadgeTone, ColorToken> = {
+  brand: 'textBrand',
+  success: 'textSuccess',
+  danger: 'textDanger',
+};
+
 export function Badge({ label, tone = 'brand', style, ...props }: BadgeProps) {
   const styles = useStyles();
-  const isSuccess = tone === 'success';
 
   return (
-    <View {...props} style={[styles.container, isSuccess && styles.success, style]}>
-      <Typography
-        variant="caption"
-        color={isSuccess ? 'textSuccess' : 'textBrand'}
-        numberOfLines={1}
-      >
+    <View {...props} style={[styles.container, styles[tone], style]}>
+      <Typography variant="caption" color={LABEL_COLOR[tone]} numberOfLines={1}>
         {label}
       </Typography>
     </View>
@@ -33,7 +36,8 @@ const useStyles = makeStyles(({ colors, radius, spacing }) => ({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     borderRadius: radius.full,
-    backgroundColor: colors.bgBrandSoft,
   },
+  brand: { backgroundColor: colors.bgBrandSoft },
   success: { backgroundColor: colors.bgSuccessSoft },
+  danger: { backgroundColor: colors.bgDangerSoft },
 }));

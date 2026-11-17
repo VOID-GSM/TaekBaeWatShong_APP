@@ -1,3 +1,4 @@
+import { View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
 import { googleGXml } from '../../assets/google-g';
@@ -12,13 +13,14 @@ export function GoogleIcon({ size }: GoogleIconProps) {
   const theme = useTheme();
   const iconSize = size ?? theme.size.iconM;
 
+  // 접근성 속성은 View 에 둔다. SvgXml 에 주면 웹에서 <svg> 의 알 수 없는 DOM 속성이 되어 경고가 난다.
   return (
-    <SvgXml
-      xml={googleGXml}
-      width={iconSize}
-      height={iconSize}
+    <View
       accessible={false}
-      importantForAccessibility="no"
-    />
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+    >
+      <SvgXml xml={googleGXml} width={iconSize} height={iconSize} />
+    </View>
   );
 }

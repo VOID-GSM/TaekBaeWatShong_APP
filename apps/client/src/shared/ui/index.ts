@@ -2,6 +2,7 @@ export * from './badge';
 export * from './brand-surface';
 export * from './button';
 export * from './card';
+export * from './chip';
 export * from './date-time-field';
 export * from './icon';
 export * from './icon-button';
