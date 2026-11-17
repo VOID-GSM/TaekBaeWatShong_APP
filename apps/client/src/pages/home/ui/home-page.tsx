@@ -1,3 +1,4 @@
+import { normalizeInvoiceNumber } from '@taekbae/utils';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
@@ -26,7 +27,7 @@ export function HomePage() {
   const openReportLost = (trackingNumber: string) =>
     router.push({
       pathname: '/report/[invoiceNumber]',
-      params: { invoiceNumber: trackingNumber.replace(/\D/g, '') },
+      params: { invoiceNumber: normalizeInvoiceNumber(trackingNumber) },
     });
 
   return (
