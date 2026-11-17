@@ -1,6 +1,5 @@
 export { OAUTH_REDIRECT_PATH } from './api/oauth-login';
 export {
-  getAdminAccessToken,
   initializeAdminAuthSession,
   loginAdmin,
   logoutAdmin,

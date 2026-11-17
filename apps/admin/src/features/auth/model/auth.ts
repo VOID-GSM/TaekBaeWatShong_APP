@@ -100,11 +100,6 @@ export async function initializeAdminAuthSession(): Promise<void> {
   await restoreSession();
 }
 
-export async function getAdminAccessToken(): Promise<string | null> {
-  const session = await restoreSession();
-  return session?.accessToken ?? null;
-}
-
 /**
  * API 요청에 붙일 토큰. 메모리 세션만 읽어 요청마다 저장소를 열지 않는다.
  * 만료됐으면 요청을 보내기 전에 막도록 세션 만료 에러를 던진다(`configureApi` 가 로그아웃시킨다).
