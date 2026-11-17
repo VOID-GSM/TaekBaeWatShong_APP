@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,7 +19,15 @@ export function HomePage() {
   const styles = useStyles();
   const userName = useAuthStore((state) => state.user?.name);
   const [filter, setFilter] = useState<ParcelFilter>('latest');
+  const router = useRouter();
   const parcels = filterParcels(MOCK_PARCELS, filter);
+
+  // 분실 신고 화면은 운송장 번호(숫자만)로 내 택배를 찾는다.
+  const openReportLost = (trackingNumber: string) =>
+    router.push({
+      pathname: '/report/[invoiceNumber]',
+      params: { invoiceNumber: trackingNumber.replace(/\D/g, '') },
+    });
 
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>
@@ -54,7 +63,13 @@ export function HomePage() {
             {emptyMessage[filter]}
           </Typography>
         ) : (
-          parcels.map((parcel) => <ParcelCard key={parcel.id} parcel={parcel} />)
+          parcels.map((parcel) => (
+            <ParcelCard
+              key={parcel.id}
+              parcel={parcel}
+              onReportLost={() => openReportLost(parcel.trackingNumber)}
+            />
+          ))
         )}
       </ScrollView>
     </SafeAreaView>
