@@ -128,6 +128,18 @@ describe('ParcelRegisterPage', () => {
     expect(screen.getByRole('radio', { name: 'CJ대한통운' })).toBeChecked();
   });
 
+  it('서버 문구가 보인 뒤 입력을 고치면 문구가 사라진다', async () => {
+    registerParcel.mockRejectedValue(new ApiError('이미 등록된 운송장 번호입니다.', 409));
+    await renderPage();
+    await fillRequired();
+    await fireEvent.press(screen.getByRole('button', SUBMIT));
+    await screen.findByText('이미 등록된 운송장 번호입니다.');
+
+    await fireEvent.changeText(screen.getByLabelText(INVOICE), '6041 2237 889');
+
+    await waitFor(() => expect(screen.queryByText('이미 등록된 운송장 번호입니다.')).toBeNull());
+  });
+
   it('필수 값이 없으면 등록하지 않고 안내 문구를 보여준다', async () => {
     await renderPage();
 

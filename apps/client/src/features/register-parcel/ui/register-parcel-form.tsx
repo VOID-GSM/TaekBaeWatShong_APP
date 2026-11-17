@@ -16,7 +16,7 @@ export type RegisterParcelFormProps = UseRegisterParcelFormOptions;
 /** 운송장 번호 · 택배사 · 상품명 입력 카드와 등록 버튼. 버튼은 화면 맨 아래에 붙는다. */
 export function RegisterParcelForm({ onSuccess }: RegisterParcelFormProps) {
   const styles = useStyles();
-  const { form, submit, isSubmitting, submitError, registered, clearRegistered } =
+  const { form, submit, isSubmitting, submitError, registered, clearFeedback } =
     useRegisterParcelForm({
       onSuccess,
     });
@@ -33,7 +33,7 @@ export function RegisterParcelForm({ onSuccess }: RegisterParcelFormProps) {
               required
               value={field.value}
               onChangeText={(text) => {
-                clearRegistered();
+                clearFeedback();
                 field.onChange(formatInvoiceNumberInput(text));
               }}
               onBlur={field.onBlur}
@@ -71,7 +71,7 @@ export function RegisterParcelForm({ onSuccess }: RegisterParcelFormProps) {
                     label={carrier}
                     selected={field.value === carrier}
                     onPress={() => {
-                      clearRegistered();
+                      clearFeedback();
                       field.onChange(carrier);
                     }}
                   />
@@ -95,7 +95,7 @@ export function RegisterParcelForm({ onSuccess }: RegisterParcelFormProps) {
               helperText="내가 알아보기 쉬운 이름으로 저장돼요"
               value={field.value}
               onChangeText={(text) => {
-                clearRegistered();
+                clearFeedback();
                 field.onChange(text);
               }}
               onBlur={field.onBlur}

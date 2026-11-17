@@ -63,7 +63,10 @@ export function useRegisterParcelForm({ onSuccess }: UseRegisterParcelFormOption
     submitError: mutation.error?.message ?? null,
     /** 방금 등록한 택배. 등록 완료 안내에 쓴다. */
     registered,
-    /** 다음 입력을 시작할 때 등록 완료 안내를 지운다. */
-    clearRegistered: () => setRegistered(null),
+    /** 다음 입력을 시작하면 이전 등록 결과(완료 안내·실패 문구)를 지운다. */
+    clearFeedback: () => {
+      setRegistered(null);
+      if (mutation.isError) mutation.reset();
+    },
   };
 }
