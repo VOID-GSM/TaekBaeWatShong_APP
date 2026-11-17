@@ -119,14 +119,25 @@ describe('LostReportsPage', () => {
   });
 
   it('불러오지 못하면 에러와 다시 시도를 보여주고, 다시 시도하면 목록을 보여준다', async () => {
+    let resolveRetry: (reports: AdminReport[]) => void = () => {};
     mockFetchAllReports.mockRejectedValueOnce(new ApiError('네트워크 오류가 발생했습니다.'));
-    mockFetchAllReports.mockResolvedValueOnce([newReport]);
+    mockFetchAllReports.mockImplementationOnce(
+      () =>
+        new Promise<AdminReport[]>((resolve) => {
+          resolveRetry = resolve;
+        }),
+    );
     await renderPage();
 
     expect(await screen.findByText('분실 신고를 불러오지 못했어요.')).toBeOnTheScreen();
     expect(screen.getByText('네트워크 오류가 발생했습니다.')).toBeOnTheScreen();
 
     await fireEvent.press(screen.getByRole('button', { name: '다시 시도' }));
+
+    // 데이터가 없으면 react-query 가 다시 불러오는 동안 상태를 pending 으로 되돌려, 처음 로딩과 같은 표시가 나온다.
+    expect(await screen.findByLabelText('분실 신고를 불러오는 중')).toBeOnTheScreen();
+    expect(screen.queryByText('분실 신고를 불러오지 못했어요.')).toBeNull();
+    resolveRetry([newReport]);
 
     expect(await screen.findByText('접수된 신고 1건')).toBeOnTheScreen();
   });
