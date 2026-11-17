@@ -67,7 +67,7 @@ function mockForm(result: Partial<UseReportLostParcelFormResult> = {}) {
   // 훅 규칙상 이름이 use 로 시작하는 함수 안에서 useForm 을 부른다.
   function useFakeReportForm(): UseReportLostParcelFormResult {
     const { control } = useForm<ReportLostParcelFormValues>({
-      defaultValues: { lostEstimatedAt: '2026. 07. 06 15:30', content: '' },
+      defaultValues: { lostEstimatedAt: new Date(2026, 6, 6, 15, 30), content: '' },
     });
     return { control, submit, isSubmitting: false, submitError: null, ...result };
   }
@@ -88,7 +88,7 @@ describe('ReportLostParcelPage', () => {
     expect(screen.getByRole('header', { name: '분실 신고' })).toBeOnTheScreen();
     expect(screen.getByText('겨울 패딩')).toBeOnTheScreen();
     expect(screen.getByText('CJ대한통운 · 6041 2237 8890')).toBeOnTheScreen();
-    expect(screen.getByText('분실 예상 시각')).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: /^분실 예상 시각:/ })).toBeOnTheScreen();
     expect(screen.getByLabelText('상세 내용')).toBeOnTheScreen();
     expect(useMyParcel).toHaveBeenCalledWith('604122378890');
     expect(useReportLostParcelForm).toHaveBeenCalledWith(
