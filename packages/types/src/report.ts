@@ -24,6 +24,8 @@ export const reportSchema = z.object({
  * `GET /report`(관리자 전체 조회)의 신고 한 건 — 서버 `ReportSummary`.
  * `studentNumber`·`chatRoomId` 는 서버가 아직 채우지 않고(SERVER#26), `deliveryCompany`·`content`·`reporterRole` 은
  * 서버에 추가를 요청한 필드다. 모두 선택값으로 받아, 서버가 채우면 화면이 그대로 보여 준다.
+ * 목록은 한 건만 형식이 달라도 전체가 에러 화면이 되므로, `progress`·`lostEstimatedAt` 은 `parcelSchema.status` 처럼
+ * 문자열로만 받는다(모르는 진행 상태는 화면에서 처리 전으로, 해석할 수 없는 시각은 원문 그대로 보여 준다).
  */
 export const adminReportSchema = z.object({
   id: z.number(),
@@ -33,9 +35,9 @@ export const adminReportSchema = z.object({
   alias: z.string(),
   invoiceNumber: z.string(),
   deliveryCompany: z.string().nullish(),
-  lostEstimatedAt: z.iso.datetime({ local: true }),
+  lostEstimatedAt: z.string(),
   content: z.string().nullish(),
-  progress: reportProgressSchema,
+  progress: z.string(),
   chatRoomId: z.number().nullish(),
   createdAt: z.iso.datetime({ local: true }),
 });

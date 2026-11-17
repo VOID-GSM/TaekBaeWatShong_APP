@@ -1,4 +1,8 @@
-import { parcelListResponseSchema, reportSchema } from '@taekbae/types';
+import {
+  adminReportListResponseSchema,
+  parcelListResponseSchema,
+  reportSchema,
+} from '@taekbae/types';
 
 const parcel = {
   id: 1,
@@ -55,5 +59,28 @@ describe('reportSchema', () => {
 
   it('progress 가 스펙과 다르면 실패한다', () => {
     expect(reportSchema.safeParse({ ...report, progress: 'CLOSED' }).success).toBe(false);
+  });
+});
+
+describe('adminReportListResponseSchema', () => {
+  const report = {
+    id: 1,
+    reporterName: '김민준',
+    alias: '겨울 패딩',
+    invoiceNumber: '604122378890',
+    lostEstimatedAt: '2026-07-06T15:30:00',
+    progress: 'RECEIVED',
+    createdAt: '2026-07-06T16:00:00',
+  };
+
+  it('모르는 진행 상태나 다른 형식의 시각이 섞여도 목록 전체를 파싱한다', () => {
+    const odd = {
+      ...report,
+      id: 2,
+      progress: 'REJECTED',
+      lostEstimatedAt: '2026-07-06T15:30:00+09:00',
+    };
+
+    expect(adminReportListResponseSchema.parse({ reports: [report, odd] }).reports).toHaveLength(2);
   });
 });

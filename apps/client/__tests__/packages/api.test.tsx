@@ -218,8 +218,14 @@ describe('fetchAllReports', () => {
     await expect(fetchAllReports()).resolves.toEqual([enriched]);
   });
 
+  it('모르는 진행 상태가 와도 목록을 돌려준다', async () => {
+    respond(200, { reports: [{ ...summary, progress: 'REJECTED' }] });
+
+    await expect(fetchAllReports()).resolves.toEqual([{ ...summary, progress: 'REJECTED' }]);
+  });
+
   it('응답 형식이 다르면 ApiError 로 실패한다', async () => {
-    respond(200, { reports: [{ ...summary, progress: 'UNKNOWN' }] });
+    respond(200, { reports: [{ ...summary, id: '3' }] });
 
     await expect(fetchAllReports()).rejects.toBeInstanceOf(ApiError);
   });
