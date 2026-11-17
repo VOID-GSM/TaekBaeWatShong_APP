@@ -1,4 +1,4 @@
-import { formatInvoiceNumber, normalizeInvoiceNumber } from '../invoice-number';
+import { formatInvoiceNumber, normalizeInvoiceNumber } from '@taekbae/utils';
 
 describe('invoice number', () => {
   it('숫자만 남긴다', () => {

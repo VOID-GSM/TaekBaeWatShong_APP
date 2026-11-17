@@ -1,6 +1,7 @@
+import { INVOICE_NUMBER_LENGTH, normalizeInvoiceNumber } from '@taekbae/utils';
 import { z } from 'zod';
 
-import { INVOICE_NUMBER_LENGTH, normalizeInvoiceNumber, PARCEL_CARRIERS } from '@/entities/parcel';
+import { PARCEL_CARRIERS } from '@/entities/parcel';
 
 export const ALIAS_MAX_LENGTH = 20;
 

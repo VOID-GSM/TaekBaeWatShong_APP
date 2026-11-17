@@ -1,7 +1,8 @@
+import { formatInvoiceNumber } from '@taekbae/utils';
 import { Controller } from 'react-hook-form';
 import { View } from 'react-native';
 
-import { formatInvoiceNumber, PARCEL_CARRIERS } from '@/entities/parcel';
+import { PARCEL_CARRIERS } from '@/entities/parcel';
 import { Button, Chip, makeStyles, TextField, Typography } from '@/shared/ui';
 
 import { ALIAS_MAX_LENGTH, type RegisterParcelValues } from '../model/register-parcel-schema';
