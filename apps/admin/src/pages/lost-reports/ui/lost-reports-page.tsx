@@ -1,5 +1,6 @@
 import { reportQueries } from '@taekbae/api';
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -27,13 +28,18 @@ function getChatAction(report: LostReport, state: LostReportState) {
 export function LostReportsPage({ onOpenChat }: LostReportsPageProps) {
   const styles = useStyles();
   const { colors } = useTheme();
-  const {
-    data: reports,
-    error,
-    isPending,
-    isRefetching,
-    refetch,
-  } = useQuery(reportQueries.adminList());
+  const { data: reports, error, isPending, refetch } = useQuery(reportQueries.adminList());
+  // isRefetching 은 백그라운드 재조회(탭의 빨간 점, 신고 접수 후 무효화)에도 true 가 된다.
+  // 사용자가 당겼을 때만 스피너를 보여 주려고 따로 둔다.
+  const [isPullRefreshing, setIsPullRefreshing] = useState(false);
+  const onPullRefresh = async () => {
+    setIsPullRefreshing(true);
+    try {
+      await refetch();
+    } finally {
+      setIsPullRefreshing(false);
+    }
+  };
 
   const renderBody = () => {
     // 백그라운드 재조회가 실패해도 react-query 는 기존 데이터를 유지한다 — 목록이 있으면 목록을 우선 보여준다.
@@ -75,13 +81,14 @@ export function LostReportsPage({ onOpenChat }: LostReportsPageProps) {
 
     return (
       <FlatList
+        testID="lost-reports-list"
         data={reports}
         keyExtractor={(report) => String(report.id)}
         contentContainerStyle={styles.content}
         refreshControl={
           <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={() => void refetch()}
+            refreshing={isPullRefreshing}
+            onRefresh={() => void onPullRefresh()}
             tintColor={colors.textBrand}
             colors={[colors.textBrand]}
           />

@@ -1,7 +1,7 @@
 import { ApiError } from '@taekbae/api';
 import type { AdminReport } from '@taekbae/types';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
 
 import { LostReportsPage } from '../lost-reports-page';
 
@@ -43,13 +43,25 @@ const chatReport: AdminReport = {
   createdAt: '2026-07-07T10:30:00',
 };
 
-async function renderPage(onOpenChat?: (report: AdminReport) => void) {
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+const queryClient = () => new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+async function renderPage(
+  onOpenChat?: (report: AdminReport) => void,
+  client: QueryClient = queryClient(),
+) {
   return render(
-    <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={client}>
       <LostReportsPage onOpenChat={onOpenChat} />
     </QueryClientProvider>,
   );
+}
+
+// 테스트 환경의 RefreshControl 은 props 를 그리지 않아, 목록에 넘긴 refreshControl 로 확인한다.
+function refreshControl() {
+  return screen.getByTestId('lost-reports-list').props.refreshControl.props as {
+    refreshing: boolean;
+    onRefresh: () => void;
+  };
 }
 
 describe('LostReportsPage', () => {
@@ -140,5 +152,36 @@ describe('LostReportsPage', () => {
     resolveRetry([newReport]);
 
     expect(await screen.findByText('접수된 신고 1건')).toBeOnTheScreen();
+  });
+
+  it('당겨서 새로고침할 때만 스피너를 보여 주고, 백그라운드 재조회에는 보여 주지 않는다', async () => {
+    let resolveFetch: (reports: AdminReport[]) => void = () => {};
+    const deferred = () =>
+      new Promise<AdminReport[]>((resolve) => {
+        resolveFetch = resolve;
+      });
+    mockFetchAllReports.mockResolvedValueOnce([newReport]);
+    const client = queryClient();
+    await renderPage(undefined, client);
+    await screen.findByText('접수된 신고 1건');
+
+    // 다른 곳(신고 접수 후 무효화 등)에서 다시 불러올 때
+    mockFetchAllReports.mockImplementationOnce(deferred);
+    await act(async () => {
+      void client.invalidateQueries();
+    });
+    expect(refreshControl().refreshing).toBe(false);
+    await act(async () => resolveFetch([newReport]));
+
+    // 사용자가 당겼을 때
+    mockFetchAllReports.mockImplementationOnce(deferred);
+    await act(async () => {
+      refreshControl().onRefresh();
+    });
+    expect(refreshControl().refreshing).toBe(true);
+    await act(async () => resolveFetch([newReport, chatReport]));
+
+    expect(await screen.findByText('접수된 신고 2건')).toBeOnTheScreen();
+    expect(refreshControl().refreshing).toBe(false);
   });
 });
