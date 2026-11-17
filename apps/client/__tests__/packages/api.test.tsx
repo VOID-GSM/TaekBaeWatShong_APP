@@ -5,6 +5,7 @@ import {
   fetchMyParcels,
   parcelKeys,
   useCreateReportMutation,
+  useRegisterParcelMutation,
 } from '@taekbae/api';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook } from '@testing-library/react-native';
@@ -183,4 +184,66 @@ describe('useCreateReportMutation', () => {
     expect(JSON.parse(String(config?.data))).toEqual(request);
     expect(invalidate).toHaveBeenCalledWith({ queryKey: parcelKeys.all });
   });
+});
+
+describe('useRegisterParcelMutation', () => {
+  function setup() {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { gcTime: Infinity },
+        mutations: { retry: false, gcTime: Infinity },
+      },
+    });
+    const invalidate = jest.spyOn(queryClient, 'invalidateQueries');
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+    return { invalidate, wrapper };
+  }
+
+  const request = {
+    invoiceNumber: '604122378890',
+    deliveryCompany: 'CJ대한통운',
+    alias: '겨울 패딩',
+  };
+
+  it('POST /parcel 후 parcel 쿼리를 invalidate 한다', async () => {
+    respond(201, { ...parcel, status: 'PENDING' });
+    const { invalidate, wrapper } = setup();
+    const { result } = await renderHook(() => useRegisterParcelMutation(), { wrapper });
+
+    await act(async () => {
+      await expect(result.current.mutateAsync(request)).resolves.toMatchObject({
+        invoiceNumber: '604122378890',
+        status: 'PENDING',
+      });
+    });
+
+    const config = adapter.mock.calls[0]?.[0];
+    expect(config?.method).toBe('post');
+    expect(config?.url).toBe('/parcel');
+    expect(JSON.parse(String(config?.data))).toEqual(request);
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: parcelKeys.all });
+  });
+
+  it.each([
+    [400, '유효하지 않은 운송장 번호이거나 조회할 수 없는 택배입니다.'],
+    [409, '이미 등록된 운송장 번호입니다.'],
+  ])(
+    '%i 응답이면 서버 문구를 ApiError 로 넘기고 invalidate 하지 않는다',
+    async (status, message) => {
+      respond(status, { message });
+      const { invalidate, wrapper } = setup();
+      const { result } = await renderHook(() => useRegisterParcelMutation(), { wrapper });
+
+      await act(async () => {
+        await expect(result.current.mutateAsync(request)).rejects.toMatchObject({
+          status,
+          message,
+        });
+      });
+
+      expect(invalidate).not.toHaveBeenCalled();
+    },
+  );
 });
