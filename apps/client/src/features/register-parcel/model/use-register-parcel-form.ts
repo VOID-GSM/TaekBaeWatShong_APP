@@ -38,21 +38,32 @@ export function useRegisterParcelForm({ onSuccess }: UseRegisterParcelFormOption
     };
   }, []);
 
+  // 버튼은 loading 동안 막히지만 키보드 '완료'(onSubmitEditing)는 막히지 않는다.
+  // formState.isSubmitting 은 다음 렌더에야 바뀌어 연타를 못 막으므로 ref 로 막는다.
+  const submittingRef = useRef(false);
+
   // handleSubmit 을 렌더 중이 아니라 누를 때 만든다 — 핸들러 안에서 ref 를 읽기 때문이다.
-  const submit = () =>
-    void form.handleSubmit(async (values) => {
-      setRegistered(null);
-      try {
-        const parcel = await mutation.mutateAsync(values);
-        if (!isMountedRef.current) return;
-        form.reset(DEFAULT_VALUES);
-        mutation.reset();
-        setRegistered(parcel);
-        onSuccess?.(parcel);
-      } catch {
-        // 실패 문구는 mutation.error 로 노출한다.
-      }
-    })();
+  const submit = () => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    void form
+      .handleSubmit(async (values) => {
+        setRegistered(null);
+        try {
+          const parcel = await mutation.mutateAsync(values);
+          if (!isMountedRef.current) return;
+          form.reset(DEFAULT_VALUES);
+          mutation.reset();
+          setRegistered(parcel);
+          onSuccess?.(parcel);
+        } catch {
+          // 실패 문구는 mutation.error 로 노출한다.
+        }
+      })()
+      .finally(() => {
+        submittingRef.current = false;
+      });
+  };
 
   return {
     form,

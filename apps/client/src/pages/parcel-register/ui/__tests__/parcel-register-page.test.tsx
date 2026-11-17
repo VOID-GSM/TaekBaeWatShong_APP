@@ -140,6 +140,27 @@ describe('ParcelRegisterPage', () => {
     await waitFor(() => expect(screen.queryByText('이미 등록된 운송장 번호입니다.')).toBeNull());
   });
 
+  it('등록 중에 키보드 완료를 다시 눌러도 한 번만 요청한다', async () => {
+    let resolve: (value: Parcel) => void = () => {};
+    registerParcel.mockImplementation(
+      () =>
+        new Promise<Parcel>((done) => {
+          resolve = done;
+        }),
+    );
+    await renderPage();
+    await fillRequired();
+    const alias = screen.getByLabelText('상품명 (선택)');
+
+    await fireEvent(alias, 'submitEditing');
+    await fireEvent(alias, 'submitEditing');
+    await waitFor(() => expect(registerParcel).toHaveBeenCalledTimes(1));
+    resolve(parcel);
+
+    expect(await screen.findByText(/택배를 등록했어요/)).toBeOnTheScreen();
+    expect(registerParcel).toHaveBeenCalledTimes(1);
+  });
+
   it('필수 값이 없으면 등록하지 않고 안내 문구를 보여준다', async () => {
     await renderPage();
 
