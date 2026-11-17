@@ -2,6 +2,7 @@
 const palette = {
   white: '#ffffff',
   white75: 'rgba(255, 255, 255, 0.75)',
+  navy900Scrim: 'rgba(26, 31, 75, 0.4)',
   navy600: '#272e6e',
   navy700: '#20265a',
   navy900: '#1a1f4b',
@@ -35,6 +36,8 @@ export const lightColors = {
   bgSubtle: palette.slate50,
   bgNeutralSoft: palette.slate100,
   bgNavy: palette.navy700,
+  /** 바텀시트 뒤 화면을 어둡게 덮는 색. 시안에 없어 임의로 정했다. */
+  bgScrim: palette.navy900Scrim,
   bgBrandSoft: palette.indigo50,
   bgBrandSofter: palette.indigo100,
   bgDangerSoft: palette.red100,
