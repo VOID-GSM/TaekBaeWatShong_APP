@@ -6,6 +6,8 @@ import { Typography } from '../typography';
 
 export interface TextFieldProps extends TextInputProps {
   label: string;
+  /** 필수 입력이면 화면 라벨 뒤에 `*` 를 붙이고, 스크린리더에는 "필수"로 읽어 준다. */
+  required?: boolean;
   /** 입력칸 아래 안내 문구. 에러가 있으면 에러 문구로 바뀐다. */
   helperText?: string;
   errorMessage?: string;
@@ -15,6 +17,7 @@ const BORDER = { default: 1, focused: 2 };
 
 export function TextField({
   label,
+  required = false,
   helperText,
   errorMessage,
   style,
@@ -26,14 +29,21 @@ export function TextField({
   const { colors } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
   const hasError = errorMessage !== undefined;
+  const accessibleLabel = required ? `${label}, 필수` : label;
 
   return (
     <View style={styles.container}>
-      <Typography variant="bodyMStrong" color="textSecondary">
-        {label}
+      {/* 라벨은 입력칸의 accessibilityLabel 로 읽히므로, 화면 글자("… *")는 스크린리더에서 뺀다. */}
+      <Typography
+        variant="bodyMStrong"
+        color="textSecondary"
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      >
+        {required ? `${label} *` : label}
       </Typography>
       <TextInput
-        accessibilityLabel={label}
+        accessibilityLabel={accessibleLabel}
         placeholderTextColor={colors.textTertiary}
         {...props}
         onFocus={(event) => {

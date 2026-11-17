@@ -11,7 +11,7 @@ describe('ParcelRegisterPage', () => {
   it('운송장 번호를 4자리씩 띄워 보여준다', async () => {
     await render(<ParcelRegisterPage />);
 
-    await fireEvent.changeText(screen.getByLabelText('운송장 번호 *'), '604122378890');
+    await fireEvent.changeText(screen.getByLabelText('운송장 번호, 필수'), '604122378890');
 
     expect(screen.getByDisplayValue('6041 2237 8890')).toBeOnTheScreen();
   });
@@ -19,7 +19,7 @@ describe('ParcelRegisterPage', () => {
   it('운송장 번호는 14자리까지만 입력된다', async () => {
     await render(<ParcelRegisterPage />);
 
-    await fireEvent.changeText(screen.getByLabelText('운송장 번호 *'), '1234567890123456');
+    await fireEvent.changeText(screen.getByLabelText('운송장 번호, 필수'), '1234567890123456');
 
     expect(screen.getByDisplayValue('1234 5678 9012 34')).toBeOnTheScreen();
   });
@@ -28,7 +28,7 @@ describe('ParcelRegisterPage', () => {
     const onSubmit = jest.fn();
     await render(<ParcelRegisterPage onSubmit={onSubmit} />);
 
-    await fireEvent.changeText(screen.getByLabelText('운송장 번호 *'), '6041 2237 8890');
+    await fireEvent.changeText(screen.getByLabelText('운송장 번호, 필수'), '6041 2237 8890');
     await fireEvent.press(screen.getByRole('radio', { name: 'CJ대한통운' }));
     await fireEvent.changeText(screen.getByLabelText('상품명 (선택)'), ' 겨울 패딩 ');
     await fireEvent.press(screen.getByRole('button', SUBMIT));

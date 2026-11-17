@@ -24,7 +24,8 @@ export function RegisterParcelForm({ onSubmit }: RegisterParcelFormProps) {
           name="invoiceNumber"
           render={({ field, fieldState }) => (
             <TextField
-              label="운송장 번호 *"
+              label="운송장 번호"
+              required
               value={field.value}
               onChangeText={(text) => field.onChange(formatInvoiceNumber(text))}
               onBlur={field.onBlur}
@@ -42,10 +43,19 @@ export function RegisterParcelForm({ onSubmit }: RegisterParcelFormProps) {
           name="deliveryCompany"
           render={({ field, fieldState }) => (
             <View style={styles.field}>
-              <Typography variant="bodyMStrong" color="textSecondary">
+              <Typography
+                variant="bodyMStrong"
+                color="textSecondary"
+                accessibilityElementsHidden
+                importantForAccessibility="no-hide-descendants"
+              >
                 택배사 *
               </Typography>
-              <View style={styles.chips} accessibilityRole="radiogroup">
+              <View
+                style={styles.chips}
+                accessibilityRole="radiogroup"
+                accessibilityLabel="택배사, 필수"
+              >
                 {PARCEL_CARRIERS.map((carrier) => (
                   <Chip
                     key={carrier}
