@@ -1,6 +1,9 @@
+import { reportQueries } from '@taekbae/api';
+import { useQuery } from '@tanstack/react-query';
 import { TabList, Tabs, TabSlot, TabTrigger } from 'expo-router/ui';
 import { StyleSheet } from 'react-native';
 
+import { getLostReportState } from '@/entities/lost-report';
 import { chatXml } from '@/shared/assets/chat';
 import { flagXml } from '@/shared/assets/flag';
 import { homeXml } from '@/shared/assets/home';
@@ -9,8 +12,11 @@ import { scanBarcodeXml } from '@/shared/assets/scan-barcode';
 import { MainTabBar, MainTabButton } from '@/widgets/main-tab-bar';
 
 export default function TabsLayout() {
-  // TODO: 신고 API 가 생기면 확인하지 않은 신고 여부로 바꾼다.
-  const hasNewReports = false;
+  // 신고 탭과 같은 쿼리를 써서, 목록을 새로고침하면 점도 함께 갱신된다.
+  const { data: hasNewReports = false } = useQuery({
+    ...reportQueries.adminList(),
+    select: (reports) => reports.some((report) => getLostReportState(report) === 'new'),
+  });
 
   return (
     <Tabs style={{ flex: 1 }}>
