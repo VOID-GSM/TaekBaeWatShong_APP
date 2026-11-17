@@ -22,6 +22,7 @@ export const spacing = {
 /** Figma 변수(radius/*). */
 export const radius = {
   sm: 10,
+  /** 입력 카드(분실 신고 C9)도 이 값을 쓴다. */
   md: 16,
   lg: 22,
   xl: 26,
@@ -46,9 +47,22 @@ export const size = {
   tabPillHeight: 30,
   logoMark: 130,
   logoRing: 160,
+  /** 화면 상단 헤더(뒤로가기 + 제목) 높이. C9 스크린샷 추정 — 디자이너 확인 필요. */
+  header: 56,
+  /** 최소 터치 영역 */
+  touchTarget: 44,
+  /** 한 줄 입력 카드 높이. C9 스크린샷 추정(약 49) — 디자이너 확인 필요. */
+  inputM: 48,
+  /** 여러 줄 입력 카드 최소 높이. C9 스크린샷 추정(약 133) — 디자이너 확인 필요. */
+  inputMultiline: 132,
+  /** 하단 고정 버튼(취소·제출) 높이. C9 스크린샷 추정(약 49) — 디자이너 확인 필요. */
+  buttonFooter: 50,
 } as const;
 
 export const opacity = { pressed: 0.85, disabled: 0.6 } as const;
+
+/** 테두리 두께 */
+export const borderWidth = { thin: 1 } as const;
 
 export const motion = { fast: 150, normal: 250, slow: 400 } as const;
 

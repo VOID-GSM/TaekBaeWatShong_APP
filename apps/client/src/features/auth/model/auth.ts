@@ -1,5 +1,6 @@
 import {
   AuthError,
+  createSessionExpiredError,
   exchangeAuthCode,
   fetchCurrentUser,
   readTokenExpiresAt,
@@ -16,6 +17,11 @@ import {
   storeAppSession,
 } from '../api/session-storage';
 import { useAuthStore } from './auth-store';
+
+/**
+ * 메모리에 올려 둔 현재 세션. API 요청마다 SecureStore 를 읽지 않도록 로그인·복원·로그아웃 때만 갱신한다.
+ */
+let currentSession: AppSession | null = null;
 
 function getErrorMessage(error: unknown): string {
   return error instanceof AuthError
@@ -40,6 +46,7 @@ async function createSession(code: string): Promise<AppSession> {
 
   const session: AppSession = { accessToken, expiresAt, user: user.data };
   await storeAppSession(session);
+  currentSession = session;
   return session;
 }
 
@@ -48,6 +55,7 @@ async function restoreSession(): Promise<AppSession | null> {
     const session = await readStoredAppSession();
 
     if (!session || session.expiresAt <= Date.now()) {
+      currentSession = null;
       if (session) {
         await clearStoredAppSession();
       }
@@ -55,6 +63,7 @@ async function restoreSession(): Promise<AppSession | null> {
       return null;
     }
 
+    currentSession = session;
     useAuthStore.getState().setUser(session.user);
     return session;
   } catch (error) {
@@ -96,7 +105,18 @@ export async function getAppAccessToken(): Promise<string | null> {
   return session?.accessToken ?? null;
 }
 
+/**
+ * API 요청마다 불린다 — 메모리의 세션만 읽는다.
+ * 만료됐으면 토큰 없이 요청을 보내지 않도록 로그인 만료 에러를 던진다(API 클라이언트가 onUnauthorized 를 부른다).
+ */
+export async function readAppAccessToken(): Promise<string | null> {
+  if (currentSession === null) return null;
+  if (currentSession.expiresAt <= Date.now()) throw createSessionExpiredError();
+  return currentSession.accessToken;
+}
+
 export async function logout(): Promise<void> {
+  currentSession = null;
   try {
     await clearStoredAppSession();
     useAuthStore.getState().clear();

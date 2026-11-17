@@ -7,7 +7,9 @@ const palette = {
   indigo600: '#4352cf',
   slate500: '#6e7595',
   slate400: '#9aa1bf',
-  red600: '#d93036',
+  red100: '#fee2e2',
+  red600: '#dc2626',
+  grey25: '#f7f8fd',
   grey50: '#f1f3fa',
   grey200: '#e3e6f2',
   indigo500: '#4f5ed8',
@@ -22,6 +24,9 @@ export const lightColors = {
   bgNavy: palette.navy700,
   bgBrandSoft: palette.indigo50,
   bgSuccessSoft: palette.green100,
+  bgDangerSoft: palette.red100,
+  /** 카드 안 보조 정보 상자 */
+  bgSubtle: palette.grey25,
   /** 브랜드 버튼 그라디언트 시작·끝 (Figma Button 채움) */
   bgBrandStart: palette.indigo500,
   bgBrandEnd: palette.indigo700,
@@ -34,7 +39,6 @@ export const lightColors = {
   textOnBrand: palette.white,
   textOnNavy: palette.white,
   iconStrong: palette.navy900,
-  /** 에러 문구. Figma 변수에 없어 임의로 정한 값 — 디자이너 확인 필요. */
   textDanger: palette.red600,
 } as const;
 

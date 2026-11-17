@@ -6,6 +6,7 @@ export * from './chip';
 export * from './icon';
 export * from './icon-button';
 export * from './logo-mark';
+export * from './screen-header';
 export * from './select-menu';
 export * from './text-field';
 export * from './theme';

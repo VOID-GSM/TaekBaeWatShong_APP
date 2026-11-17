@@ -7,12 +7,29 @@ import { Typography } from '../typography';
 
 export interface TopBarProps {
   title: string;
+  /** center: 뒤로가기 + 가운데 제목, title: 탭 첫 화면의 왼쪽 큰 제목 (Figma `TopBar/Title`). */
+  variant?: 'center' | 'title';
   onBack?: () => void;
 }
 
-export function TopBar({ title, onBack }: TopBarProps) {
+export function TopBar({ title, variant = 'center', onBack }: TopBarProps) {
   const styles = useStyles();
   const { size } = useTheme();
+
+  if (variant === 'title') {
+    return (
+      <View style={[styles.container, styles.titleContainer]}>
+        <Typography
+          variant="titlePage"
+          numberOfLines={1}
+          accessibilityRole="header"
+          style={styles.title}
+        >
+          {title}
+        </Typography>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -52,6 +69,7 @@ const useStyles = makeStyles(({ opacity, size, spacing }) => ({
     height: size.topBar,
     paddingHorizontal: spacing.sm,
   },
+  titleContainer: { paddingHorizontal: spacing.xl },
   side: {
     width: size.iconButton,
     height: size.iconButton,

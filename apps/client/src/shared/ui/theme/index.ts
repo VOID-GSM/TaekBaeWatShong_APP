@@ -16,7 +16,7 @@ import {
   lightColors,
 } from './colors';
 import { fontAssets, fontFamily } from './fonts';
-import { motion, opacity, radius, shadow, size, spacing } from './spacing';
+import { borderWidth, motion, opacity, radius, shadow, size, spacing } from './spacing';
 import { typography, type TypographyVariant } from './typography';
 
 export function useTheme() {
@@ -31,6 +31,7 @@ export function useTheme() {
       radius,
       size,
       opacity,
+      borderWidth,
       shadow,
       motion,
       scheme,
@@ -52,6 +53,7 @@ export function makeStyles<T extends NamedStyles<T>>(factory: (theme: Theme) => 
 }
 
 export {
+  borderWidth,
   type ColorToken,
   type ColorTokens,
   fontAssets,

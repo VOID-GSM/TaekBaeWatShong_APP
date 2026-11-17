@@ -19,8 +19,8 @@ import { BrandSurface } from '../brand-surface';
 import { type ColorToken, makeStyles, type TypographyVariant, useTheme } from '../theme';
 import { Typography } from '../typography';
 
-/** navy: 로그인 등 주 버튼 · brand: 브랜드 그라데이션 · dangerSoft: 연한 빨강(분실 신고 등) */
-export type ButtonVariant = 'navy' | 'brand' | 'dangerSoft';
+/** navy: 로그인 등 주 버튼 · brand: 브랜드 그라데이션 · dangerSoft: 연한 빨강(분실 신고 등) · outline: 흰 배경 + 테두리(취소 등 보조) */
+export type ButtonVariant = 'navy' | 'brand' | 'dangerSoft' | 'outline';
 /** l: 높이 56 · m: 높이 40(카드 안 버튼) */
 export type ButtonSize = 'l' | 'm';
 
@@ -50,6 +50,7 @@ const labelColors: Record<ButtonVariant, ColorToken> = {
   navy: 'textOnNavy',
   brand: 'textOnBrand',
   dangerSoft: 'textDanger',
+  outline: 'textPrimary',
 };
 
 export function Button({
@@ -120,7 +121,7 @@ export function Button({
   );
 }
 
-const useStyles = makeStyles(({ colors, opacity, radius, shadow, size, spacing }) => ({
+const useStyles = makeStyles(({ borderWidth, colors, opacity, radius, shadow, size, spacing }) => ({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -145,6 +146,11 @@ const useStyles = makeStyles(({ colors, opacity, radius, shadow, size, spacing }
   // 웹은 absolute 요소가 일반 자식 위에 그려져 라벨을 덮으므로 뒤로 보낸다.
   gradient: { ...StyleSheet.absoluteFill, zIndex: -1 },
   dangerSoft: { backgroundColor: colors.bgDangerSoft },
+  outline: {
+    backgroundColor: colors.bgSurface,
+    borderWidth: borderWidth.thin,
+    borderColor: colors.borderDefault,
+  },
   disabled: { opacity: opacity.disabled },
   icon: { width: size.iconM, height: size.iconM },
 }));

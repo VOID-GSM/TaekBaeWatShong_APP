@@ -1,4 +1,4 @@
-import { formatInvoiceNumber } from '@taekbae/utils';
+import { formatInvoiceNumberInput } from '@taekbae/utils';
 import { Controller } from 'react-hook-form';
 import { View } from 'react-native';
 
@@ -28,9 +28,10 @@ export function RegisterParcelForm({ onSubmit }: RegisterParcelFormProps) {
               label="운송장 번호"
               required
               value={field.value}
-              onChangeText={(text) => field.onChange(formatInvoiceNumber(text))}
+              onChangeText={(text) => field.onChange(formatInvoiceNumberInput(text))}
               onBlur={field.onBlur}
-              errorMessage={fieldState.error?.message}
+              error={fieldState.error?.message}
+              size="l"
               placeholder="숫자만 입력해 주세요"
               keyboardType="number-pad"
               autoComplete="off"
@@ -85,7 +86,8 @@ export function RegisterParcelForm({ onSubmit }: RegisterParcelFormProps) {
               value={field.value}
               onChangeText={field.onChange}
               onBlur={field.onBlur}
-              errorMessage={fieldState.error?.message}
+              error={fieldState.error?.message}
+              size="l"
               placeholder="예) 겨울 패딩"
               maxLength={ALIAS_MAX_LENGTH}
               returnKeyType="done"
