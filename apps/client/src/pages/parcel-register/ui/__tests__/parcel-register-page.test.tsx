@@ -92,27 +92,28 @@ describe('ParcelRegisterPage', () => {
     await renderPage();
     await fillRequired();
     await fireEvent.press(screen.getByRole('button', SUBMIT));
-    await screen.findByText("'겨울 패딩' 택배를 등록했어요");
+    await screen.findByText('택배를 등록했어요');
 
     await fireEvent.changeText(screen.getByLabelText(INVOICE), '1');
 
-    await waitFor(() => expect(screen.queryByText("'겨울 패딩' 택배를 등록했어요")).toBeNull());
+    await waitFor(() => expect(screen.queryByText('택배를 등록했어요')).toBeNull());
   });
 
-  it('상품명을 비우면 별칭 없이 보낸다', async () => {
-    registerParcel.mockResolvedValue(parcel);
+  it('상품명을 비우면 별칭 없이 보내고, 서버가 채운 별칭은 안내에 쓰지 않는다', async () => {
+    // 상품명을 비우면 서버는 사용자 이름을 별칭으로 저장한다.
+    registerParcel.mockResolvedValue({ ...parcel, alias: '이효은' });
     await renderPage();
 
     await fillRequired();
     await fireEvent.press(screen.getByRole('button', SUBMIT));
 
-    await waitFor(() =>
-      expect(registerParcel).toHaveBeenCalledWith({
-        invoiceNumber: '604122378890',
-        deliveryCompany: 'CJ대한통운',
-        alias: undefined,
-      }),
-    );
+    expect(await screen.findByText('택배를 등록했어요')).toBeOnTheScreen();
+    expect(screen.queryByText(/이효은/)).toBeNull();
+    expect(registerParcel).toHaveBeenCalledWith({
+      invoiceNumber: '604122378890',
+      deliveryCompany: 'CJ대한통운',
+      alias: undefined,
+    });
   });
 
   it('서버가 거절하면 입력을 그대로 두고 서버 문구를 보여준다', async () => {

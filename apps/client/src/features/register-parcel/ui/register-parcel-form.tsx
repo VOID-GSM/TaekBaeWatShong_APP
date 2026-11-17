@@ -131,7 +131,9 @@ export function RegisterParcelForm({ onSuccess }: RegisterParcelFormProps) {
           accessibilityLiveRegion="polite"
           accessibilityRole="alert"
         >
-          {`'${registered.alias}' 택배를 등록했어요`}
+          {registered.alias === undefined
+            ? '택배를 등록했어요'
+            : `'${registered.alias}' 택배를 등록했어요`}
         </Typography>
       )}
 

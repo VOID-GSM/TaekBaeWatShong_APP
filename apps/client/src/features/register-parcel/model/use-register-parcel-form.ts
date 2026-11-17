@@ -14,6 +14,15 @@ export interface UseRegisterParcelFormOptions {
   onSuccess?: (parcel: Parcel) => void;
 }
 
+/**
+ * 방금 등록한 택배와 사용자가 입력한 상품명.
+ * 상품명을 비우면 서버가 사용자 이름을 별칭으로 저장하므로, 안내 문구에는 입력한 값만 쓴다.
+ */
+export interface RegisteredParcel {
+  parcel: Parcel;
+  alias: string | undefined;
+}
+
 const DEFAULT_VALUES: DefaultValues<RegisterParcelFormInput> = {
   invoiceNumber: '',
   deliveryCompany: undefined,
@@ -28,7 +37,7 @@ export function useRegisterParcelForm({ onSuccess }: UseRegisterParcelFormOption
     mode: 'onSubmit',
   });
   const mutation = useRegisterParcelMutation();
-  const [registered, setRegistered] = useState<Parcel | null>(null);
+  const [registered, setRegistered] = useState<RegisteredParcel | null>(null);
   // 등록 중에 다른 탭으로 가도 요청은 끝까지 간다 — 그 뒤 화면 갱신이 사라진 화면에서 실행되지 않게 한다.
   const isMountedRef = useRef(true);
   useEffect(() => {
@@ -54,7 +63,7 @@ export function useRegisterParcelForm({ onSuccess }: UseRegisterParcelFormOption
           if (!isMountedRef.current) return;
           form.reset(DEFAULT_VALUES);
           mutation.reset();
-          setRegistered(parcel);
+          setRegistered({ parcel, alias: values.alias });
           onSuccess?.(parcel);
         } catch {
           // 실패 문구는 mutation.error 로 노출한다.
