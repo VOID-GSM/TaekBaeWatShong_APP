@@ -29,14 +29,14 @@ describe('reportLostParcelFormSchema', () => {
     '형식이 다르면 형식 안내 문구 (%s)',
     (lostEstimatedAt) => {
       expect(messages({ lostEstimatedAt, content: '내용' })).toEqual([
-        '날짜와 시각을 2026. 07. 06 15:30 형식으로 입력해 주세요.',
+        '분실 예상 시각을 선택해 주세요.',
       ]);
     },
   );
 
   it('현재보다 이후 시각이면 거부한다', () => {
     expect(messages({ lostEstimatedAt: '2026. 07. 06 15:31', content: '내용' })).toEqual([
-      '현재보다 이후 시각은 입력할 수 없어요.',
+      '현재보다 이후 시각은 선택할 수 없어요.',
     ]);
   });
 

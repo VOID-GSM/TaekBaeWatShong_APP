@@ -88,7 +88,7 @@ describe('ReportLostParcelPage', () => {
     expect(screen.getByRole('header', { name: '분실 신고' })).toBeOnTheScreen();
     expect(screen.getByText('겨울 패딩')).toBeOnTheScreen();
     expect(screen.getByText('CJ대한통운 · 6041 2237 8890')).toBeOnTheScreen();
-    expect(screen.getByLabelText('분실 예상 시각')).toBeOnTheScreen();
+    expect(screen.getByText('분실 예상 시각')).toBeOnTheScreen();
     expect(screen.getByLabelText('상세 내용')).toBeOnTheScreen();
     expect(useMyParcel).toHaveBeenCalledWith('604122378890');
     expect(useReportLostParcelForm).toHaveBeenCalledWith(

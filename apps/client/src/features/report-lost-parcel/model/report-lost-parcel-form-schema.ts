@@ -9,14 +9,14 @@ export const reportLostParcelFormSchema = z.object({
     if (localDateTime === null) {
       ctx.addIssue({
         code: 'custom',
-        message: '날짜와 시각을 2026. 07. 06 15:30 형식으로 입력해 주세요.',
+        message: '분실 예상 시각을 선택해 주세요.',
       });
       return;
     }
 
     const date = localDateTimeToDate(localDateTime);
     if (date !== null && date.getTime() > Date.now()) {
-      ctx.addIssue({ code: 'custom', message: '현재보다 이후 시각은 입력할 수 없어요.' });
+      ctx.addIssue({ code: 'custom', message: '현재보다 이후 시각은 선택할 수 없어요.' });
     }
   }),
   content: z
