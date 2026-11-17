@@ -13,6 +13,8 @@ import { MainTabBar, MainTabButton } from '@/widgets/main-tab-bar';
 
 export default function TabsLayout() {
   // 신고 탭과 같은 쿼리를 써서, 목록을 새로고침하면 점도 함께 갱신된다.
+  // 빨간 점은 "확인하지 않은 신고"가 아니라 "아직 채팅을 시작하지 않은 신고가 있다"는 뜻이다(읽음 여부는 서버에 없다).
+  // 서버가 chatRoomId 를 채우기 전(SERVER#26)에는 처리 완료가 아닌 신고가 하나라도 있으면 계속 켜져 있다.
   const { data: hasNewReports = false } = useQuery({
     ...reportQueries.adminList(),
     select: (reports) => reports.some((report) => getLostReportState(report) === 'new'),
