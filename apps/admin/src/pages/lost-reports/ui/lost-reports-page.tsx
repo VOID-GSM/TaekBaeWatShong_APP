@@ -11,8 +11,9 @@ export interface LostReportsPageProps {
 
 export function LostReportsPage({ onOpenChat }: LostReportsPageProps) {
   const styles = useStyles();
-  // TODO: 분실 신고 API 가 생기면 쿼리 결과로 바꾼다.
-  const reports = sampleLostReports;
+  // TODO(#17): `GET /report` 쿼리 결과로 바꾼다. 그 전까지 샘플은 개발 빌드에서만 보여 주고,
+  // 배포 빌드에는 가짜 신고가 보이지 않게 빈 목록을 쓴다.
+  const reports: LostReport[] = __DEV__ ? sampleLostReports : [];
   const newCount = reports.filter((report) => report.status === 'NEW').length;
   const chatRequestedCount = reports.filter((report) => report.status === 'CHAT_REQUESTED').length;
 

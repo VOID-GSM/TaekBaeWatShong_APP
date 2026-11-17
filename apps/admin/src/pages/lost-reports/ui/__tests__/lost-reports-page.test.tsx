@@ -16,6 +16,21 @@ describe('LostReportsPage', () => {
     expect(screen.getByText('채팅 요청 1')).toBeOnTheScreen();
   });
 
+  it('배포 빌드에서는 샘플 신고를 보여주지 않는다', async () => {
+    // RN 은 __DEV__ 를 읽기 전용 상수로 선언해 두어서 전역 객체로 바꾼다.
+    const global = globalThis as unknown as { __DEV__: boolean };
+    const previousDev = global.__DEV__;
+    global.__DEV__ = false;
+    try {
+      await render(<LostReportsPage />);
+
+      expect(screen.getByText('접수된 신고 0건')).toBeOnTheScreen();
+      expect(screen.queryByText('김민준 · 20614')).not.toBeOnTheScreen();
+    } finally {
+      global.__DEV__ = previousDev;
+    }
+  });
+
   it('신고 카드에 신고자·운송장·분실 예상 시각을 보여준다', async () => {
     await render(<LostReportsPage />);
 
