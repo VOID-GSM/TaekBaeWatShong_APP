@@ -1,5 +1,6 @@
 import {
   AuthError,
+  createSessionExpiredError,
   exchangeAuthCode,
   fetchCurrentUser,
   type OAuthProvider,
@@ -17,6 +18,9 @@ import {
   storeAdminSession,
 } from '../api/session-storage';
 import { useAdminAuthStore } from './auth-store';
+
+/** API 요청마다 SecureStore 를 읽지 않도록 로그인·복원한 세션을 메모리에 둔다. */
+let currentSession: AdminSession | null = null;
 
 function getErrorMessage(error: unknown): string {
   return error instanceof AuthError
@@ -41,6 +45,7 @@ async function createSession(code: string): Promise<AdminSession> {
 
   const session: AdminSession = { accessToken, expiresAt, user: user.data };
   await storeAdminSession(session);
+  currentSession = session;
   return session;
 }
 
@@ -49,6 +54,7 @@ async function restoreSession(): Promise<AdminSession | null> {
     const session = await readStoredAdminSession();
 
     if (!session || session.expiresAt <= Date.now()) {
+      currentSession = null;
       if (session) {
         await clearStoredAdminSession();
       }
@@ -56,9 +62,11 @@ async function restoreSession(): Promise<AdminSession | null> {
       return null;
     }
 
+    currentSession = session;
     useAdminAuthStore.getState().setUser(session.user);
     return session;
   } catch (error) {
+    currentSession = null;
     useAdminAuthStore.getState().setStatus('unauthenticated');
     useAdminAuthStore.getState().setError(getErrorMessage(error));
     throw error;
@@ -97,7 +105,18 @@ export async function getAdminAccessToken(): Promise<string | null> {
   return session?.accessToken ?? null;
 }
 
+/**
+ * API 요청에 붙일 토큰. 메모리 세션만 읽어 요청마다 저장소를 열지 않는다.
+ * 만료됐으면 요청을 보내기 전에 막도록 세션 만료 에러를 던진다(`configureApi` 가 로그아웃시킨다).
+ */
+export async function readAdminAccessToken(): Promise<string | null> {
+  if (currentSession === null) return null;
+  if (currentSession.expiresAt <= Date.now()) throw createSessionExpiredError();
+  return currentSession.accessToken;
+}
+
 export async function logoutAdmin(): Promise<void> {
+  currentSession = null;
   try {
     await clearStoredAdminSession();
     useAdminAuthStore.getState().clear();

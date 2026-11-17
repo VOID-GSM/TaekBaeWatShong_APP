@@ -2,7 +2,7 @@ import * as Linking from 'expo-linking';
 import * as SecureStore from 'expo-secure-store';
 import * as WebBrowser from 'expo-web-browser';
 
-import { loginAdmin, logoutAdmin } from '../auth';
+import { loginAdmin, logoutAdmin, readAdminAccessToken } from '../auth';
 import { useAdminAuthStore } from '../auth-store';
 
 jest.mock('expo-secure-store', () => ({
@@ -129,5 +129,45 @@ describe('admin sign-up and login', () => {
 
     expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith(SESSION_KEY);
     expect(useAdminAuthStore.getState()).toMatchObject({ status: 'unauthenticated', user: null });
+  });
+
+  describe('readAdminAccessToken', () => {
+    async function login(): Promise<string> {
+      const token = createJwt(EXPIRES_AT_SECONDS);
+      mockCallback('code=one-time-code');
+      fetchMock
+        .mockResolvedValueOnce(jsonResponse({ token }))
+        .mockResolvedValueOnce(
+          jsonResponse({ id: 7, email: 'driver@example.test', name: '택배기사', role: 'ADMIN' }),
+        );
+      await loginAdmin('google');
+      return token;
+    }
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('로그인한 세션의 토큰을 저장소를 다시 읽지 않고 돌려준다', async () => {
+      const token = await login();
+      jest.mocked(SecureStore.getItemAsync).mockClear();
+
+      await expect(readAdminAccessToken()).resolves.toBe(token);
+      expect(SecureStore.getItemAsync).not.toHaveBeenCalled();
+    });
+
+    it('로그아웃하면 토큰을 돌려주지 않는다', async () => {
+      await login();
+      await logoutAdmin();
+
+      await expect(readAdminAccessToken()).resolves.toBeNull();
+    });
+
+    it('만료된 세션이면 요청 전에 세션 만료 에러를 던진다', async () => {
+      await login();
+      jest.spyOn(Date, 'now').mockReturnValue((EXPIRES_AT_SECONDS + 1) * 1000);
+
+      await expect(readAdminAccessToken()).rejects.toMatchObject({ status: 401 });
+    });
   });
 });
