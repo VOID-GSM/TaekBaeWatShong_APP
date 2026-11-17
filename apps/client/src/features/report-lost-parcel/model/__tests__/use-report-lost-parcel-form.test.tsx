@@ -71,15 +71,20 @@ describe('useReportLostParcelForm', () => {
   it('기본값은 현재 시각과 빈 내용이다', async () => {
     const rendered = await setup();
 
-    expect(rendered.result.current.fields.lostEstimatedAt.field.value).toBe('2026. 07. 06 15:30');
+    expect(rendered.result.current.fields.lostEstimatedAt.field.value).toEqual(
+      new Date(2026, 6, 6, 15, 30),
+    );
     expect(rendered.result.current.fields.content.field.value).toBe('');
   });
 
-  it('제출하면 LocalDateTime 으로 바꿔 신고하고 onSuccess 를 부른다', async () => {
+  it('제출하면 LocalDateTime(초 버림)으로 바꿔 신고하고 onSuccess 를 부른다', async () => {
     mutateAsync.mockResolvedValue(report);
     const onSuccess = jest.fn();
     const rendered = await setup(onSuccess);
-    await fill(rendered, { lostEstimatedAt: '2026. 07. 06 15:00', content: ' 현관 앞에 없어요 ' });
+    await fill(rendered, {
+      lostEstimatedAt: new Date(2026, 6, 6, 15, 0, 42),
+      content: ' 현관 앞에 없어요 ',
+    });
 
     await act(async () => rendered.result.current.form.submit());
 

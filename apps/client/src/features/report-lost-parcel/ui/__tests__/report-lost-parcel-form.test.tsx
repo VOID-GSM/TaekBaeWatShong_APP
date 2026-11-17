@@ -8,7 +8,7 @@ import { ReportLostParcelForm } from '../report-lost-parcel-form';
 jest.setTimeout(10_000);
 
 const DEFAULT_VALUES: ReportLostParcelFormValues = {
-  lostEstimatedAt: '2026. 07. 06 15:30',
+  lostEstimatedAt: new Date(2026, 6, 6, 15, 30),
   content: '',
 };
 

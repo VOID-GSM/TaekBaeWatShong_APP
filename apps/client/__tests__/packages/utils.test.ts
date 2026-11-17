@@ -2,6 +2,7 @@ import {
   formatDateTimeInput,
   formatInvoiceNumber,
   formatInvoiceNumberInput,
+  formatLocalDateTime,
   localDateTimeToDate,
   normalizeInvoiceNumber,
   parseDateTimeInput,
@@ -41,6 +42,13 @@ describe('formatDateTimeInput', () => {
   it('로컬 시각을 입력 형식으로 만든다', () => {
     expect(formatDateTimeInput(new Date(2026, 6, 6, 15, 30))).toBe('2026. 07. 06 15:30');
     expect(formatDateTimeInput(new Date(2026, 0, 1, 0, 5))).toBe('2026. 01. 01 00:05');
+  });
+});
+
+describe('formatLocalDateTime', () => {
+  it('기기 로컬 시각을 오프셋 없는 LocalDateTime 으로 만들고 초는 버린다', () => {
+    expect(formatLocalDateTime(new Date(2026, 6, 6, 15, 30, 42))).toBe('2026-07-06T15:30:00');
+    expect(formatLocalDateTime(new Date(2026, 0, 1, 0, 5))).toBe('2026-01-01T00:05:00');
   });
 });
 

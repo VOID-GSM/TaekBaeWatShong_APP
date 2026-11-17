@@ -1,4 +1,3 @@
-import { formatDateTimeInput, localDateTimeToDate, parseDateTimeInput } from '@taekbae/utils';
 import { type Control, Controller } from 'react-hook-form';
 import { StyleSheet, View } from 'react-native';
 
@@ -23,12 +22,11 @@ export function ReportLostParcelForm({ control }: ReportLostParcelFormProps) {
         render={({ field, fieldState }) => (
           <DateTimeField
             label="분실 예상 시각"
-            value={toDate(field.value)}
-            // 폼 값은 서버 변환·검증을 그대로 쓰도록 "YYYY. MM. DD HH:mm" 문자열로 둔다.
-            onChange={(date) => field.onChange(formatDateTimeInput(date))}
+            value={field.value}
+            onChange={field.onChange}
             onClose={field.onBlur}
-            // 미래 시각은 고를 수 없게 한다. 선택 창을 여는 시점 기준이다.
-            maximumDate={new Date()}
+            // 미래 시각은 고를 수 없게 한다. 상한은 선택 창을 여는 순간의 현재 시각이다.
+            disallowFuture
             error={fieldState.error?.message}
           />
         )}
@@ -51,11 +49,6 @@ export function ReportLostParcelForm({ control }: ReportLostParcelFormProps) {
       />
     </View>
   );
-}
-
-function toDate(value: string): Date | null {
-  const localDateTime = parseDateTimeInput(value);
-  return localDateTime === null ? null : localDateTimeToDate(localDateTime);
 }
 
 const styles = StyleSheet.create({

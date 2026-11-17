@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type ApiError, useCreateReportMutation } from '@taekbae/api';
 import type { Report } from '@taekbae/types';
-import { formatDateTimeInput, parseDateTimeInput } from '@taekbae/utils';
+import { formatLocalDateTime } from '@taekbae/utils';
 import { useEffect, useRef } from 'react';
 import { type Control, useForm } from 'react-hook-form';
 
@@ -45,14 +45,10 @@ export function useReportLostParcelForm({
   // handleSubmit 을 렌더 중이 아니라 누를 때 만든다 — 핸들러 안에서 ref 를 읽기 때문이다.
   const submit = () =>
     void form.handleSubmit(async (values) => {
-      const lostEstimatedAt = parseDateTimeInput(values.lostEstimatedAt);
-      // 스키마가 이미 검증했으므로 null 이 될 수 없다.
-      if (lostEstimatedAt === null) return;
-
       try {
         const report = await mutation.mutateAsync({
           invoiceNumber,
-          lostEstimatedAt,
+          lostEstimatedAt: formatLocalDateTime(values.lostEstimatedAt),
           content: values.content,
         });
         if (isMountedRef.current) onSuccess?.(report);
@@ -77,5 +73,5 @@ function getSubmitErrorMessage(error: ApiError): string {
 }
 
 function createDefaultValues(): ReportLostParcelFormValues {
-  return { lostEstimatedAt: formatDateTimeInput(new Date()), content: '' };
+  return { lostEstimatedAt: new Date(), content: '' };
 }
