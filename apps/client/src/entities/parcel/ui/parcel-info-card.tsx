@@ -42,10 +42,12 @@ export function ParcelInfoCard({
   );
 }
 
-const useStyles = makeStyles(({ colors, radius, spacing }) => ({
+const useStyles = makeStyles(({ colors, radius, shadow, spacing }) => ({
   card: {
     padding: spacing.lg,
     borderRadius: radius.lg,
     backgroundColor: colors.bgBrandSoft,
+    // 배경(bgApp)과 색 차이가 작아 그림자로 카드를 띄운다.
+    ...shadow.brandRaised,
   },
 }));
