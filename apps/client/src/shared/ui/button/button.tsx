@@ -1,9 +1,10 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode } from 'react';
 import {
   ActivityIndicator,
   Pressable,
   type PressableProps,
   type StyleProp,
+  StyleSheet,
   type ViewStyle,
 } from 'react-native';
 import Animated, {
@@ -14,7 +15,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 
-import { BrandGradient } from '../brand-surface';
+import { BrandSurface } from '../brand-surface';
 import { type ColorToken, makeStyles, type TypographyVariant, useTheme } from '../theme';
 import { Typography } from '../typography';
 
@@ -67,7 +68,6 @@ export function Button({
   const { colors, opacity } = useTheme();
   const reduceMotion = useReducedMotion();
   const pressProgress = useSharedValue(0);
-  const [layout, setLayout] = useState({ width: 0, height: 0 });
   const isDisabled = disabled === true || loading;
   const isBrand = variant === 'brand';
   const labelColor = labelColors[variant];
@@ -94,15 +94,6 @@ export function Button({
       accessibilityState={{ disabled: isDisabled, busy: loading }}
       {...props}
       disabled={isDisabled}
-      onLayout={(event) => {
-        if (isBrand) {
-          const { width, height } = event.nativeEvent.layout;
-          setLayout((prev) =>
-            prev.width === width && prev.height === height ? prev : { width, height },
-          );
-        }
-        props.onLayout?.(event);
-      }}
       onPressIn={(event) => {
         pressProgress.set(reduceMotion ? 1 : withSpring(1, PRESS_IN_SPRING));
         props.onPressIn?.(event);
@@ -120,9 +111,7 @@ export function Button({
         pressStyle,
       ]}
     >
-      {isBrand && layout.width > 0 && (
-        <BrandGradient {...layout} angle={BRAND_GRADIENT_ANGLE[size]} />
-      )}
+      {isBrand && <BrandSurface angle={BRAND_GRADIENT_ANGLE[size]} style={styles.gradient} />}
       {loading ? <ActivityIndicator color={colors[labelColor]} style={styles.icon} /> : leftIcon}
       <Typography variant={labelVariant} color={labelColor} numberOfLines={1}>
         {label}
@@ -151,9 +140,10 @@ const useStyles = makeStyles(({ colors, opacity, radius, shadow, size, spacing }
     borderRadius: radius.md,
   },
   navy: { backgroundColor: colors.bgNavy, ...shadow.card },
-  // 그라디언트가 그려지기 전(첫 레이아웃 전)에는 끝 색 단색으로 보인다.
-  // zIndex 0 으로 쌓임 맥락을 만들어 zIndex -1 그라디언트가 배경 밑으로 빠지지 않게 한다.
-  brand: { backgroundColor: colors.bgBrandEnd, zIndex: 0 },
+  // zIndex 0 으로 쌓임 맥락을 만들어, 아래 gradient(zIndex -1)가 라벨 뒤·버튼 배경 위에 깔리게 한다.
+  brand: { zIndex: 0 },
+  // 웹은 absolute 요소가 일반 자식 위에 그려져 라벨을 덮으므로 뒤로 보낸다.
+  gradient: { ...StyleSheet.absoluteFill, zIndex: -1 },
   dangerSoft: { backgroundColor: colors.bgDangerSoft },
   disabled: { opacity: opacity.disabled },
   icon: { width: size.iconM, height: size.iconM },

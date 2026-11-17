@@ -1,7 +1,12 @@
-import { useState } from 'react';
-import { Pressable, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  Pressable,
+  type PressableProps,
+  type StyleProp,
+  StyleSheet,
+  type ViewStyle,
+} from 'react-native';
 
-import { BrandGradient } from '../brand-surface';
+import { BrandSurface } from '../brand-surface';
 import { makeStyles } from '../theme';
 import { Typography } from '../typography';
 
@@ -17,7 +22,6 @@ const SELECTED_GRADIENT_ANGLE = 156.85;
 /** 여러 개 중 하나를 고르는 알약 모양 선택지 (Figma `Chip`). */
 export function Chip({ label, selected = false, style, ...props }: ChipProps) {
   const styles = useStyles();
-  const [layout, setLayout] = useState({ width: 0, height: 0 });
 
   return (
     <Pressable
@@ -25,13 +29,6 @@ export function Chip({ label, selected = false, style, ...props }: ChipProps) {
       accessibilityLabel={label}
       accessibilityState={{ checked: selected }}
       {...props}
-      onLayout={(event) => {
-        const { width, height } = event.nativeEvent.layout;
-        setLayout((prev) =>
-          prev.width === width && prev.height === height ? prev : { width, height },
-        );
-        props.onLayout?.(event);
-      }}
       style={({ pressed }) => [
         styles.container,
         selected ? styles.selected : styles.unselected,
@@ -39,9 +36,7 @@ export function Chip({ label, selected = false, style, ...props }: ChipProps) {
         style,
       ]}
     >
-      {selected && layout.width > 0 && (
-        <BrandGradient {...layout} angle={SELECTED_GRADIENT_ANGLE} />
-      )}
+      {selected && <BrandSurface angle={SELECTED_GRADIENT_ANGLE} style={styles.gradient} />}
       <Typography variant="bodyMStrong" color={selected ? 'textOnBrand' : 'textSecondary'}>
         {label}
       </Typography>
@@ -61,7 +56,10 @@ const useStyles = makeStyles(({ colors, opacity, radius, spacing }) => ({
     overflow: 'hidden',
     zIndex: 0,
   },
+  // 투명 테두리 1px 아래로 배경이 비치지 않게 그라디언트 끝 색을 깔아 둔다.
   selected: { borderColor: 'transparent', backgroundColor: colors.bgBrandEnd },
+  // 웹은 absolute 요소가 일반 자식 위에 그려져 라벨을 덮으므로 뒤로 보낸다.
+  gradient: { ...StyleSheet.absoluteFill, zIndex: -1 },
   unselected: { borderColor: colors.borderDefault, backgroundColor: colors.bgSurface },
   pressed: { opacity: opacity.pressed },
 }));
