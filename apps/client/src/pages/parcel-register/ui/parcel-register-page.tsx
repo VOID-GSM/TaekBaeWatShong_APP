@@ -1,15 +1,11 @@
 import { KeyboardAvoidingView, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { RegisterParcelForm, type RegisterParcelValues } from '@/features/register-parcel';
+import { RegisterParcelForm } from '@/features/register-parcel';
 import { makeStyles, TopBar } from '@/shared/ui';
 
-export interface ParcelRegisterPageProps {
-  /** 등록 API 가 연결되면 넘긴다. 없으면 검증만 하고 아무 일도 하지 않는다. */
-  onSubmit?: (values: RegisterParcelValues) => void | Promise<void>;
-}
-
-export function ParcelRegisterPage({ onSubmit }: ParcelRegisterPageProps) {
+/** 택배 등록 화면 (시안 C6). */
+export function ParcelRegisterPage() {
   const styles = useStyles();
 
   return (
@@ -22,7 +18,7 @@ export function ParcelRegisterPage({ onSubmit }: ParcelRegisterPageProps) {
           keyboardShouldPersistTaps="handled"
           bounces={false}
         >
-          <RegisterParcelForm onSubmit={onSubmit} />
+          <RegisterParcelForm />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

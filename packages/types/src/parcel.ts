@@ -31,3 +31,13 @@ export type Parcel = z.infer<typeof parcelSchema>;
 export type ParcelListResponse = z.infer<typeof parcelListResponseSchema>;
 
 export type MyParcelListParams = { status?: ParcelStatus };
+
+/**
+ * `POST /parcel` 요청. 응답은 서버 `ParcelResponse` 라 `parcelSchema` 로 검증한다.
+ * `alias` 를 비우면 서버가 사용자 이름을 별칭으로 저장한다. 값 검증은 폼 스키마가 맡는다.
+ */
+export interface ParcelRegisterRequest {
+  deliveryCompany: string;
+  invoiceNumber: string;
+  alias?: string;
+}
