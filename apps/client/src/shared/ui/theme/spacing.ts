@@ -49,6 +49,12 @@ export const size = {
   logoRing: 160,
   /** 화면 상단 헤더(뒤로가기 + 제목) 높이. C9 스크린샷 추정 — 디자이너 확인 필요. */
   header: 56,
+  /** 회수 화면 스캐너 안내 원형 아이콘 (지름 72, 안쪽 아이콘 36) */
+  scannerIcon: 72,
+  scannerIconGlyph: 36,
+  /** 회수 확인 카드(C8)의 체크 원 지름과 '회수 완료 처리' 버튼 높이 */
+  resultCheck: 48,
+  buttonResult: 52,
   /** 최소 터치 영역 */
   touchTarget: 44,
   /** 한 줄 입력 카드 높이. C9 스크린샷 추정(약 49) — 디자이너 확인 필요. */
@@ -114,6 +120,18 @@ export const shadow = {
         blurRadius: 20,
         spreadDistance: 0,
         color: 'rgba(15, 23, 41, 0.08)',
+      },
+    ],
+  },
+  /** Figma `Shadow/Primary-Glow` — 브랜드 그라디언트 원형 아이콘 */
+  primaryGlow: {
+    boxShadow: [
+      {
+        offsetX: 0,
+        offsetY: 6,
+        blurRadius: 16,
+        spreadDistance: -2,
+        color: 'rgba(37, 99, 235, 0.3)',
       },
     ],
   },
