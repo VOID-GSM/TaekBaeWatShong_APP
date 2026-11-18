@@ -55,7 +55,7 @@ export function NotificationItem({ notification, onPress, now }: NotificationIte
   const { icon, tone } = kindVisuals[getNotificationKind(notification.type)];
   const time = formatNotificationTime(notification.createdAt, now);
   const showUnclaimedDays = unclaimedDays != null && unclaimedDays > 0;
-  const accessibilityLabel = `${isRead ? '' : '안 읽음, '}${title}. ${message}. ${time}`;
+  const accessibilityLabel = `${isRead ? '' : '안 읽음, '}${joinSentences([title, message, time])}`;
 
   const content = (
     <Card rounded="lg" style={[styles.card, !isRead && styles.unread]}>
@@ -102,6 +102,11 @@ export function NotificationItem({ notification, onPress, now }: NotificationIte
       {content}
     </Pressable>
   );
+}
+
+/** 문장을 '. ' 로 잇는다. 서버 메시지는 '…니다.' 처럼 마침표로 끝나기도 해서, 끝 마침표를 떼고 이어 '..' 가 되지 않게 한다. */
+function joinSentences(parts: string[]) {
+  return parts.map((part) => part.trim().replace(/[.。]+$/, '')).join('. ');
 }
 
 /** 안 읽은 카드는 배경이 bgBrandSoft 라, 브랜드 아이콘 원은 한 단계 진한 색으로 띄운다. */

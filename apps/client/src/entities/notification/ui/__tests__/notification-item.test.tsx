@@ -45,6 +45,26 @@ describe('NotificationItem', () => {
     ).toBeOnTheScreen();
   });
 
+  it('내용이 마침표로 끝나도 스크린 리더 문장 구분자를 겹치지 않는다', async () => {
+    await render(
+      <NotificationItem
+        notification={{
+          ...arrived,
+          isRead: true,
+          message: '[겨울 패딩] 택배 수령이 완료되었습니다.',
+        }}
+        now={now}
+        onPress={() => {}}
+      />,
+    );
+
+    expect(
+      screen.getByRole('button', {
+        name: '택배가 도착했어요. [겨울 패딩] 택배 수령이 완료되었습니다. 5분 전',
+      }),
+    ).toBeOnTheScreen();
+  });
+
   it('누르면 알림을 넘겨 onPress 를 부른다', async () => {
     const onPress = jest.fn();
     await render(<NotificationItem notification={arrived} now={now} onPress={onPress} />);
