@@ -149,6 +149,25 @@ describe('NotificationsPage', () => {
     expect(await screen.findByText('미수령 3일')).toBeOnTheScreen();
   });
 
+  it('화면을 열어 둔 채 1분이 지나면 데이터가 같아도 상대 시각을 갱신한다', async () => {
+    // arrived 는 14:55 알림 — 30초 뒤면 '방금 전', 1분이 더 지나면 '1분 전'.
+    jest.useFakeTimers({ now: new Date(2026, 10, 18, 14, 55, 30), doNotFake: ['nextTick'] });
+    try {
+      mockFetchNotifications.mockResolvedValue(page([arrived]));
+      await renderPage();
+      expect(await screen.findByText('방금 전')).toBeOnTheScreen();
+
+      await act(async () => {
+        jest.advanceTimersByTime(60_000);
+      });
+
+      expect(screen.getByText('1분 전')).toBeOnTheScreen();
+      expect(mockFetchNotifications).toHaveBeenCalledTimes(1);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('안 읽은 알림을 누르면 읽음 요청을 보내고 해당 택배를 연다', async () => {
     mockFetchNotifications.mockResolvedValue(page([arrived, claimed]));
     mockMarkRead.mockResolvedValue({ id: arrived.id, isRead: true, unreadCount: 0 });

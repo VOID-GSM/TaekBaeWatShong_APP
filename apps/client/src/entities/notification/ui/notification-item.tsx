@@ -20,7 +20,7 @@ import {
 export interface NotificationItemProps {
   notification: ParcelNotification;
   onPress?: (notification: ParcelNotification) => void;
-  /** 테스트용 기준 시각 */
+  /** 상대 시각(`5분 전`)의 기준 시각. 없으면 그릴 때의 현재 시각. */
   now?: Date;
 }
 

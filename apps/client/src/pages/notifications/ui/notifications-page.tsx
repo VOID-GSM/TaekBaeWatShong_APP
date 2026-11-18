@@ -1,5 +1,5 @@
 import { useFocusEffect } from 'expo-router';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -41,6 +41,7 @@ export function NotificationsPage({ onOpenParcel }: NotificationsPageProps) {
     pullRefresh,
   } = useNotificationList();
   const readNotification = useReadNotification();
+  const now = useMinuteClock();
 
   useFocusEffect(refetchOnFocus);
 
@@ -57,10 +58,11 @@ export function NotificationsPage({ onOpenParcel }: NotificationsPageProps) {
     ({ item }) => (
       <NotificationItem
         notification={item}
+        now={now}
         onPress={onOpenParcel || !item.isRead ? onPressItem : undefined}
       />
     ),
-    [onOpenParcel, onPressItem],
+    [now, onOpenParcel, onPressItem],
   );
 
   const renderBody = () => {
@@ -98,6 +100,8 @@ export function NotificationsPage({ onOpenParcel }: NotificationsPageProps) {
         data={notifications}
         keyExtractor={(notification) => String(notification.id)}
         renderItem={renderItem}
+        // 기준 시각이 바뀌면 데이터가 같아도 행을 다시 그려 상대 시각을 갱신한다.
+        extraData={now}
         contentContainerStyle={styles.content}
         onEndReached={() => {
           // 다음 페이지가 실패했으면 자동으로 다시 부르지 않는다 — footer 의 다시 시도로만 재요청한다.
@@ -176,6 +180,21 @@ export function NotificationsPage({ onOpenParcel }: NotificationsPageProps) {
     </SafeAreaView>
   );
 }
+
+/** 알림 시각을 상대 시각('방금 전', '5분 전')으로 그릴 기준 시각. 화면이 보이는 동안 1분마다, 다시 보일 때 바로 갱신한다. */
+function useMinuteClock(): Date {
+  const [now, setNow] = useState(() => new Date());
+  useFocusEffect(
+    useCallback(() => {
+      setNow(new Date());
+      const timer = setInterval(() => setNow(new Date()), CLOCK_INTERVAL_MS);
+      return () => clearInterval(timer);
+    }, []),
+  );
+  return now;
+}
+
+const CLOCK_INTERVAL_MS = 60_000;
 
 const useStyles = makeStyles(({ colors, radius, spacing }) => ({
   screen: { flex: 1, backgroundColor: colors.bgApp },
