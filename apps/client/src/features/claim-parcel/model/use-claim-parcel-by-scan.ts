@@ -3,7 +3,7 @@ import type { Parcel } from '@taekbae/types';
 import { INVOICE_NUMBER_LENGTH, normalizeInvoiceNumber } from '@taekbae/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo } from 'react-native';
+import { AccessibilityInfo, Platform } from 'react-native';
 
 export type ClaimResult =
   | { id: number; type: 'success'; message: string; alias: string }
@@ -50,7 +50,8 @@ export function useClaimParcelByScan() {
   // 새 결과가 오면 타이머를 다시 잡는다 — 마지막 결과가 끝까지 보이게.
   useEffect(() => {
     if (!result) return;
-    AccessibilityInfo.announceForAccessibility(result.message);
+    // Android 는 ClaimResultToast 의 accessibilityLiveRegion 이 읽어 주므로 iOS 에서만 직접 알린다.
+    if (Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(result.message);
     const timer = setTimeout(() => setResult(null), CLAIM_RESULT_DURATION_MS);
     return () => clearTimeout(timer);
   }, [result]);

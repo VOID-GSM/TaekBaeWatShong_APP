@@ -24,7 +24,8 @@ export function ScannerHero({ isReady, busyLabel, onReconnect }: ScannerHeroProp
       disabled={isReady}
       // 연결된 상태에서는 누를 일이 없으므로 '비활성 버튼'으로 읽히지 않게 버튼 역할을 뺀다.
       accessibilityRole={isReady ? undefined : 'button'}
-      accessibilityLabel="스캐너로 바코드를 찍어주세요"
+      // 라벨이 자식 글자를 대신하므로 배지의 상태도 함께 읽히게 한다.
+      accessibilityLabel={`스캐너로 바코드를 찍어주세요. ${busyLabel ?? (isReady ? '스캐너 연결됨' : '스캐너 연결 안 됨')}`}
       accessibilityHint={isReady ? undefined : '눌러서 스캐너를 다시 연결해요'}
       accessibilityState={{ busy: Boolean(busyLabel) }}
     >
