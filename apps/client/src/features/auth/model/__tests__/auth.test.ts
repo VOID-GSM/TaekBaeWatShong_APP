@@ -193,10 +193,12 @@ describe('client DataGSM login', () => {
       setLogoutCleanup(null);
     });
 
-    it('runs the cleanup with the access token before clearing the stored session', async () => {
+    it('clears the session without waiting, then starts the cleanup with the access token', async () => {
       const order: string[] = [];
-      const cleanup = jest.fn(async () => {
+      // 끝나지 않는 정리 작업 — 로그아웃이 기다리면 이 테스트가 시간 초과로 실패한다.
+      const cleanup = jest.fn(() => {
         order.push('cleanup');
+        return new Promise<void>(() => {});
       });
       jest.mocked(SecureStore.deleteItemAsync).mockImplementation(async () => {
         order.push('clear');
@@ -214,7 +216,8 @@ describe('client DataGSM login', () => {
       await logout();
 
       expect(cleanup).toHaveBeenCalledWith(token);
-      expect(order).toEqual(['cleanup', 'clear']);
+      expect(order).toEqual(['clear', 'cleanup']);
+      expect(useAuthStore.getState()).toMatchObject({ status: 'unauthenticated', user: null });
     });
 
     it('passes an expired access token too — logout after a 401 is the common case', async () => {
@@ -254,8 +257,8 @@ describe('client DataGSM login', () => {
       expect(useAuthStore.getState()).toMatchObject({ status: 'unauthenticated', user: null });
     });
 
-    it('runs the cleanup when an expired session is dropped on app start', async () => {
-      const cleanup = jest.fn(async () => {});
+    it('starts the cleanup without delaying app start when an expired session is dropped', async () => {
+      const cleanup = jest.fn(() => new Promise<void>(() => {}));
       setLogoutCleanup(cleanup);
       jest.mocked(SecureStore.getItemAsync).mockResolvedValue(
         JSON.stringify({
