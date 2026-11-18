@@ -1,7 +1,7 @@
-import { useRouter } from 'expo-router';
 import { ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useGoBack } from '@/shared/hooks';
 import { makeStyles, ScreenHeader } from '@/shared/ui';
 import { OverdueRankingSection } from '@/widgets/overdue-ranking';
 import { ZoneMapCard } from '@/widgets/zone-map';
@@ -11,15 +11,7 @@ import { MOCK_LEFT_SHELF, MOCK_OVERDUE_TOP3, MOCK_RIGHT_SHELF } from '../model/m
 /** 택배 약도·방치자 — 홈 상단 "택배 약도 확인하기"에서 들어온다. */
 export function ZonePage() {
   const styles = useStyles();
-  const router = useRouter();
-
-  const goBack = () => {
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace('/');
-    }
-  };
+  const goBack = useGoBack();
 
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>
