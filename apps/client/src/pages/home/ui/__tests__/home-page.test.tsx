@@ -1,6 +1,13 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
+import { logout } from '@/features/auth';
+
 import { HomePage } from '../home-page';
+
+jest.mock('@/features/auth', () => ({
+  ...jest.requireActual('@/features/auth'),
+  logout: jest.fn(() => Promise.resolve()),
+}));
 
 jest.mock('expo-router', () => {
   const router = { push: jest.fn() };
@@ -43,5 +50,13 @@ describe('HomePage', () => {
     await fireEvent.press(screen.getByRole('link', { name: '택배 약도 확인하기' }));
 
     expect(router.push).toHaveBeenCalledWith('/zone');
+  });
+
+  it('이름 옆 "로그아웃"을 누르면 로그아웃한다', async () => {
+    await render(<HomePage />);
+
+    await fireEvent.press(screen.getByRole('button', { name: '로그아웃' }));
+
+    expect(logout).toHaveBeenCalledTimes(1);
   });
 });

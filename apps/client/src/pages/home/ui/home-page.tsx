@@ -11,7 +11,7 @@ import {
   type ParcelFilter,
   ParcelSummaryCard,
 } from '@/entities/parcel';
-import { useAuthStore } from '@/features/auth';
+import { logout, useAuthStore } from '@/features/auth';
 import { Icon, IconButton, makeStyles, SelectMenu, Typography, useTheme } from '@/shared/ui';
 
 import { MOCK_PARCELS, MOCK_SUMMARY } from '../model/mock';
@@ -38,9 +38,22 @@ export function HomePage() {
           <Typography variant="bodyL" color="textSecondary">
             안녕하세요 👋
           </Typography>
-          <Typography variant="titlePage" accessibilityRole="header">
-            {userName ?? '회원'}님
-          </Typography>
+          <View style={styles.nameRow}>
+            <Typography variant="titlePage" accessibilityRole="header">
+              {userName ?? '회원'}님
+            </Typography>
+            {/* 마이페이지·설정 시안이 없어 이름 옆에 눈에 덜 띄는 링크로 둔다. */}
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => void logout().catch(() => {})}
+              hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
+              style={({ pressed }) => pressed && styles.pressed}
+            >
+              <Typography variant="caption" color="textTertiary">
+                로그아웃
+              </Typography>
+            </Pressable>
+          </View>
         </View>
         {/* 약도·방치자 화면으로 가는 탭이 없어 인사말 옆에 눈에 덜 띄는 링크로 둔다. */}
         <Pressable
@@ -114,6 +127,7 @@ const useStyles = makeStyles(({ colors, opacity, size, spacing }) => ({
     paddingHorizontal: spacing.lg,
   },
   listHeader: { flexDirection: 'row', alignItems: 'center' },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   zoneLink: {
     flexDirection: 'row',
     alignItems: 'center',
