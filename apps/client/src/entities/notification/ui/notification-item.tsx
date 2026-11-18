@@ -55,7 +55,13 @@ export function NotificationItem({ notification, onPress, now }: NotificationIte
   const { icon, tone } = kindVisuals[getNotificationKind(notification.type)];
   const time = formatNotificationTime(notification.createdAt, now);
   const showUnclaimedDays = unclaimedDays != null && unclaimedDays > 0;
-  const accessibilityLabel = `${isRead ? '' : '안 읽음, '}${joinSentences([title, message, time])}`;
+  // 행 전체를 한 라벨로 읽으므로 배지 글자는 따로 읽히지 않는다 — 미수령 일수도 라벨에 넣는다.
+  const accessibilityLabel = `${isRead ? '' : '안 읽음, '}${joinSentences([
+    title,
+    message,
+    ...(showUnclaimedDays ? [`미수령 ${unclaimedDays}일`] : []),
+    time,
+  ])}`;
 
   const content = (
     <Card rounded="lg" style={[styles.card, !isRead && styles.unread]}>

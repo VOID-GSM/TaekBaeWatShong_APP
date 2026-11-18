@@ -90,6 +90,12 @@ describe('NotificationItem', () => {
     );
 
     expect(screen.getByText('미수령 3일')).toBeOnTheScreen();
+    // 배지 글자는 행 라벨에 가려 따로 읽히지 않으므로 라벨에 들어 있어야 한다.
+    expect(
+      screen.getByLabelText(
+        '안 읽음, 택배가 도착했어요. CJ대한통운 택배가 B구역에 도착했어요. 미수령 3일. 5분 전',
+      ),
+    ).toBeOnTheScreen();
   });
 
   it('모르는 종류의 알림도 그대로 보여준다', async () => {
