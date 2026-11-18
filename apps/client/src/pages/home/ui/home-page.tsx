@@ -12,12 +12,13 @@ import {
   ParcelSummaryCard,
 } from '@/entities/parcel';
 import { useAuthStore } from '@/features/auth';
-import { Icon, IconButton, makeStyles, SelectMenu, Typography } from '@/shared/ui';
+import { Icon, IconButton, makeStyles, SelectMenu, Typography, useTheme } from '@/shared/ui';
 
 import { MOCK_PARCELS, MOCK_SUMMARY } from '../model/mock';
 
 export function HomePage() {
   const styles = useStyles();
+  const { size } = useTheme();
   const userName = useAuthStore((state) => state.user?.name);
   const [filter, setFilter] = useState<ParcelFilter>('latest');
   const router = useRouter();
@@ -45,13 +46,13 @@ export function HomePage() {
         <Pressable
           accessibilityRole="link"
           onPress={() => router.push('/zone')}
-          hitSlop={8}
+          hitSlop={{ left: 8, right: 8 }}
           style={({ pressed }) => [styles.zoneLink, pressed && styles.pressed]}
         >
           <Typography variant="caption" color="textTertiary">
             택배 약도 확인하기
           </Typography>
-          <Icon name="chevronRight" size={14} />
+          <Icon name="chevronRight" size={size.iconS} />
         </Pressable>
         <IconButton icon="bell" accessibilityLabel="알림" />
       </View>
@@ -96,7 +97,7 @@ const emptyMessage: Record<ParcelFilter, string> = {
   pending: '도착 예정인 택배가 없어요.',
 };
 
-const useStyles = makeStyles(({ colors, spacing }) => ({
+const useStyles = makeStyles(({ colors, opacity, size, spacing }) => ({
   screen: { flex: 1, backgroundColor: colors.bgApp },
   header: {
     flexDirection: 'row',
@@ -113,7 +114,12 @@ const useStyles = makeStyles(({ colors, spacing }) => ({
     paddingHorizontal: spacing.lg,
   },
   listHeader: { flexDirection: 'row', alignItems: 'center' },
-  zoneLink: { flexDirection: 'row', alignItems: 'center', gap: spacing['2xs'] },
-  pressed: { opacity: 0.6 },
+  zoneLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing['2xs'],
+    minHeight: size.touchTarget,
+  },
+  pressed: { opacity: opacity.pressed },
   flex: { flex: 1 },
 }));
