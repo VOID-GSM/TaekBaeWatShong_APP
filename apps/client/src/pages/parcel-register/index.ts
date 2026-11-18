@@ -1,1 +1,1 @@
-export { ParcelRegisterPage, type ParcelRegisterPageProps } from './ui/parcel-register-page';
+export { ParcelRegisterPage } from './ui/parcel-register-page';
