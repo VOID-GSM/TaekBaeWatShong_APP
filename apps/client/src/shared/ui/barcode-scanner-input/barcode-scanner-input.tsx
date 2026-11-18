@@ -120,6 +120,8 @@ export function BarcodeScannerInput({
       onBlur={() => {
         onReadyChangeRef.current?.(false);
         if (!isActiveRef.current) return;
+        // 짧은 사이 blur 가 여러 번 나도 타이머가 쌓이지 않게 이전 것을 지운다.
+        if (refocusTimerRef.current) clearTimeout(refocusTimerRef.current);
         refocusTimerRef.current = setTimeout(() => {
           if (isActiveRef.current) focus();
         }, REFOCUS_DELAY_MS);
