@@ -1,4 +1,4 @@
-import { notificationKeys, useMarkNotificationReadMutation } from '@taekbae/api';
+import { type ApiError, notificationKeys, useMarkNotificationReadMutation } from '@taekbae/api';
 import { useQueryClient } from '@tanstack/react-query';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
@@ -57,14 +57,20 @@ export function NotificationsPage({ onOpenParcel }: NotificationsPageProps) {
   // isRefetching 은 백그라운드 재조회(탭 진입, 탭 빨간 점 쿼리)에도 true 가 된다.
   // 사용자가 당겼을 때만 스피너를 보여 주려고 따로 둔다.
   const [isPullRefreshing, setIsPullRefreshing] = useState(false);
+  // 목록이 있으면 재조회 실패에도 목록을 그대로 두므로, 당겨서 새로고침이 실패했는지는 따로 기억해 알린다.
+  const [pullRefreshError, setPullRefreshError] = useState<ApiError | null>(null);
   const onPullRefresh = async () => {
     setIsPullRefreshing(true);
     try {
       await refetch();
+      const state = queryClient.getQueryState<unknown, ApiError>(notificationKeys.list());
+      setPullRefreshError(state?.status === 'error' ? state.error : null);
     } finally {
       setIsPullRefreshing(false);
     }
   };
+  // 그 뒤 다른 재조회(포커스·앱 복귀)가 성공하면 error 가 비워지므로 안내도 함께 숨긴다.
+  const refreshError = error !== null ? pullRefreshError : null;
 
   const onPressItem = useCallback(
     (notification: ParcelNotification) => {
@@ -130,9 +136,23 @@ export function NotificationsPage({ onOpenParcel }: NotificationsPageProps) {
           />
         }
         ListHeaderComponent={
-          unreadCount > 0 ? (
-            <View style={styles.summary}>
-              <Badge label={`안 읽은 알림 ${unreadCount}개`} />
+          refreshError !== null || unreadCount > 0 ? (
+            <View style={styles.header}>
+              {refreshError !== null && (
+                <View style={styles.refreshError} accessibilityRole="alert">
+                  <Typography variant="caption" color="textDanger">
+                    새로고침하지 못했어요.
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary">
+                    {refreshError.message}
+                  </Typography>
+                </View>
+              )}
+              {unreadCount > 0 && (
+                <View style={styles.summary}>
+                  <Badge label={`안 읽은 알림 ${unreadCount}개`} />
+                </View>
+              )}
             </View>
           ) : undefined
         }
@@ -180,7 +200,7 @@ export function NotificationsPage({ onOpenParcel }: NotificationsPageProps) {
   );
 }
 
-const useStyles = makeStyles(({ colors, spacing }) => ({
+const useStyles = makeStyles(({ colors, radius, spacing }) => ({
   screen: { flex: 1, backgroundColor: colors.bgApp },
   content: {
     flexGrow: 1,
@@ -188,6 +208,14 @@ const useStyles = makeStyles(({ colors, spacing }) => ({
     paddingTop: spacing.sm,
     paddingBottom: spacing.lg,
     paddingHorizontal: spacing.lg,
+  },
+  header: { gap: spacing.md },
+  refreshError: {
+    gap: spacing['2xs'],
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
+    backgroundColor: colors.bgDangerSoft,
   },
   summary: { flexDirection: 'row' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
