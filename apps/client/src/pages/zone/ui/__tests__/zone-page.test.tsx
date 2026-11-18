@@ -68,13 +68,8 @@ describe('ZonePage', () => {
     jest.mocked(useOverdueRanking).mockReturnValue(
       rankingResult({
         ranks: [
-          {
-            rank: 1,
-            ownerName: '박서연',
-            parcelName: '겨울 패딩',
-            zone: 'C',
-            overdueFor: '3일 07:12',
-          },
+          { rank: 1, ownerName: '박서연', zone: 'C', overdueFor: '3일 07:12' },
+          { rank: 2, ownerName: '이도윤', zone: null, overdueFor: '1일 01:00' },
         ],
       }),
     );
@@ -84,6 +79,8 @@ describe('ZonePage', () => {
     expect(screen.getByText('10개 보관 중')).toBeOnTheScreen();
     expect(screen.getByText('박서연')).toBeOnTheScreen();
     expect(screen.getByText('3일 07:12')).toBeOnTheScreen();
+    expect(screen.getByText('C구역')).toBeOnTheScreen();
+    expect(screen.getByText('구역 미배정')).toBeOnTheScreen();
   });
 
   it('불러오는 중이면 섹션마다 로딩을 보여준다', async () => {

@@ -36,8 +36,7 @@ export function toOverdueRanks(ranks: readonly UnclaimedRank[], now: Date): Over
     .map(({ item, elapsed }, index) => ({
       rank: index + 1,
       ownerName: item.ownerName,
-      parcelName: item.alias,
-      zone: item.zone ?? '-',
+      zone: item.zone ?? null,
       overdueFor: formatElapsed(elapsed),
     }));
 }
