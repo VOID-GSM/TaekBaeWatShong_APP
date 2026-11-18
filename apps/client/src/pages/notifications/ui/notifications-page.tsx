@@ -81,9 +81,15 @@ export function NotificationsPage({ onOpenParcel }: NotificationsPageProps) {
     [markRead, onOpenParcel],
   );
 
+  // 택배 화면이 연결되지 않았으면 읽은 알림은 눌러도 할 일이 없어 버튼으로 만들지 않는다.
   const renderItem = useCallback<ListRenderItem<ParcelNotification>>(
-    ({ item }) => <NotificationItem notification={item} onPress={onPressItem} />,
-    [onPressItem],
+    ({ item }) => (
+      <NotificationItem
+        notification={item}
+        onPress={onOpenParcel || !item.isRead ? onPressItem : undefined}
+      />
+    ),
+    [onOpenParcel, onPressItem],
   );
 
   const renderBody = () => {
