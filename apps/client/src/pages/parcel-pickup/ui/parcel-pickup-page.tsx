@@ -1,4 +1,4 @@
-import { formatElapsed, formatInvoiceNumber, formatMonthDayTime } from '@taekbae/utils';
+import { formatInvoiceNumber, formatMonthDayTime } from '@taekbae/utils';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, View } from 'react-native';
@@ -11,7 +11,6 @@ import {
   ScannerHero,
   useClaimParcelByScan,
 } from '@/features/claim-parcel';
-import { useNow } from '@/shared/hooks';
 import {
   BarcodeScannerInput,
   type BarcodeScannerInputHandle,
@@ -41,7 +40,6 @@ export function ParcelPickupPage() {
   const { scan, scanned, isLookingUp, confirm, isClaiming, result } = useClaimParcelByScan();
   const recent = useRecentlyClaimedParcels();
   const showRecent = !scanned;
-  const now = useNow(1000, showRecent && recent.parcels.length > 0);
 
   const header = (
     <View style={styles.header}>
@@ -108,7 +106,7 @@ export function ParcelPickupPage() {
             <ClaimedParcelRow
               invoiceNumber={formatInvoiceNumber(item.parcel.invoiceNumber)}
               meta={formatMeta(item)}
-              elapsed={formatElapsed(now.getTime() - item.claimedAt.getTime())}
+              claimedAt={item.claimedAt}
               zone={item.parcel.zone}
             />
           )}
