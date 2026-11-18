@@ -55,11 +55,12 @@ async function hasPermission(): Promise<boolean> {
 }
 
 /**
- * 알림 권한을 받고 이 기기의 Expo 푸시 토큰을 서버에 등록한다. 로그인·세션 복원 때마다 부른다.
- * 웹·시뮬레이터처럼 푸시를 받을 수 없는 환경이거나 권한을 거절하면 등록하지 않는다.
- * 네트워크·서버 오류는 던진다 — 부르는 쪽에서 무시하면 다음 앱 실행 때 다시 시도된다.
+ * 진행 중인 등록. 등록하는 사이(권한 창을 띄워 둔 동안 등) 로그아웃하면, 해제가 이 등록이 끝나기를 기다렸다가 지운다.
+ * 기다리지 않으면 해제가 먼저 끝나고 그 뒤 등록이 완료돼, 로그아웃한 기기가 이전 계정으로 등록된 채 남는다.
  */
-export async function registerPushToken(): Promise<PushTokenRegistration> {
+let pendingRegistration: Promise<unknown> | null = null;
+
+async function register(): Promise<PushTokenRegistration> {
   const platform = devicePlatform();
   if (platform === null || !Device.isDevice) return { status: 'unsupported' };
 
@@ -67,9 +68,25 @@ export async function registerPushToken(): Promise<PushTokenRegistration> {
   if (!(await hasPermission())) return { status: 'denied' };
 
   const { data: token } = await getExpoPushTokenAsync({ projectId: easProjectId() });
-  await registerDeviceToken({ deviceToken: token, platform });
+  // 서버에 보내기 전에 저장한다 — 등록 요청이 서버에 닿았는지 모르는 채 실패해도 로그아웃 때 지울 수 있다.
   await storePushToken(token);
+  await registerDeviceToken({ deviceToken: token, platform });
   return { status: 'registered', token };
+}
+
+/**
+ * 알림 권한을 받고 이 기기의 Expo 푸시 토큰을 서버에 등록한다. 로그인·세션 복원 때마다 부른다.
+ * 웹·시뮬레이터처럼 푸시를 받을 수 없는 환경이거나 권한을 거절하면 등록하지 않는다.
+ * 네트워크·서버 오류는 던진다 — 부르는 쪽에서 무시하면 다음 앱 실행 때 다시 시도된다.
+ */
+export function registerPushToken(): Promise<PushTokenRegistration> {
+  const registration = register();
+  pendingRegistration = registration;
+  const settle = () => {
+    if (pendingRegistration === registration) pendingRegistration = null;
+  };
+  registration.then(settle, settle);
+  return registration;
 }
 
 /**
@@ -77,8 +94,13 @@ export async function registerPushToken(): Promise<PushTokenRegistration> {
  * 실패해도 저장한 토큰은 지운다 — 다음에 다른 계정으로 로그인하면 서버가 토큰 소유자를 바꾼다.
  */
 export async function unregisterPushToken(accessToken: string): Promise<void> {
+  await pendingRegistration?.catch(() => undefined);
+
   const token = await readStoredPushToken();
   if (token === null) return;
+  // 서버 요청보다 먼저 지운다. 로그아웃은 이 작업을 기다리지 않으므로, 요청하는 사이 다시 로그인한 계정이
+  // 저장한 토큰을 뒤늦게 지우지 않게 하기 위해서다(기기 토큰 값은 계정이 바뀌어도 같다).
+  await clearStoredPushToken();
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), UNREGISTER_TIMEOUT_MS);
@@ -87,6 +109,5 @@ export async function unregisterPushToken(accessToken: string): Promise<void> {
     await deleteDeviceToken(baseUrl, accessToken, token, controller.signal);
   } finally {
     clearTimeout(timer);
-    await clearStoredPushToken();
   }
 }

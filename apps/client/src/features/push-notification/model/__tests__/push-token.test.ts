@@ -131,12 +131,16 @@ describe('registerPushToken', () => {
     expect(registerDeviceToken).not.toHaveBeenCalled();
   });
 
-  it('서버 등록이 실패하면 저장하지 않고 에러를 던진다', async () => {
+  it('서버에 보내기 전에 저장해 두고, 등록이 실패하면 에러를 던진다', async () => {
     jest.mocked(registerDeviceToken).mockRejectedValue(new Error('network'));
 
     await expect(registerPushToken()).rejects.toThrow('network');
 
-    expect(SecureStore.setItemAsync).not.toHaveBeenCalled();
+    // 요청이 서버에 닿았는지 모르는 채 실패해도 로그아웃 때 지울 수 있게 남겨 둔다.
+    const [storeOrder] = jest.mocked(SecureStore.setItemAsync).mock.invocationCallOrder;
+    const [registerOrder] = jest.mocked(registerDeviceToken).mock.invocationCallOrder;
+    expect(SecureStore.setItemAsync).toHaveBeenCalledWith(STORAGE_KEY, TOKEN);
+    expect(storeOrder).toBeLessThan(registerOrder ?? 0);
   });
 });
 
@@ -151,7 +155,7 @@ describe('unregisterPushToken', () => {
     jest.useRealTimers();
   });
 
-  it('저장한 토큰을 넘겨받은 액세스 토큰으로 지우고 저장값도 지운다', async () => {
+  it('저장값을 먼저 지운 뒤, 넘겨받은 액세스 토큰으로 서버에서 지운다', async () => {
     jest.mocked(SecureStore.getItemAsync).mockResolvedValue(TOKEN);
 
     await unregisterPushToken('expired-access-token');
@@ -162,7 +166,52 @@ describe('unregisterPushToken', () => {
       TOKEN,
       expect.any(AbortSignal),
     );
+    // 요청하는 사이 다시 로그인한 계정이 저장한 토큰을 뒤늦게 지우지 않도록 요청보다 먼저 지운다.
+    const [clearOrder] = jest.mocked(SecureStore.deleteItemAsync).mock.invocationCallOrder;
+    const [deleteOrder] = jest.mocked(deleteDeviceToken).mock.invocationCallOrder;
     expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith(STORAGE_KEY);
+    expect(clearOrder).toBeLessThan(deleteOrder ?? 0);
+  });
+
+  it('등록하는 중에 로그아웃하면 등록이 끝난 뒤에 지운다', async () => {
+    setPlatform('android');
+    jest.mocked(Notifications.getPermissionsAsync).mockResolvedValue(permission(true));
+    jest
+      .mocked(Notifications.getExpoPushTokenAsync)
+      .mockResolvedValue({ type: 'expo', data: TOKEN });
+    // 저장소를 실제처럼 동작하게 한다.
+    let stored: string | null = null;
+    jest.mocked(SecureStore.setItemAsync).mockImplementation(async (_key, value) => {
+      stored = value;
+    });
+    jest.mocked(SecureStore.getItemAsync).mockImplementation(async () => stored);
+    jest.mocked(SecureStore.deleteItemAsync).mockImplementation(async () => {
+      stored = null;
+    });
+    let finishRegister: () => void = () => {};
+    jest.mocked(registerDeviceToken).mockReturnValue(
+      new Promise((resolve) => {
+        finishRegister = () => resolve({ id: 1, platform: 'ANDROID', createdAt: null });
+      }),
+    );
+
+    const registration = registerPushToken();
+    const unregistration = unregisterPushToken('access-token');
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(deleteDeviceToken).not.toHaveBeenCalled();
+
+    finishRegister();
+    await registration;
+    await unregistration;
+
+    expect(deleteDeviceToken).toHaveBeenCalledWith(
+      'https://api.example.test',
+      'access-token',
+      TOKEN,
+      expect.any(AbortSignal),
+    );
+    expect(stored).toBeNull();
   });
 
   it('저장한 토큰이 없으면 요청하지 않는다', async () => {
