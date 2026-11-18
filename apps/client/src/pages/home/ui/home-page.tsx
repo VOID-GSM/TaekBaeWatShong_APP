@@ -13,8 +13,16 @@ import {
 } from '@/entities/parcel';
 import { useAuthStore } from '@/features/auth';
 import { IconButton, makeStyles, SelectMenu, Typography } from '@/shared/ui';
+import { OverdueRankingSection } from '@/widgets/overdue-ranking';
+import { ZoneMapCard } from '@/widgets/zone-map';
 
-import { MOCK_PARCELS, MOCK_SUMMARY } from '../model/mock';
+import {
+  MOCK_LEFT_SHELF,
+  MOCK_OVERDUE_TOP3,
+  MOCK_PARCELS,
+  MOCK_RIGHT_SHELF,
+  MOCK_SUMMARY,
+} from '../model/mock';
 
 export function HomePage() {
   const styles = useStyles();
@@ -72,6 +80,12 @@ export function HomePage() {
             />
           ))
         )}
+
+        {/* 구역 약도·방치자 화면으로 가는 탭이 없어 홈 아래쪽에 함께 둔다. */}
+        <View style={styles.zoneSection}>
+          <ZoneMapCard leftShelf={MOCK_LEFT_SHELF} rightShelf={MOCK_RIGHT_SHELF} />
+          <OverdueRankingSection ranks={MOCK_OVERDUE_TOP3} />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -101,5 +115,7 @@ const useStyles = makeStyles(({ colors, spacing }) => ({
     paddingHorizontal: spacing.lg,
   },
   listHeader: { flexDirection: 'row', alignItems: 'center' },
+  // 내 택배 목록과 구분되도록 위쪽을 한 칸 더 띄운다.
+  zoneSection: { gap: spacing.lg, marginTop: spacing.lg },
   flex: { flex: 1 },
 }));
