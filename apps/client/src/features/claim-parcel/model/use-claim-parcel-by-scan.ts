@@ -1,4 +1,4 @@
-import { parcelQueries, useClaimParcelMutation } from '@taekbae/api';
+import { ApiError, parcelQueries, useClaimParcelMutation } from '@taekbae/api';
 import type { Parcel } from '@taekbae/types';
 import { INVOICE_NUMBER_LENGTH, normalizeInvoiceNumber } from '@taekbae/utils';
 import { useQueryClient } from '@tanstack/react-query';
@@ -113,6 +113,15 @@ export function useClaimParcelByScan() {
         alias: response.alias,
       });
     } catch (error) {
+      // 404·409 는 다시 눌러도 같은 결과라(다른 기기에서 먼저 회수 등) 카드를 닫는다.
+      // 네트워크 오류 등은 다시 시도할 수 있게 남긴다.
+      if (
+        isMountedRef.current &&
+        error instanceof ApiError &&
+        (error.status === 404 || error.status === 409)
+      ) {
+        setScanned((current) => (current?.id === scanned.id ? null : current));
+      }
       // 403·404·409 는 서버의 한국어 message 가 ApiError 에 담겨 온다.
       show({ type: 'error', message: errorMessage(error, '회수 처리에 실패했어요.') });
     } finally {

@@ -144,6 +144,21 @@ describe('ParcelPickupPage', () => {
   });
 
   it.each([
+    [404, '택배를 찾을 수 없습니다.'],
+    [409, '이미 수령 처리된 택배입니다.'],
+  ])('회수 요청이 %i 로 실패하면 다시 눌러도 같으므로 카드를 닫는다', async (status, message) => {
+    claimParcel.mockRejectedValue(new ApiError(message, status));
+    await renderPage();
+    await scan('338811025567');
+
+    await fireEvent.press(await screen.findByRole('button', CONFIRM));
+
+    expect(await screen.findByText(message)).toBeOnTheScreen();
+    expect(screen.queryByRole('button', CONFIRM)).not.toBeOnTheScreen();
+    expect(screen.getByText('방금 회수한 택배')).toBeOnTheScreen();
+  });
+
+  it.each([
     ['내 택배가 아니면', '999988887777', '내 택배 목록에 없는 운송장이에요.'],
     ['도착 전이면', '111122223333', '아직 도착하지 않은 택배예요.'],
     ['이미 회수했으면', '444455556666', '이미 회수한 택배예요.'],
