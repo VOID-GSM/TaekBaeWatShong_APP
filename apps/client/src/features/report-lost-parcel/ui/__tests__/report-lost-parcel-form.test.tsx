@@ -8,7 +8,7 @@ import { ReportLostParcelForm } from '../report-lost-parcel-form';
 jest.setTimeout(10_000);
 
 const DEFAULT_VALUES: ReportLostParcelFormValues = {
-  lostEstimatedAt: '2026. 07. 06 15:30',
+  lostEstimatedAt: new Date(2026, 6, 6, 15, 30),
   content: '',
 };
 
@@ -45,7 +45,10 @@ describe('ReportLostParcelForm', () => {
   it('두 입력을 라벨로 찾을 수 있고 기본값을 보여준다', async () => {
     await render(<Harness />);
 
-    expect(screen.getByLabelText('분실 예상 시각')).toHaveDisplayValue('2026. 07. 06 15:30');
+    // 분실 예상 시각은 직접 입력하지 않고 눌러서 고르는 칸이다.
+    expect(
+      screen.getByRole('button', { name: '분실 예상 시각: 2026년 7월 6일 (월) 오후 3:30' }),
+    ).toBeOnTheScreen();
     expect(screen.getByLabelText('상세 내용')).toHaveDisplayValue('');
   });
 
@@ -53,15 +56,13 @@ describe('ReportLostParcelForm', () => {
     await render(
       <Harness
         errors={{
-          lostEstimatedAt: '날짜와 시각을 2026. 07. 06 15:30 형식으로 입력해 주세요.',
+          lostEstimatedAt: '분실 예상 시각을 선택해 주세요.',
           content: '상세 내용을 입력해 주세요.',
         }}
       />,
     );
 
-    expect(
-      await screen.findByText('날짜와 시각을 2026. 07. 06 15:30 형식으로 입력해 주세요.'),
-    ).toBeOnTheScreen();
+    expect(await screen.findByText('분실 예상 시각을 선택해 주세요.')).toBeOnTheScreen();
     expect(screen.getByText('상세 내용을 입력해 주세요.')).toBeOnTheScreen();
   });
 

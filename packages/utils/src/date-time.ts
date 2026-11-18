@@ -8,6 +8,14 @@ export function formatDateTimeInput(date: Date): string {
   );
 }
 
+/** 기기 로컬 시각을 서버 `LocalDateTime` 문자열(`2026-07-06T15:30:00`)로 만든다. 초는 버린다. */
+export function formatLocalDateTime(date: Date): string {
+  return (
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+    `T${pad(date.getHours())}:${pad(date.getMinutes())}:00`
+  );
+}
+
 const DATE_TIME_INPUT_PATTERN = /^(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})\s+(\d{1,2}):(\d{2})$/;
 
 /** 입력받는 가장 이른 연도. `Date` 는 0–99 년을 1900+year 로 해석하므로 그보다 크게 잡는다. */

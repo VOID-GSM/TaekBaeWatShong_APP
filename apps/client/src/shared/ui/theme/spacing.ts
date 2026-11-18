@@ -83,6 +83,28 @@ export const shadow = {
       },
     ],
   },
+  /**
+   * 연한 브랜드 면(bgBrandSoft)을 배경에서 띄워 보이게 하는 브랜드 톤 그림자.
+   * 시안에 없어 임의로 정했다 — 디자이너 확인 필요.
+   */
+  brandRaised: {
+    boxShadow: [
+      {
+        offsetX: 0,
+        offsetY: 2,
+        blurRadius: 6,
+        spreadDistance: 0,
+        color: 'rgba(67, 82, 207, 0.08)',
+      },
+      {
+        offsetX: 0,
+        offsetY: 10,
+        blurRadius: 24,
+        spreadDistance: -6,
+        color: 'rgba(67, 82, 207, 0.22)',
+      },
+    ],
+  },
   /** Figma `Shadow/Float-Up` — 하단 탭 바처럼 화면 아래에 붙은 면 */
   floatUp: {
     boxShadow: [
