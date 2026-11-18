@@ -8,6 +8,9 @@ import { fontAssets } from '@/shared/ui';
 
 import { AppProviders } from '../providers';
 
+/** 서버 없이 화면만 볼 때 로그인을 건너뛴다. 개발 빌드에서 .env 로 켤 때만 동작한다. */
+const DEV_SKIP_AUTH = __DEV__ && process.env.EXPO_PUBLIC_DEV_SKIP_AUTH === 'true';
+
 // 폰트와 저장된 세션을 읽을 때까지 스플래시를 유지한다.
 void SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -16,8 +19,9 @@ function RootNavigator() {
   const status = useAuthStore((state) => state.status);
 
   // 폰트 로드가 실패해도 앱은 시스템 폰트로 띄운다.
-  const isReady = (fontsLoaded || fontError !== null) && status !== 'initializing';
-  const isAuthenticated = status === 'authenticated';
+  const isReady =
+    (fontsLoaded || fontError !== null) && (status !== 'initializing' || DEV_SKIP_AUTH);
+  const isAuthenticated = status === 'authenticated' || DEV_SKIP_AUTH;
 
   useEffect(() => {
     if (isReady) {
@@ -34,7 +38,9 @@ function RootNavigator() {
   return (
     <Stack>
       <Stack.Protected guard={isAuthenticated}>
-        <Stack.Screen name="index" />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="report/[invoiceNumber]" options={{ headerShown: false }} />
+        <Stack.Screen name="zone" options={{ headerShown: false }} />
       </Stack.Protected>
       <Stack.Protected guard={!isAuthenticated}>
         <Stack.Screen name="login" options={{ headerShown: false }} />

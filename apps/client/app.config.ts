@@ -16,7 +16,7 @@ const config: ExpoConfig = {
   slug: 'taekbaewatshong',
   /** 동적 설정(app.config.ts)에서는 소유 계정을 명시해야 EAS 가 프로젝트를 찾는다. */
   owner: 'jyuuuuu0',
-  version: '0.1.1',
+  version: '0.2.0',
   orientation: 'portrait',
   icon: './assets/icon.png',
   scheme: 'taekbaewatshong',

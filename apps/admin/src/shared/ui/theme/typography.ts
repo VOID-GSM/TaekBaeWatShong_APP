@@ -10,7 +10,9 @@ export const typography = {
   bodyM: { fontFamily: fontFamily.regular, fontSize: 14, lineHeight: 22 },
   bodyMStrong: { fontFamily: fontFamily.bold, fontSize: 14, lineHeight: 22 },
   caption: { fontFamily: fontFamily.regular, fontSize: 12, lineHeight: 18 },
+  micro: { fontFamily: fontFamily.regular, fontSize: 11, lineHeight: 16 },
   buttonL: { fontFamily: fontFamily.regular, fontSize: 16, lineHeight: 24 },
+  buttonM: { fontFamily: fontFamily.regular, fontSize: 14, lineHeight: 20 },
 } satisfies Record<string, TextStyle>;
 
 export type TypographyVariant = keyof typeof typography;
