@@ -1,4 +1,5 @@
 export { PARCEL_CARRIERS, type ParcelCarrier } from './model/carrier';
+export { formatElapsed, OVERDUE_AFTER_MS, toOverdueRanks } from './model/overdue-rank';
 export {
   DELIVERY_STEPS,
   filterParcels,
@@ -10,6 +11,7 @@ export {
   type ParcelSummary,
 } from './model/parcel';
 export { useMyParcel, type UseMyParcelResult } from './model/use-my-parcel';
+export { useOverdueRanking, type UseOverdueRankingResult } from './model/use-overdue-ranking';
 export { DeliveryStepper } from './ui/delivery-stepper';
 export { OverdueRankRow } from './ui/overdue-rank-row';
 export { ParcelCard, type ParcelCardProps } from './ui/parcel-card';
