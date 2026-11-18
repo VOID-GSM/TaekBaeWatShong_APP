@@ -44,7 +44,7 @@ export interface ParcelRegisterRequest {
 
 /**
  * `GET /parcel/zone/summary` 응답 — 구역별 보관(ARRIVED) 택배 수. 사용자 앱 약도용이라 택배 정보 없이 수만 받는다.
- * 서버에 아직 없는 API다(관리자용 `GET /parcel/zone` 은 사용자 권한으로 403). 백엔드 이슈 계약 기준.
+ * 서버 SERVER#44. A~F 를 항상 순서대로 주고, 구역 미배정 택배는 세지 않는다.
  */
 export const zoneSummaryResponseSchema = z.object({
   zones: z.array(z.object({ zone: z.string(), count: z.number() })),
@@ -52,14 +52,14 @@ export const zoneSummaryResponseSchema = z.object({
 
 /**
  * `GET /parcel/unclaimed/ranking` 응답 — 도착 후 24시간이 지나도 찾아가지 않은 택배를 오래된 순으로 최대 3건.
- * 서버에 아직 없는 API다. 백엔드 이슈 계약 기준. 방치 시간은 `arrivedAt` 으로 화면에서 계산한다.
+ * 택배 별칭은 모든 사용자에게 보이면 안 돼 응답에 없다(SERVER#45). 구역 미배정이면 `zone` 이 null.
+ * 방치 시간은 `arrivedAt` 으로 화면에서 계산한다.
  */
 export const unclaimedRankingResponseSchema = z.object({
   ranks: z.array(
     z.object({
       rank: z.number(),
       ownerName: z.string(),
-      alias: z.string(),
       zone: z.string().nullish(),
       arrivedAt: z.string(),
     }),
