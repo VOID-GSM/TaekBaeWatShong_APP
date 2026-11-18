@@ -4,7 +4,13 @@ import { View } from 'react-native';
 import { Badge, makeStyles, Typography } from '@/shared/ui';
 
 import { formatLostAt, formatReporter, formatWaybill } from '../lib/format';
-import type { LostReport } from '../model/lost-report';
+import { getLostReportState, type LostReport, type LostReportState } from '../model/lost-report';
+
+const BADGE: Record<LostReportState, { label: string; tone: 'danger' | 'brand' | 'success' }> = {
+  new: { label: '분실 신고', tone: 'danger' },
+  chatRequested: { label: '채팅 요청', tone: 'brand' },
+  done: { label: '처리 완료', tone: 'success' },
+};
 
 export interface LostReportCardProps {
   report: LostReport;
@@ -15,7 +21,7 @@ export interface LostReportCardProps {
 /** 분실 신고 한 건 (Figma `ReportCard`). */
 export function LostReportCard({ report, action }: LostReportCardProps) {
   const styles = useStyles();
-  const isChatRequested = report.status === 'CHAT_REQUESTED';
+  const badge = BADGE[getLostReportState(report)];
 
   return (
     <View style={styles.card}>
@@ -27,17 +33,14 @@ export function LostReportCard({ report, action }: LostReportCardProps) {
           accessibilityElementsHidden
           importantForAccessibility="no-hide-descendants"
         >
-          <Typography color="textBrand">{report.reporter.name.slice(0, 1)}</Typography>
+          <Typography color="textBrand">{report.reporterName.slice(0, 1)}</Typography>
         </View>
-        <Typography style={styles.flex}>{formatReporter(report.reporter)}</Typography>
-        <Badge
-          label={isChatRequested ? '채팅 요청' : '분실 신고'}
-          tone={isChatRequested ? 'brand' : 'danger'}
-        />
+        <Typography style={styles.flex}>{formatReporter(report)}</Typography>
+        <Badge label={badge.label} tone={badge.tone} />
       </View>
 
       <View style={styles.product}>
-        <Typography variant="headingH2">{report.productName}</Typography>
+        <Typography variant="headingH2">{report.alias}</Typography>
         <Typography variant="caption" color="textSecondary">
           {formatWaybill(report)}
         </Typography>
@@ -47,10 +50,11 @@ export function LostReportCard({ report, action }: LostReportCardProps) {
         <Typography variant="micro" color="textTertiary">
           분실 예상 시각
         </Typography>
-        <Typography>{formatLostAt(report.lostAt)}</Typography>
+        <Typography>{formatLostAt(report.lostEstimatedAt)}</Typography>
       </View>
 
-      <Typography color="textSecondary">{report.content}</Typography>
+      {/* 목록 응답에 신고 내용이 아직 없다(SERVER#26) — 오면 보여 준다. */}
+      {report.content ? <Typography color="textSecondary">{report.content}</Typography> : null}
 
       {action}
     </View>

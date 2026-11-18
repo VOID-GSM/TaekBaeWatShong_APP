@@ -1,25 +1,19 @@
+import type { AdminReport } from '@taekbae/types';
+
+/** 관리자가 보는 분실 신고 한 건 — 서버 `GET /report` 응답 그대로. */
+export type LostReport = AdminReport;
+
 /**
- * 신고 처리 상태. 채팅을 요청하면 `CHAT_REQUESTED` 로 바뀐다.
- * API 응답을 그대로 쓰도록 서버 enum 표기(`role` 과 같은 대문자 스네이크)를 따른다.
+ * 카드에 보여 줄 처리 상태. 서버는 `progress`(접수·처리 중·완료)와 채팅방 유무를 따로 내려주므로 둘을 합쳐 정한다.
+ * - new: 아직 채팅을 시작하지 않은 신고
+ * - chatRequested: 채팅방이 만들어진 신고
+ * - done: 처리 완료 (시안에 없는 상태 — 디자이너 확인 필요)
  */
-export type LostReportStatus = 'NEW' | 'CHAT_REQUESTED';
+export type LostReportState = 'new' | 'chatRequested' | 'done';
 
-export interface LostReportReporter {
-  name: string;
-  role: 'STUDENT' | 'TEACHER';
-  /** 학생만 있다. */
-  studentNumber?: string;
-}
-
-/** 학생·선생님이 접수한 택배 분실 신고. 백엔드 API 가 생기면 `@taekbae/types` 스키마로 옮긴다. */
-export interface LostReport {
-  id: number;
-  status: LostReportStatus;
-  reporter: LostReportReporter;
-  productName: string;
-  carrier: string;
-  trackingNumber: string;
-  /** 분실 예상 시각 (ISO 8601) */
-  lostAt: string;
-  content: string;
+export function getLostReportState(
+  report: Pick<LostReport, 'progress' | 'chatRoomId'>,
+): LostReportState {
+  if (report.progress === 'DONE') return 'done';
+  return report.chatRoomId != null ? 'chatRequested' : 'new';
 }

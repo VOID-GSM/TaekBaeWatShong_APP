@@ -2,6 +2,7 @@ import {
   ApiError,
   configureApi,
   createSessionExpiredError,
+  fetchAllReports,
   fetchMyParcels,
   parcelKeys,
   useCreateReportMutation,
@@ -183,6 +184,51 @@ describe('useCreateReportMutation', () => {
     expect(config?.url).toBe('/report');
     expect(JSON.parse(String(config?.data))).toEqual(request);
     expect(invalidate).toHaveBeenCalledWith({ queryKey: parcelKeys.all });
+  });
+});
+
+describe('fetchAllReports', () => {
+  const summary = {
+    id: 3,
+    reporterName: '김민준',
+    studentNumber: null,
+    alias: '겨울 패딩',
+    invoiceNumber: '604122378890',
+    lostEstimatedAt: '2026-07-06T15:30:00',
+    progress: 'RECEIVED',
+    chatRoomId: null,
+    createdAt: '2026-07-06T16:00:00',
+  };
+
+  it('GET /report 응답의 신고 목록을 돌려준다 (서버가 아직 보내지 않는 필드가 없어도 통과)', async () => {
+    respond(200, { reports: [summary] });
+
+    await expect(fetchAllReports()).resolves.toEqual([summary]);
+    expect(adapter.mock.calls[0]?.[0].url).toBe('/report');
+  });
+
+  it('서버가 택배사·내용·역할을 보내면 함께 돌려준다', async () => {
+    const enriched = {
+      ...summary,
+      deliveryCompany: 'CJ대한통운',
+      content: '현관 앞에 없어요',
+      reporterRole: 'STUDENT',
+    };
+    respond(200, { reports: [enriched] });
+
+    await expect(fetchAllReports()).resolves.toEqual([enriched]);
+  });
+
+  it('모르는 진행 상태가 와도 목록을 돌려준다', async () => {
+    respond(200, { reports: [{ ...summary, progress: 'REJECTED' }] });
+
+    await expect(fetchAllReports()).resolves.toEqual([{ ...summary, progress: 'REJECTED' }]);
+  });
+
+  it('응답 형식이 다르면 ApiError 로 실패한다', async () => {
+    respond(200, { reports: [{ ...summary, id: '3' }] });
+
+    await expect(fetchAllReports()).rejects.toBeInstanceOf(ApiError);
   });
 });
 
