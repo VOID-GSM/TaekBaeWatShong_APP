@@ -3,7 +3,7 @@ import { formatInvoiceNumber } from '@taekbae/utils';
 import { View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
-import { Button, Card, Icon, makeStyles, Typography } from '@/shared/ui';
+import { Button, Card, Icon, makeStyles, Typography, useTheme } from '@/shared/ui';
 
 export interface ScannedParcelCardProps {
   parcel: Parcel;
@@ -14,6 +14,7 @@ export interface ScannedParcelCardProps {
 /** 스캔한 택배 확인 카드 + 회수 완료 버튼 (Figma C8 `Result card`). */
 export function ScannedParcelCard({ parcel, isClaiming, onConfirm }: ScannedParcelCardProps) {
   const styles = useStyles();
+  const { size } = useTheme();
   const detail = [parcel.zone && `${parcel.zone}구역`, formatInvoiceNumber(parcel.invoiceNumber)]
     .filter(Boolean)
     .join(' · ');
@@ -22,7 +23,7 @@ export function ScannedParcelCard({ parcel, isClaiming, onConfirm }: ScannedParc
     <Animated.View entering={FadeIn} style={styles.wrapper}>
       <Card style={styles.card}>
         <View style={styles.check}>
-          <Icon name="check" color="statusSuccess" size={26} />
+          <Icon name="check" color="statusSuccess" size={size.resultCheckGlyph} />
         </View>
         <View style={styles.texts}>
           <Typography variant="bodyMStrong" align="center" numberOfLines={1}>

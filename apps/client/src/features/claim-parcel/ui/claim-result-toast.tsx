@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import Animated, { FadeInUp, FadeOutUp } from 'react-native-reanimated';
 
-import { Icon, makeStyles, Typography } from '@/shared/ui';
+import { Icon, makeStyles, Typography, useTheme } from '@/shared/ui';
 
 import type { ClaimResult } from '../model/use-claim-parcel-by-scan';
 
@@ -15,6 +15,7 @@ export interface ClaimResultToastProps {
  */
 export function ClaimResultToast({ result }: ClaimResultToastProps) {
   const styles = useStyles();
+  const { size } = useTheme();
   const isSuccess = result?.type === 'success';
 
   // 바깥 View 는 항상 두고 안쪽만 바꿔야 사라질 때 exiting 애니메이션이 재생된다.
@@ -33,7 +34,7 @@ export function ClaimResultToast({ result }: ClaimResultToastProps) {
           <Icon
             name={isSuccess ? 'check' : 'alert'}
             color={isSuccess ? 'statusSuccess' : 'statusDanger'}
-            size={20}
+            size={size.claimToastIcon}
           />
           <View style={styles.texts}>
             <Typography variant="bodyMStrong" color={isSuccess ? 'textSuccess' : 'textDanger'}>
@@ -51,7 +52,7 @@ export function ClaimResultToast({ result }: ClaimResultToastProps) {
   );
 }
 
-const useStyles = makeStyles(({ colors, radius, shadow, spacing }) => ({
+const useStyles = makeStyles(({ borderWidth, colors, radius, shadow, spacing }) => ({
   container: {
     position: 'absolute',
     top: spacing.sm,
@@ -66,7 +67,7 @@ const useStyles = makeStyles(({ colors, radius, shadow, spacing }) => ({
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
     borderRadius: radius.lg,
-    borderWidth: 1,
+    borderWidth: borderWidth.thin,
     ...shadow.card,
   },
   success: { backgroundColor: colors.bgSuccessSoft, borderColor: colors.statusSuccess },

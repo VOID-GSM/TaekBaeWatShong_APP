@@ -54,7 +54,10 @@ export const size = {
   scannerIconGlyph: 36,
   /** 회수 확인 카드(C8)의 체크 원 지름과 '회수 완료 처리' 버튼 높이 */
   resultCheck: 48,
+  resultCheckGlyph: 26,
   buttonResult: 52,
+  /** 회수 결과 안내 토스트 아이콘. 시안에 없는 요소 — 디자이너 확인 필요. */
+  claimToastIcon: 20,
   /** 최소 터치 영역 */
   touchTarget: 44,
   /** 한 줄 입력 카드 높이. C9 스크린샷 추정(약 49) — 디자이너 확인 필요. */
