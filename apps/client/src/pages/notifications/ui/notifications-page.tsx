@@ -1,7 +1,5 @@
-import { type ApiError, notificationKeys, useMarkNotificationReadMutation } from '@taekbae/api';
-import { useQueryClient } from '@tanstack/react-query';
 import { useFocusEffect } from 'expo-router';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -16,6 +14,7 @@ import {
   type ParcelNotification,
   useNotificationList,
 } from '@/entities/notification';
+import { useReadNotification } from '@/features/read-notification';
 import { Badge, Button, makeStyles, TopBar, Typography, useTheme } from '@/shared/ui';
 
 export interface NotificationsPageProps {
@@ -36,49 +35,21 @@ export function NotificationsPage({ onOpenParcel }: NotificationsPageProps) {
     fetchNextPage,
     isFetchingNextPage,
     isFetchNextPageError,
+    refetchOnFocus,
+    isPullRefreshing,
+    pullRefreshError: refreshError,
+    pullRefresh,
   } = useNotificationList();
-  const { mutate: markRead } = useMarkNotificationReadMutation();
-  const queryClient = useQueryClient();
+  const readNotification = useReadNotification();
 
-  // TabSlot 은 한 번 연 탭을 언마운트하지 않아, 탭을 다시 열어도 refetchOnMount 가 일어나지 않는다.
-  // 포커스될 때 stale 인 경우만 다시 받는다 — 무한 목록 refetch 는 받아 둔 페이지를 전부 다시 받으므로
-  // 매번 받지 않고 refetchOnWindowFocus 처럼 staleTime 판단에 맡긴다. 첫 포커스는 마운트 조회와 겹쳐 건너뛴다.
-  const isFirstFocus = useRef(true);
-  useFocusEffect(
-    useCallback(() => {
-      if (isFirstFocus.current) {
-        isFirstFocus.current = false;
-        return;
-      }
-      void queryClient.refetchQueries({ queryKey: notificationKeys.list(), stale: true });
-    }, [queryClient]),
-  );
-
-  // isRefetching 은 백그라운드 재조회(탭 진입, 탭 빨간 점 쿼리)에도 true 가 된다.
-  // 사용자가 당겼을 때만 스피너를 보여 주려고 따로 둔다.
-  const [isPullRefreshing, setIsPullRefreshing] = useState(false);
-  // 목록이 있으면 재조회 실패에도 목록을 그대로 두므로, 당겨서 새로고침이 실패했는지는 따로 기억해 알린다.
-  const [pullRefreshError, setPullRefreshError] = useState<ApiError | null>(null);
-  const onPullRefresh = async () => {
-    setIsPullRefreshing(true);
-    try {
-      await refetch();
-      const state = queryClient.getQueryState<unknown, ApiError>(notificationKeys.list());
-      setPullRefreshError(state?.status === 'error' ? state.error : null);
-    } finally {
-      setIsPullRefreshing(false);
-    }
-  };
-  // 그 뒤 다른 재조회(포커스·앱 복귀)가 성공하면 error 가 비워지므로 안내도 함께 숨긴다.
-  const refreshError = error !== null ? pullRefreshError : null;
+  useFocusEffect(refetchOnFocus);
 
   const onPressItem = useCallback(
     (notification: ParcelNotification) => {
-      // 읽음 처리 실패는 알리지 않는다 — 다음 조회 때 다시 안 읽음으로 보인다.
-      if (!notification.isRead) markRead(notification.id);
+      readNotification(notification);
       onOpenParcel?.(notification.parcelId);
     },
-    [markRead, onOpenParcel],
+    [readNotification, onOpenParcel],
   );
 
   // 택배 화면이 연결되지 않았으면 읽은 알림은 눌러도 할 일이 없어 버튼으로 만들지 않는다.
@@ -136,7 +107,7 @@ export function NotificationsPage({ onOpenParcel }: NotificationsPageProps) {
         refreshControl={
           <RefreshControl
             refreshing={isPullRefreshing}
-            onRefresh={() => void onPullRefresh()}
+            onRefresh={() => void pullRefresh()}
             tintColor={colors.textBrand}
             colors={[colors.textBrand]}
           />
