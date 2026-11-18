@@ -31,6 +31,16 @@ jest.mock('@taekbae/api', () => {
   };
 });
 
+// expo-router 는 Jest 에서 ESM 의존성을 불러오지 못해 mock 한다. 화면이 처음 포커스될 때처럼 마운트 시 한 번 부른다.
+jest.mock('expo-router', () => {
+  const { useEffect } = jest.requireActual('react');
+  return {
+    useFocusEffect: (effect: () => void) => {
+      useEffect(effect, [effect]);
+    },
+  };
+});
+
 // 캐시가 없는 첫 실행에서는 첫 렌더가 RN 모듈을 지연 로드하느라 기본 5초를 넘길 수 있다.
 jest.setTimeout(10_000);
 
@@ -253,5 +263,29 @@ describe('NotificationsPage', () => {
 
     expect(await screen.findByText('택배가 도착했어요')).toBeOnTheScreen();
     expect(refreshControl().refreshing).toBe(false);
+  });
+
+  it('당겨서 새로고침이 실패하면 목록은 두고 실패 안내를 보여 준다', async () => {
+    mockFetchNotifications.mockResolvedValueOnce(page([claimed]));
+    await renderPage();
+    await screen.findByText('택배를 수령했어요');
+
+    mockFetchNotifications.mockRejectedValueOnce(new ApiError('네트워크 오류가 발생했습니다.'));
+    await act(async () => {
+      refreshControl().onRefresh();
+    });
+
+    expect(await screen.findByText('새로고침하지 못했어요.')).toBeOnTheScreen();
+    expect(screen.getByText('네트워크 오류가 발생했습니다.')).toBeOnTheScreen();
+    expect(screen.getByText('택배를 수령했어요')).toBeOnTheScreen();
+  });
+
+  it('택배 화면이 연결되지 않았으면 읽은 알림은 누를 수 없고, 안 읽은 알림만 누를 수 있다', async () => {
+    mockFetchNotifications.mockResolvedValueOnce(page([arrived, claimed]));
+    await renderPage();
+    await screen.findByText('택배를 수령했어요');
+
+    expect(screen.getAllByRole('button')).toHaveLength(1);
+    expect(screen.getByRole('button', { name: /택배가 도착했어요/ })).toBeOnTheScreen();
   });
 });
