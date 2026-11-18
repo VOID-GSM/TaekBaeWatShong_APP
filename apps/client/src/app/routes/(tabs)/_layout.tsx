@@ -1,6 +1,7 @@
 import { TabList, Tabs, TabSlot, TabTrigger } from 'expo-router/ui';
 import { StyleSheet } from 'react-native';
 
+import { useUnreadNotificationCount } from '@/entities/notification';
 import { bellXml } from '@/shared/assets/bell';
 import { chatXml } from '@/shared/assets/chat';
 import { homeXml } from '@/shared/assets/home';
@@ -9,8 +10,7 @@ import { scanBarcodeXml } from '@/shared/assets/scan-barcode';
 import { MainTabBar, MainTabButton } from '@/widgets/main-tab-bar';
 
 export default function TabsLayout() {
-  // TODO: 알림 API 가 생기면 읽지 않은 알림 여부로 바꾼다.
-  const hasUnreadNotifications = false;
+  const hasUnreadNotifications = useUnreadNotificationCount() > 0;
 
   return (
     <Tabs style={{ flex: 1 }}>
