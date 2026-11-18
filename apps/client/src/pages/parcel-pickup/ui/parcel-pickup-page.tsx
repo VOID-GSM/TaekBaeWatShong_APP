@@ -11,7 +11,7 @@ import {
   ScannerHero,
   useClaimParcelByScan,
 } from '@/features/claim-parcel';
-import { useNow } from '@/shared/hooks/use-now';
+import { useNow } from '@/shared/hooks';
 import {
   BarcodeScannerInput,
   type BarcodeScannerInputHandle,
