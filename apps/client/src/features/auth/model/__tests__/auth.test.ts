@@ -2,7 +2,7 @@ import * as Linking from 'expo-linking';
 import * as SecureStore from 'expo-secure-store';
 import * as WebBrowser from 'expo-web-browser';
 
-import { getAppAccessToken, loginWithDataGsm, logout } from '../auth';
+import { getAppAccessToken, initializeAuthSession, loginWithDataGsm, logout } from '../auth';
 import { useAuthStore } from '../auth-store';
 
 jest.mock('expo-secure-store', () => ({
@@ -144,5 +144,36 @@ describe('client DataGSM login', () => {
 
     expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith(SESSION_KEY);
     expect(useAuthStore.getState()).toMatchObject({ status: 'unauthenticated', user: null });
+  });
+
+  it('discards a corrupted stored session without showing an error', async () => {
+    jest.mocked(SecureStore.getItemAsync).mockResolvedValue('{not json');
+
+    await expect(initializeAuthSession()).resolves.toBeUndefined();
+
+    expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith(SESSION_KEY);
+    expect(useAuthStore.getState()).toMatchObject({ status: 'unauthenticated', error: null });
+  });
+
+  it('signs out when the restored token expires', async () => {
+    jest.useFakeTimers();
+    try {
+      jest.mocked(SecureStore.getItemAsync).mockResolvedValue(
+        JSON.stringify({
+          accessToken: 'token',
+          expiresAt: Date.now() + 60_000,
+          user: { id: 1, email: 's25048@gsm.hs.kr', name: '홍길동', role: 'STUDENT' },
+        }),
+      );
+
+      await initializeAuthSession();
+      expect(useAuthStore.getState().status).toBe('authenticated');
+
+      await jest.advanceTimersByTimeAsync(60_000);
+
+      expect(useAuthStore.getState()).toMatchObject({ status: 'unauthenticated', user: null });
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });

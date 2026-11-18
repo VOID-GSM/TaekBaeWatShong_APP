@@ -2,7 +2,7 @@ import * as Linking from 'expo-linking';
 import * as SecureStore from 'expo-secure-store';
 import * as WebBrowser from 'expo-web-browser';
 
-import { loginAdmin, logoutAdmin } from '../auth';
+import { initializeAdminAuthSession, loginAdmin, logoutAdmin } from '../auth';
 import { useAdminAuthStore } from '../auth-store';
 
 jest.mock('expo-secure-store', () => ({
@@ -129,5 +129,36 @@ describe('admin sign-up and login', () => {
 
     expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith(SESSION_KEY);
     expect(useAdminAuthStore.getState()).toMatchObject({ status: 'unauthenticated', user: null });
+  });
+
+  it('discards a corrupted stored session without showing an error', async () => {
+    jest.mocked(SecureStore.getItemAsync).mockResolvedValue('{not json');
+
+    await expect(initializeAdminAuthSession()).resolves.toBeUndefined();
+
+    expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith(SESSION_KEY);
+    expect(useAdminAuthStore.getState()).toMatchObject({ status: 'unauthenticated', error: null });
+  });
+
+  it('signs out when the restored token expires', async () => {
+    jest.useFakeTimers();
+    try {
+      jest.mocked(SecureStore.getItemAsync).mockResolvedValue(
+        JSON.stringify({
+          accessToken: 'token',
+          expiresAt: Date.now() + 60_000,
+          user: { id: 1, email: 'admin@example.test', name: '홍길동', role: 'ADMIN' },
+        }),
+      );
+
+      await initializeAdminAuthSession();
+      expect(useAdminAuthStore.getState().status).toBe('authenticated');
+
+      await jest.advanceTimersByTimeAsync(60_000);
+
+      expect(useAdminAuthStore.getState()).toMatchObject({ status: 'unauthenticated', user: null });
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });

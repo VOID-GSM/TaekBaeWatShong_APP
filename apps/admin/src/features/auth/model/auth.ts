@@ -24,6 +24,29 @@ function getErrorMessage(error: unknown): string {
     : '로그인 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.';
 }
 
+// setTimeout 은 32비트 정수 밀리초까지만 받는다.
+const MAX_TIMER_DELAY = 2 ** 31 - 1;
+let expiryTimer: ReturnType<typeof setTimeout> | null = null;
+
+function cancelSessionExpiry(): void {
+  if (expiryTimer !== null) {
+    clearTimeout(expiryTimer);
+    expiryTimer = null;
+  }
+}
+
+// 백엔드에 토큰 갱신 API 가 없어, 만료 시각에 세션을 지워 가드가 로그인 화면으로 보내게 한다.
+function scheduleSessionExpiry(expiresAt: number): void {
+  cancelSessionExpiry();
+  expiryTimer = setTimeout(
+    () => {
+      expiryTimer = null;
+      void restoreSession();
+    },
+    Math.min(Math.max(expiresAt - Date.now(), 0), MAX_TIMER_DELAY),
+  );
+}
+
 async function createSession(code: string): Promise<AdminSession> {
   const baseUrl = resolveApiBaseUrl(process.env.EXPO_PUBLIC_API_URL);
   const accessToken = await exchangeAuthCode(baseUrl, code);
@@ -49,6 +72,7 @@ async function restoreSession(): Promise<AdminSession | null> {
     const session = await readStoredAdminSession();
 
     if (!session || session.expiresAt <= Date.now()) {
+      cancelSessionExpiry();
       if (session) {
         await clearStoredAdminSession();
       }
@@ -57,11 +81,14 @@ async function restoreSession(): Promise<AdminSession | null> {
     }
 
     useAdminAuthStore.getState().setUser(session.user);
+    scheduleSessionExpiry(session.expiresAt);
     return session;
-  } catch (error) {
-    useAdminAuthStore.getState().setStatus('unauthenticated');
-    useAdminAuthStore.getState().setError(getErrorMessage(error));
-    throw error;
+  } catch {
+    // 손상된 저장값은 다시 로그인하기 전까지 매번 실패하므로 지우고 로그아웃 상태로 둔다.
+    cancelSessionExpiry();
+    await clearStoredAdminSession().catch(() => {});
+    useAdminAuthStore.getState().clear();
+    return null;
   }
 }
 
@@ -80,6 +107,7 @@ export async function loginAdmin(provider: OAuthProvider): Promise<boolean> {
 
     const session = await createSession(code);
     useAdminAuthStore.getState().setUser(session.user);
+    scheduleSessionExpiry(session.expiresAt);
     return true;
   } catch (error) {
     useAdminAuthStore.setState({ status, user, error: getErrorMessage(error) });
@@ -98,6 +126,8 @@ export async function getAdminAccessToken(): Promise<string | null> {
 }
 
 export async function logoutAdmin(): Promise<void> {
+  cancelSessionExpiry();
+
   try {
     await clearStoredAdminSession();
     useAdminAuthStore.getState().clear();
