@@ -1,7 +1,7 @@
 import { normalizeInvoiceNumber } from '@taekbae/utils';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -12,17 +12,9 @@ import {
   ParcelSummaryCard,
 } from '@/entities/parcel';
 import { useAuthStore } from '@/features/auth';
-import { IconButton, makeStyles, SelectMenu, Typography } from '@/shared/ui';
-import { OverdueRankingSection } from '@/widgets/overdue-ranking';
-import { ZoneMapCard } from '@/widgets/zone-map';
+import { Icon, IconButton, makeStyles, SelectMenu, Typography } from '@/shared/ui';
 
-import {
-  MOCK_LEFT_SHELF,
-  MOCK_OVERDUE_TOP3,
-  MOCK_PARCELS,
-  MOCK_RIGHT_SHELF,
-  MOCK_SUMMARY,
-} from '../model/mock';
+import { MOCK_PARCELS, MOCK_SUMMARY } from '../model/mock';
 
 export function HomePage() {
   const styles = useStyles();
@@ -41,7 +33,7 @@ export function HomePage() {
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>
       <View style={styles.header}>
-        <View>
+        <View style={styles.flex}>
           <Typography variant="bodyL" color="textSecondary">
             안녕하세요 👋
           </Typography>
@@ -49,6 +41,18 @@ export function HomePage() {
             {userName ?? '회원'}님
           </Typography>
         </View>
+        {/* 약도·방치자 화면으로 가는 탭이 없어 인사말 옆에 눈에 덜 띄는 링크로 둔다. */}
+        <Pressable
+          accessibilityRole="link"
+          onPress={() => router.push('/zone')}
+          hitSlop={8}
+          style={({ pressed }) => [styles.zoneLink, pressed && styles.pressed]}
+        >
+          <Typography variant="caption" color="textTertiary">
+            택배 약도 확인하기
+          </Typography>
+          <Icon name="chevronRight" size={14} />
+        </Pressable>
         <IconButton icon="bell" accessibilityLabel="알림" />
       </View>
 
@@ -80,12 +84,6 @@ export function HomePage() {
             />
           ))
         )}
-
-        {/* 구역 약도·방치자 화면으로 가는 탭이 없어 홈 아래쪽에 함께 둔다. */}
-        <View style={styles.zoneSection}>
-          <ZoneMapCard leftShelf={MOCK_LEFT_SHELF} rightShelf={MOCK_RIGHT_SHELF} />
-          <OverdueRankingSection ranks={MOCK_OVERDUE_TOP3} />
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -103,7 +101,7 @@ const useStyles = makeStyles(({ colors, spacing }) => ({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: spacing.sm,
     paddingTop: spacing.xs,
     paddingBottom: spacing.sm,
     paddingHorizontal: spacing.lg,
@@ -115,7 +113,7 @@ const useStyles = makeStyles(({ colors, spacing }) => ({
     paddingHorizontal: spacing.lg,
   },
   listHeader: { flexDirection: 'row', alignItems: 'center' },
-  // 내 택배 목록과 구분되도록 위쪽을 한 칸 더 띄운다.
-  zoneSection: { gap: spacing.lg, marginTop: spacing.lg },
+  zoneLink: { flexDirection: 'row', alignItems: 'center', gap: spacing['2xs'] },
+  pressed: { opacity: 0.6 },
   flex: { flex: 1 },
 }));
