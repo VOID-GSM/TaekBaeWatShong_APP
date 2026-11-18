@@ -33,6 +33,10 @@ export function useMarkNotificationReadMutation(): UseMutationResult<
   const queryClient = useQueryClient();
   return useMutation<NotificationReadResponse, ApiError, number>({
     mutationFn: markNotificationRead,
+    // 읽음 요청 전에 시작된 목록 재조회(탭 재진입·앱 복귀)가 늦게 끝나면 아래에서 고친 값을 덮어쓴다 — 먼저 취소한다.
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: notificationKeys.list() });
+    },
     // 무효화하지 않고 캐시를 직접 고친다 — 무한 목록을 무효화하면 받아 둔 페이지를 전부 다시 받고 스크롤 위치가 흔들린다.
     onSuccess: (res) => {
       queryClient.setQueryData<InfiniteData<NotificationListResponse, number | undefined>>(

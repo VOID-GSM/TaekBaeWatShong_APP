@@ -5,6 +5,7 @@ import {
   fetchNotifications,
   markNotificationRead,
   notificationKeys,
+  notificationQueries,
   useMarkNotificationReadMutation,
 } from '@taekbae/api';
 import type { NotificationListResponse, ParcelNotification } from '@taekbae/types';
@@ -132,6 +133,37 @@ describe('useMarkNotificationReadMutation', () => {
     expect(data?.pageParams).toEqual([undefined, 3]);
     expect(invalidate).not.toHaveBeenCalled();
     expect(get).not.toHaveBeenCalled();
+  });
+
+  it('읽음 요청 전에 시작된 목록 재조회는 취소해, 늦게 온 응답이 읽음 처리를 덮어쓰지 않는다', async () => {
+    const before: NotificationListResponse = {
+      unreadCount: 1,
+      notifications: [notification({ id: 1 })],
+      nextCursor: null,
+    };
+    const { queryClient, wrapper } = setup({ pages: [before], pageParams: [undefined] });
+    let resolveStale: (value: { data: NotificationListResponse }) => void = () => {};
+    jest
+      .spyOn(api(), 'get')
+      .mockReturnValue(new Promise((resolve) => (resolveStale = resolve)) as never);
+    jest.spyOn(api(), 'patch').mockResolvedValue({ data: { id: 1, isRead: true, unreadCount: 0 } });
+
+    // 탭 재진입 등으로 읽음 요청 전에 시작된 재조회
+    const staleRefetch = queryClient
+      .fetchInfiniteQuery({ ...notificationQueries.list(), staleTime: 0 })
+      .catch(() => undefined);
+
+    const { result } = await renderHook(() => useMarkNotificationReadMutation(), { wrapper });
+    await act(async () => {
+      await result.current.mutateAsync(1);
+      // 읽음 처리 전 상태의 응답이 뒤늦게 도착한다.
+      resolveStale({ data: before });
+      await staleRefetch;
+    });
+
+    const data = queryClient.getQueryData<ListData>(notificationKeys.list());
+    expect(data?.pages[0]?.unreadCount).toBe(0);
+    expect(data?.pages[0]?.notifications[0]?.isRead).toBe(true);
   });
 
   it('목록 캐시가 없어도 실패하지 않는다', async () => {
