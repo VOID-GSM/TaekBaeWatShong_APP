@@ -1,5 +1,6 @@
 import {
   AuthError,
+  createExpiryTimer,
   createSessionExpiredError,
   exchangeAuthCode,
   fetchCurrentUser,
@@ -29,28 +30,11 @@ function getErrorMessage(error: unknown): string {
     : '로그인 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.';
 }
 
-// setTimeout 은 32비트 정수 밀리초까지만 받는다.
-const MAX_TIMER_DELAY = 2 ** 31 - 1;
-let expiryTimer: ReturnType<typeof setTimeout> | null = null;
+const LOGOUT_ERROR_MESSAGE = '로그아웃 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.';
 
-function cancelSessionExpiry(): void {
-  if (expiryTimer !== null) {
-    clearTimeout(expiryTimer);
-    expiryTimer = null;
-  }
-}
-
-// 백엔드에 토큰 갱신 API 가 없어, 만료 시각에 세션을 지워 가드가 로그인 화면으로 보내게 한다.
-function scheduleSessionExpiry(expiresAt: number): void {
-  cancelSessionExpiry();
-  expiryTimer = setTimeout(
-    () => {
-      expiryTimer = null;
-      void restoreSession();
-    },
-    Math.min(Math.max(expiresAt - Date.now(), 0), MAX_TIMER_DELAY),
-  );
-}
+// 백엔드에 토큰 갱신 API 가 없어, 만료 시각에 로그아웃해 가드가 로그인 화면으로 보내게 한다.
+// 저장소를 다시 읽지 않고 메모리의 만료 시각만 보므로 로그아웃과 경합하지 않는다.
+const sessionExpiry = createExpiryTimer(() => void logout().catch(() => {}));
 
 async function createSession(code: string): Promise<AppSession> {
   const baseUrl = resolveApiBaseUrl(process.env.EXPO_PUBLIC_API_URL);
@@ -79,7 +63,7 @@ async function restoreSession(): Promise<AppSession | null> {
 
     if (!session || session.expiresAt <= Date.now()) {
       currentSession = null;
-      cancelSessionExpiry();
+      sessionExpiry.cancel();
       if (session) {
         await clearStoredAppSession();
       }
@@ -89,13 +73,13 @@ async function restoreSession(): Promise<AppSession | null> {
 
     currentSession = session;
     useAuthStore.getState().setUser(session.user);
-    scheduleSessionExpiry(session.expiresAt);
+    sessionExpiry.schedule(session.expiresAt);
     return session;
   } catch {
-    // 손상된 저장값은 다시 로그인하기 전까지 매번 실패하므로 지우고 로그아웃 상태로 둔다.
+    // 저장소 읽기 실패(예: 기기가 잠겨 Keychain 에 접근할 수 없음)는 일시적일 수 있어 저장값은 남기고 로그아웃 상태로만 둔다.
+    // 손상된 저장값은 readStoredAppSession 이 지우고 null 을 돌려준다.
     currentSession = null;
-    cancelSessionExpiry();
-    await clearStoredAppSession().catch(() => {});
+    sessionExpiry.cancel();
     useAuthStore.getState().clear();
     return null;
   }
@@ -116,7 +100,7 @@ export async function loginWithDataGsm(): Promise<boolean> {
 
     const session = await createSession(code);
     useAuthStore.getState().setUser(session.user);
-    scheduleSessionExpiry(session.expiresAt);
+    sessionExpiry.schedule(session.expiresAt);
     return true;
   } catch (error) {
     useAuthStore.setState({ status, user, error: getErrorMessage(error) });
@@ -146,13 +130,13 @@ export async function readAppAccessToken(): Promise<string | null> {
 
 export async function logout(): Promise<void> {
   currentSession = null;
-  cancelSessionExpiry();
+  sessionExpiry.cancel();
 
   try {
     await clearStoredAppSession();
     useAuthStore.getState().clear();
   } catch (error) {
-    useAuthStore.getState().setError(getErrorMessage(error));
+    useAuthStore.getState().setError(LOGOUT_ERROR_MESSAGE);
     throw error;
   }
 }

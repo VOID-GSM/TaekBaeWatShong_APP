@@ -63,7 +63,9 @@ describe('client DataGSM login', () => {
     useAuthStore.setState({ status: 'unauthenticated', user: null, error: null });
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    // 로그인한 테스트가 남긴 만료 타이머를 정리한다.
+    await logout();
     delete process.env.EXPO_PUBLIC_API_URL;
   });
 
@@ -150,6 +152,15 @@ describe('client DataGSM login', () => {
 
     expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith(SESSION_KEY);
     expect(useAuthStore.getState()).toMatchObject({ status: 'unauthenticated', user: null });
+  });
+
+  it('keeps the stored session when SecureStore cannot be read', async () => {
+    jest.mocked(SecureStore.getItemAsync).mockRejectedValue(new Error('Keychain is locked'));
+
+    await expect(initializeAuthSession()).resolves.toBeUndefined();
+
+    expect(SecureStore.deleteItemAsync).not.toHaveBeenCalled();
+    expect(useAuthStore.getState()).toMatchObject({ status: 'unauthenticated', error: null });
   });
 
   it('discards a corrupted stored session without showing an error', async () => {
