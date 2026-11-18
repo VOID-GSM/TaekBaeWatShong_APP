@@ -54,3 +54,16 @@ export function localDateTimeToDate(value: string): Date | null {
   const [year, month, day, hour, minute, second] = match.slice(1).map((part) => Number(part ?? 0));
   return new Date(year ?? 0, (month ?? 1) - 1, day, hour, minute, second);
 }
+
+/** 기기 로컬 시각을 목록용 짧은 형식(`07.07 10:10`)으로 만든다. */
+export function formatMonthDayTime(date: Date): string {
+  return `${pad(date.getMonth() + 1)}.${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+/** 경과 시간(ms)을 `HH:MM:SS` 로 만든다. 음수(기기 시계가 서버보다 느린 경우)는 0 으로 본다. 100시간 이상이면 시 자리가 늘어난다. */
+export function formatElapsed(ms: number): string {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  return `${pad(hours)}:${pad(minutes)}:${pad(total % 60)}`;
+}
