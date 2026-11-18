@@ -30,8 +30,6 @@ export default function TabsLayout() {
           <TabTrigger name="notifications" href="/notifications" asChild>
             <MainTabButton icon={bellXml} label="알림" showDot={hasUnreadNotifications} />
           </TabTrigger>
-          {/* 구역 약도·TOP3(/zone)는 탭 버튼 없이 이동만 되게 숨겨서 등록한다. */}
-          <TabTrigger name="zone" href="/zone" style={{ display: 'none' }} />
           {/* 채팅 화면이 머지되면 탭이 아닌 스택 화면(/chat)으로 연결한다. */}
           <MainTabButton icon={chatXml} label="채팅" disabled />
         </MainTabBar>
