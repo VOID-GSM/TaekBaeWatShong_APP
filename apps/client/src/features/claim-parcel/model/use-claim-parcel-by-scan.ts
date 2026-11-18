@@ -64,17 +64,18 @@ export function useClaimParcelByScan() {
   /** 스캐너가 읽은 값 한 건. 회수할 수 있는 내 택배면 확인 카드에 올린다. */
   const scan = useCallback(
     async (value: string) => {
+      // 연달아 스캔하면 마지막 스캔 결과만 반영한다 — 잘못된 바코드도 앞선 조회를 무효화한다.
+      const lookupId = ++lookupIdRef.current;
       const invoiceNumber = normalizeInvoiceNumber(value);
       if (
         invoiceNumber.length < INVOICE_NUMBER_LENGTH.min ||
         invoiceNumber.length > INVOICE_NUMBER_LENGTH.max
       ) {
+        setLookingUp(false);
         show({ type: 'error', message: INVALID_BARCODE_MESSAGE });
         return;
       }
 
-      // 연달아 스캔하면 마지막 스캔 결과만 반영한다.
-      const lookupId = ++lookupIdRef.current;
       setLookingUp(true);
       try {
         // 관리자가 방금 도착 처리했을 수 있어 캐시가 아니라 서버에서 새로 받는다.

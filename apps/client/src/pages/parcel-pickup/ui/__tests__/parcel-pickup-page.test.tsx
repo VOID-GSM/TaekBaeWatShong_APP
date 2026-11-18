@@ -170,6 +170,25 @@ describe('ParcelPickupPage', () => {
     expect(screen.getByText('운송장 바코드가 아니에요. 다시 스캔해 주세요.')).toBeOnTheScreen();
   });
 
+  it('조회 중에 잘못된 바코드를 스캔하면 앞선 조회 결과는 반영하지 않는다', async () => {
+    let resolveLookup: (parcels: Parcel[]) => void = () => {};
+    mockFetchMine.mockImplementation((params) =>
+      params.status === 'CLAIMED'
+        ? Promise.resolve([])
+        : new Promise((resolve) => {
+            resolveLookup = resolve;
+          }),
+    );
+    await renderPage();
+    await scan('338811025567');
+
+    await scan('ABC12');
+    await act(async () => resolveLookup([earphone]));
+
+    expect(screen.getByText('운송장 바코드가 아니에요. 다시 스캔해 주세요.')).toBeOnTheScreen();
+    expect(screen.queryByRole('button', CONFIRM)).not.toBeOnTheScreen();
+  });
+
   it('오늘 회수한 택배만 최근 회수 순으로 보여준다', async () => {
     const now = new Date();
     const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
