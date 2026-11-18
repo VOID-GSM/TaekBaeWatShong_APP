@@ -1,6 +1,6 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
 
-import { logout } from '@/features/auth';
+import { logout, useAuthStore } from '@/features/auth';
 
 import { HomePage } from '../home-page';
 
@@ -30,6 +30,8 @@ jest.setTimeout(10_000);
 describe('HomePage', () => {
   beforeEach(() => {
     router.push.mockClear();
+    jest.mocked(logout).mockClear();
+    useAuthStore.setState({ error: null });
   });
 
   it('택배 카드의 분실 신고를 누르면 그 택배의 분실 신고 화면으로 이동한다', async () => {
@@ -58,5 +60,32 @@ describe('HomePage', () => {
     await fireEvent.press(screen.getByRole('button', { name: '로그아웃' }));
 
     expect(logout).toHaveBeenCalledTimes(1);
+  });
+
+  it('로그아웃 중에는 링크를 비활성화하고, 실패하면 문구를 보여준다', async () => {
+    let fail: (error: Error) => void = () => {};
+    jest.mocked(logout).mockImplementationOnce(
+      () =>
+        new Promise((_, reject) => {
+          fail = reject;
+        }),
+    );
+    await render(<HomePage />);
+    const link = screen.getByRole('button', { name: '로그아웃' });
+
+    await fireEvent.press(link);
+    await fireEvent.press(link);
+    expect(logout).toHaveBeenCalledTimes(1);
+    expect(link).toBeDisabled();
+
+    useAuthStore.setState({
+      error: '로그아웃 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.',
+    });
+    await act(async () => fail(new Error('SecureStore')));
+
+    expect(screen.getByRole('alert')).toHaveTextContent('로그아웃 중 문제가 발생했습니다', {
+      exact: false,
+    });
+    expect(link).toBeEnabled();
   });
 });

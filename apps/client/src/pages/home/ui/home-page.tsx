@@ -20,9 +20,19 @@ export function HomePage() {
   const styles = useStyles();
   const { size } = useTheme();
   const userName = useAuthStore((state) => state.user?.name);
+  const error = useAuthStore((state) => state.error);
   const [filter, setFilter] = useState<ParcelFilter>('latest');
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const router = useRouter();
   const parcels = filterParcels(MOCK_PARCELS, filter);
+
+  const handleLogout = () => {
+    setIsLoggingOut(true);
+    // 성공하면 가드가 로그인 화면으로 보낸다. 실패 문구는 스토어의 error 로 표시한다.
+    logout()
+      .catch(() => {})
+      .finally(() => setIsLoggingOut(false));
+  };
 
   // 분실 신고 화면은 운송장 번호(숫자만)로 내 택배를 찾는다.
   const openReportLost = (trackingNumber: string) =>
@@ -45,15 +55,22 @@ export function HomePage() {
             {/* 마이페이지·설정 시안이 없어 이름 옆에 눈에 덜 띄는 링크로 둔다. */}
             <Pressable
               accessibilityRole="button"
-              onPress={() => void logout().catch(() => {})}
+              accessibilityState={{ disabled: isLoggingOut, busy: isLoggingOut }}
+              disabled={isLoggingOut}
+              onPress={handleLogout}
               hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
-              style={({ pressed }) => pressed && styles.pressed}
+              style={({ pressed }) => [pressed && styles.pressed, isLoggingOut && styles.disabled]}
             >
               <Typography variant="caption" color="textTertiary">
                 로그아웃
               </Typography>
             </Pressable>
           </View>
+          {error !== null && (
+            <Typography variant="caption" color="textDanger" accessibilityRole="alert">
+              {error}
+            </Typography>
+          )}
         </View>
         {/* 약도·방치자 화면으로 가는 탭이 없어 인사말 옆에 눈에 덜 띄는 링크로 둔다. */}
         <Pressable
@@ -135,5 +152,6 @@ const useStyles = makeStyles(({ colors, opacity, size, spacing }) => ({
     minHeight: size.touchTarget,
   },
   pressed: { opacity: opacity.pressed },
+  disabled: { opacity: opacity.disabled },
   flex: { flex: 1 },
 }));
