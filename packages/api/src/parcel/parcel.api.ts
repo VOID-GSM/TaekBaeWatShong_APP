@@ -1,6 +1,9 @@
 import {
   type MyParcelListParams,
   type Parcel,
+  type ParcelClaimRequest,
+  type ParcelClaimResponse,
+  parcelClaimResponseSchema,
   parcelListResponseSchema,
   type ParcelRegisterRequest,
   parcelSchema,
@@ -18,4 +21,13 @@ export async function fetchMyParcels(params: MyParcelListParams = {}): Promise<P
 export async function registerParcel(request: ParcelRegisterRequest): Promise<Parcel> {
   const { data } = await api().post('/parcel', request);
   return parseResponse(parcelSchema, data);
+}
+
+/**
+ * `PATCH /parcel/claim` — 보관함에서 가져간 택배를 수령(CLAIMED) 처리한다.
+ * 403(남의 택배)·404(없는 운송장)·409(도착 전·이미 수령)는 서버가 한국어 message 를 보낸다.
+ */
+export async function claimParcel(request: ParcelClaimRequest): Promise<ParcelClaimResponse> {
+  const { data } = await api().patch('/parcel/claim', request);
+  return parseResponse(parcelClaimResponseSchema, data);
 }
