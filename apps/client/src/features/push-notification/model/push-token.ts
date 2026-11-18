@@ -60,7 +60,28 @@ async function hasPermission(): Promise<boolean> {
  */
 let pendingRegistration: Promise<unknown> | null = null;
 
-async function register(): Promise<PushTokenRegistration> {
+/**
+ * 진행 중인 해제. 로그아웃 직후 같은 계정으로 다시 로그인하면, 늦게 도착한 해제의 `DELETE` 가 새로 등록한 토큰을
+ * 지울 수 있다(서버는 소유자가 같으면 지운다). 그래서 등록은 이 해제가 끝나기를 기다렸다가 서버에 보낸다.
+ */
+let pendingUnregistration: Promise<unknown> | null = null;
+
+/**
+ * 진행 중인 작업이 끝나면 비우도록 걸어 둔다. 그 사이 새 작업으로 바뀌었으면 건드리지 않는다.
+ */
+function track<T>(operation: Promise<T>, clear: (operation: Promise<T>) => void): Promise<T> {
+  const settle = () => clear(operation);
+  operation.then(settle, settle);
+  return operation;
+}
+
+/**
+ * @param previousUnregistration 이 등록을 시작할 때 진행 중이던 해제. 시작할 때 잡아 두는 이유는, 등록 중에 시작된
+ *   해제는 이 등록을 기다리므로 그 해제를 다시 기다리면 서로 기다리게 되기 때문이다.
+ */
+async function register(
+  previousUnregistration: Promise<unknown> | null,
+): Promise<PushTokenRegistration> {
   const platform = devicePlatform();
   if (platform === null || !Device.isDevice) return { status: 'unsupported' };
 
@@ -68,6 +89,8 @@ async function register(): Promise<PushTokenRegistration> {
   if (!(await hasPermission())) return { status: 'denied' };
 
   const { data: token } = await getExpoPushTokenAsync({ projectId: easProjectId() });
+  // 저장하기 전에 기다린다 — 먼저 저장하면 아직 저장값을 읽기 전인 해제가 이 토큰을 지워 버린다.
+  await previousUnregistration?.catch(() => undefined);
   // 서버에 보내기 전에 저장한다 — 등록 요청이 서버에 닿았는지 모르는 채 실패해도 로그아웃 때 지울 수 있다.
   await storePushToken(token);
   await registerDeviceToken({ deviceToken: token, platform });
@@ -80,21 +103,30 @@ async function register(): Promise<PushTokenRegistration> {
  * 네트워크·서버 오류는 던진다 — 부르는 쪽에서 무시하면 다음 앱 실행 때 다시 시도된다.
  */
 export function registerPushToken(): Promise<PushTokenRegistration> {
-  const registration = register();
+  const registration = register(pendingUnregistration);
   pendingRegistration = registration;
-  const settle = () => {
-    if (pendingRegistration === registration) pendingRegistration = null;
-  };
-  registration.then(settle, settle);
-  return registration;
+  return track(registration, (operation) => {
+    if (pendingRegistration === operation) pendingRegistration = null;
+  });
 }
 
 /**
  * 로그아웃할 때 이 기기의 푸시 토큰을 서버에서 지운다. 만료된 액세스 토큰이어도 된다.
  * 실패해도 저장한 토큰은 지운다 — 다음에 다른 계정으로 로그인하면 서버가 토큰 소유자를 바꾼다.
  */
-export async function unregisterPushToken(accessToken: string): Promise<void> {
-  await pendingRegistration?.catch(() => undefined);
+export function unregisterPushToken(accessToken: string): Promise<void> {
+  const unregistration = unregister(accessToken, pendingRegistration);
+  pendingUnregistration = unregistration;
+  return track(unregistration, (operation) => {
+    if (pendingUnregistration === operation) pendingUnregistration = null;
+  });
+}
+
+async function unregister(
+  accessToken: string,
+  previousRegistration: Promise<unknown> | null,
+): Promise<void> {
+  await previousRegistration?.catch(() => undefined);
 
   const token = await readStoredPushToken();
   if (token === null) return;

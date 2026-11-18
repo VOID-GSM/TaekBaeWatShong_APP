@@ -214,6 +214,48 @@ describe('unregisterPushToken', () => {
     expect(stored).toBeNull();
   });
 
+  it('해제하는 중에 다시 로그인하면 해제가 끝난 뒤에 등록한다', async () => {
+    setPlatform('android');
+    jest.mocked(Notifications.getPermissionsAsync).mockResolvedValue(permission(true));
+    jest
+      .mocked(Notifications.getExpoPushTokenAsync)
+      .mockResolvedValue({ type: 'expo', data: TOKEN });
+    let stored: string | null = TOKEN;
+    jest.mocked(SecureStore.setItemAsync).mockImplementation(async (_key, value) => {
+      stored = value;
+    });
+    jest.mocked(SecureStore.getItemAsync).mockImplementation(async () => stored);
+    jest.mocked(SecureStore.deleteItemAsync).mockImplementation(async () => {
+      stored = null;
+    });
+    let finishDelete: () => void = () => {};
+    jest.mocked(deleteDeviceToken).mockReturnValue(
+      new Promise((resolve) => {
+        finishDelete = () => resolve();
+      }),
+    );
+    jest
+      .mocked(registerDeviceToken)
+      .mockResolvedValue({ id: 1, platform: 'ANDROID', createdAt: null });
+
+    // 같은 계정으로 다시 로그인해도, 늦게 도착한 DELETE 가 새로 등록한 토큰을 지우지 않아야 한다.
+    const unregistration = unregisterPushToken('old-access-token');
+    const registration = registerPushToken();
+    for (let i = 0; i < 10; i += 1) await Promise.resolve();
+    expect(deleteDeviceToken).toHaveBeenCalled();
+    expect(registerDeviceToken).not.toHaveBeenCalled();
+
+    finishDelete();
+    await unregistration;
+    await expect(registration).resolves.toEqual({ status: 'registered', token: TOKEN });
+
+    const [deleteOrder] = jest.mocked(deleteDeviceToken).mock.invocationCallOrder;
+    const [registerOrder] = jest.mocked(registerDeviceToken).mock.invocationCallOrder;
+    expect(deleteOrder).toBeLessThan(registerOrder ?? 0);
+    // 등록한 토큰이 저장돼 있어야 다음 로그아웃 때 지울 수 있다.
+    expect(stored).toBe(TOKEN);
+  });
+
   it('저장한 토큰이 없으면 요청하지 않는다', async () => {
     jest.mocked(SecureStore.getItemAsync).mockResolvedValue(null);
 
