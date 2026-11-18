@@ -20,7 +20,7 @@ export function HomePage() {
   };
 
   return (
-    <SafeAreaView style={styles.screen} edges={['bottom']}>
+    <SafeAreaView style={styles.screen} edges={['top']}>
       <View style={styles.content}>
         <Typography variant="bodyMStrong" color="textPrimary" align="center">
           {user ? `${user.name}님, 환영합니다` : '택배왔슝 관리자'}
