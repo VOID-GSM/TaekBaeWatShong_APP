@@ -36,4 +36,12 @@ describe('HomePage', () => {
       params: { invoiceNumber: '338811025567' },
     });
   });
+
+  it('인사말 옆 "택배 약도 확인하기"를 누르면 약도·방치자 화면으로 이동한다', async () => {
+    await render(<HomePage />);
+
+    await fireEvent.press(screen.getByRole('link', { name: '택배 약도 확인하기' }));
+
+    expect(router.push).toHaveBeenCalledWith('/zone');
+  });
 });

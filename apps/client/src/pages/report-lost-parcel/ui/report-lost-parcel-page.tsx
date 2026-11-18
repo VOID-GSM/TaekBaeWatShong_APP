@@ -1,9 +1,9 @@
-import { useRouter } from 'expo-router';
 import { ActivityIndicator, KeyboardAvoidingView, ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ParcelInfoCard, useMyParcel } from '@/entities/parcel';
 import { ReportLostParcelForm, useReportLostParcelForm } from '@/features/report-lost-parcel';
+import { useGoBack } from '@/shared/hooks';
 import { Button, makeStyles, ScreenHeader, Typography, useTheme } from '@/shared/ui';
 
 export interface ReportLostParcelPageProps {
@@ -15,15 +15,7 @@ export function ReportLostParcelPage({ invoiceNumber }: ReportLostParcelPageProp
   const styles = useStyles();
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
-  const router = useRouter();
-
-  const goBack = () => {
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace('/');
-    }
-  };
+  const goBack = useGoBack();
 
   const { parcel, isPending, error, refetch } = useMyParcel(invoiceNumber);
   const { control, submit, isSubmitting, submitError } = useReportLostParcelForm({

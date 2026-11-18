@@ -38,6 +38,8 @@ export const size = {
   buttonM: 40,
   /** 입력칸 높이 */
   field: 52,
+  /** 안내 문구·링크 옆 작은 아이콘 */
+  iconS: 14,
   /** 버튼 안 아이콘 */
   iconM: 22,
   iconButton: 40,
