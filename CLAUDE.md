@@ -1,4 +1,4 @@
-# 택배왔숑 (TaekBaeWatShong)
+# 택배왔슝 (TaekBaeWatShong)
 
 프로젝트 구조·FSD 계층·스크립트는 `README.md` 참고.
 

@@ -9,7 +9,7 @@ const bundleId = IS_DEV
     ? 'kr.hs.gsm.taekbaewatshong.preview'
     : 'kr.hs.gsm.taekbaewatshong';
 
-const appName = IS_DEV ? '택배왔숑 (dev)' : IS_PREVIEW ? '택배왔숑 (preview)' : '택배왔숑';
+const appName = IS_DEV ? '택배왔슝 (dev)' : IS_PREVIEW ? '택배왔슝 (preview)' : '택배왔슝';
 
 const config: ExpoConfig = {
   name: appName,

@@ -1,6 +1,6 @@
 ---
 name: api-layer
-description: 택배왔숑 서버 통신 계층 작성 규칙 — axios 클라이언트 설정, zod 스키마(@taekbae/types), TanStack Query 쿼리 키·queryOptions·mutation 훅(@taekbae/api), 토큰 저장(expo-secure-store)·갱신, 에러 처리. "API 연동", "axios 설정", "서버 통신", "엔드포인트 추가", "쿼리 훅 만들어줘", "useQuery", "mutation", "토큰 처리", "인터셉터", "응답 타입", "zod 스키마", "캐시 무효화", "invalidate" 요청이나 packages/api·packages/types를 수정하는 모든 작업에 반드시 이 스킬을 사용할 것.
+description: 택배왔슝 서버 통신 계층 작성 규칙 — axios 클라이언트 설정, zod 스키마(@taekbae/types), TanStack Query 쿼리 키·queryOptions·mutation 훅(@taekbae/api), 토큰 저장(expo-secure-store)·갱신, 에러 처리. "API 연동", "axios 설정", "서버 통신", "엔드포인트 추가", "쿼리 훅 만들어줘", "useQuery", "mutation", "토큰 처리", "인터셉터", "응답 타입", "zod 스키마", "캐시 무효화", "invalidate" 요청이나 packages/api·packages/types를 수정하는 모든 작업에 반드시 이 스킬을 사용할 것.
 ---
 
 # API Layer

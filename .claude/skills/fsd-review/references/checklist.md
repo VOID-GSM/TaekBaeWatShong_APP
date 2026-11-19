@@ -1,4 +1,4 @@
-# 택배왔숑 리뷰 체크리스트
+# 택배왔슝 리뷰 체크리스트
 
 ## 1. FSD 계층 (apps/client, apps/admin)
 

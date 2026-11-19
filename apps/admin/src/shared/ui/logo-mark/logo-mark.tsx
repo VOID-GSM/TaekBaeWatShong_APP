@@ -8,7 +8,7 @@ export interface LogoMarkProps {
   accessibilityLabel?: string;
 }
 
-export function LogoMark({ accessibilityLabel = '택배왔숑' }: LogoMarkProps) {
+export function LogoMark({ accessibilityLabel = '택배왔슝' }: LogoMarkProps) {
   return (
     <View accessible accessibilityRole="image" accessibilityLabel={accessibilityLabel}>
       <SvgXml xml={logoMarkXml} width={size.logoMark} height={size.logoMark} />
