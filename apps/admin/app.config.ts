@@ -10,10 +10,10 @@ const bundleId = IS_DEV
     : 'kr.hs.gsm.taekbaewatshong.admin';
 
 const appName = IS_DEV
-  ? '택배왔슝 관리자 (dev)'
+  ? '택배왔숑 관리자 (dev)'
   : IS_PREVIEW
-    ? '택배왔슝 관리자 (preview)'
-    : '택배왔슝 관리자';
+    ? '택배왔숑 관리자 (preview)'
+    : '택배왔숑 관리자';
 
 const config: ExpoConfig = {
   name: appName,

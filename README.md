@@ -1,9 +1,14 @@
 # 택배왔숑 (TaekBaeWatShong)
 
-기숙사 택배 수령 알림 서비스. pnpm + Turborepo 모노레포이며, 앱 두 개(사용자용 `client`,
+기숙사 택배 수령 알림과 방치·분실 예방 서비스. pnpm + Turborepo 모노레포이며, 앱 두 개(사용자용 `client`,
 관리자용 `admin`)가 **FSD(Feature-Sliced Design)** 구조로 되어 있습니다.
 
-아직 화면과 도메인 코드는 비어 있습니다. 빌드·린트·테스트 파이프라인과 폴더 구조만 잡혀 있는 상태입니다.
+## 구현 현황
+
+| 앱     | 서버 연동                                                          | 화면만 있음(목업·준비 중)                                                                                                  |
+| ------ | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| client | DataGSM 로그인·로그아웃, 택배 등록, 분실 신고, 푸시 토큰 등록·해제 | 홈 택배 목록·요약, 택배 약도·방치자(목업 데이터), 택배 회수(#26)·알림(#25) 탭(준비 중, 서버 연동 PR 진행 중), 채팅(비활성) |
+| admin  | DataGSM·Google 로그인·로그아웃, 분실 신고 목록                     | 관리자 가입(`/signup`, 진입 경로·서버 연동 전), 택배 스캔·QR 탭(준비 중), 채팅(비활성)                                     |
 
 ## 요구 사항
 
@@ -103,9 +108,13 @@ extra: {
 - `src/app/routes/` — `_layout.tsx` 와 라우트 파일만 둡니다. 라우트 파일은
   `pages` 계층 화면을 re-export 하는 한 줄이면 충분합니다.
   ```tsx
-  // src/app/routes/index.tsx
+  // src/app/routes/(tabs)/index.tsx
   export { HomePage as default } from '@/pages/home';
   ```
+- 하단 탭 화면은 `(tabs)` 그룹에 둡니다. 괄호 폴더는 URL 에 나타나지 않아
+  `(tabs)/index.tsx` 가 `/`, `(tabs)/register.tsx` 가 `/register` 가 됩니다.
+  탭 바 구성은 `(tabs)/_layout.tsx` 에 있습니다. 탭 없이 쌓이는 화면(`login`, `zone`,
+  `report/[invoiceNumber]` 등)은 `routes/` 바로 아래에 둡니다.
 - `src/app/providers` — 라우트가 아닌 app 계층 코드는 여기에 둡니다.
 
 ## 스크립트
@@ -130,11 +139,12 @@ Turborepo 가 패키지 단위로 캐싱하므로 두 번째 실행부터는 변
 `EXPO_PUBLIC_` 접두사가 붙은 값만 클라이언트 번들에 주입됩니다.
 **비밀 값은 절대 넣지 마세요 — 번들에 평문으로 박힙니다.**
 
-| 변수                  | 설명                                     |
-| --------------------- | ---------------------------------------- |
-| `EXPO_PUBLIC_API_URL` | REST API 베이스 URL                      |
-| `EXPO_PUBLIC_WS_URL`  | 채팅 WebSocket URL                       |
-| `APP_VARIANT`         | `development` / `preview` / `production` |
+| 변수                        | 설명                                                                        |
+| --------------------------- | --------------------------------------------------------------------------- |
+| `EXPO_PUBLIC_API_URL`       | REST API 베이스 URL                                                         |
+| `EXPO_PUBLIC_WS_URL`        | 채팅 WebSocket URL. 채팅 연동 전이라 아직 코드에서 쓰지 않습니다            |
+| `EXPO_PUBLIC_DEV_SKIP_AUTH` | 사용자 앱 전용. `true` 면 개발 모드(`__DEV__`)에서 로그인 가드를 건너뜁니다 |
+| `APP_VARIANT`               | `development` / `preview` / `production`                                    |
 
 앱과 사용자에 따라 로그인 수단이 다릅니다.
 
@@ -151,9 +161,34 @@ OAuth 인가 흐름은 백엔드([TaekBaeWatShong_SERVER](https://github.com/VOI
 3. 앱이 30초 안에 `GET /auth/token?code=` 로 JWT 를 받고, `GET /api/users/me` 로 사용자와
    역할을 확인한 뒤 `expo-secure-store` 에 세션을 저장합니다.
 
-가입 전용 API 는 없습니다. 처음 로그인하는 계정은 백엔드가 자동으로 가입시키며, 학생·선생님
-역할은 백엔드가 DataGSM 계정 유형으로 판별하므로 앱은 역할을 보내지 않습니다. 관리자 앱은
+OAuth 로그인에는 따로 가입 단계가 없습니다. 처음 로그인하는 계정은 백엔드가 자동으로 가입시키며,
+학생·선생님 역할은 백엔드가 DataGSM 계정 유형으로 판별하므로 앱은 역할을 보내지 않습니다. 관리자 앱은
 provider 와 관계없이 백엔드 `ADMIN_EMAILS` 에 등록된 이메일만 허용됩니다.
+백엔드에는 이메일 가입·로그인 API(`/auth/email/*`)도 있지만 앱은 아직 쓰지 않습니다. 관리자 앱의
+가입 화면(`/signup`)은 UI 만 있습니다.
+
+### 세션 유지와 로그아웃
+
+백엔드에 토큰 갱신(refresh) API 가 없어서, JWT 가 만료되면 다시 로그인해야 합니다.
+만료 시각은 토큰의 `exp` 로 판단합니다.
+
+- 세션은 `expo-secure-store` 에 저장하고, 앱을 켤 때 읽어 메모리에 올립니다. API 요청은 메모리의 토큰만 씁니다.
+- 아래 세 경우에 자동으로 로그아웃되고, 가드가 로그인 화면으로 보냅니다.
+  - 앱을 켠 채로 만료 시각이 지났을 때(타이머)
+  - 요청 직전에 토큰이 만료돼 있을 때
+  - 서버가 `401` 을 돌려줬을 때
+- 저장값이 깨져 있으면(파싱·형식 오류) 지웁니다. 기기가 잠겨 있는 등 저장소를 읽지 못한 경우는
+  일시적일 수 있어 저장값을 남기고 로그아웃 상태로만 시작합니다.
+- 로그아웃 버튼: 사용자 앱은 홈 이름 옆, 관리자 앱은 홈 탭에 있습니다.
+
+### 푸시 알림 (사용자 앱)
+
+로그인하거나 세션을 복원하면 알림 권한을 확인하고, Expo 푸시 토큰을 `POST /notification/token` 으로 등록합니다.
+로그아웃하면(자동 로그아웃 포함) `DELETE /notification/token` 으로 지웁니다(만료된 토큰으로 지우는 경우는 서버 SERVER#41 반영 후 동작). 웹·시뮬레이터나 권한을
+거절한 경우는 등록하지 않습니다.
+
+- 푸시 토큰은 Expo Go 로 받을 수 없어 development build 가 필요합니다.
+- Android 는 EAS 프로젝트에 FCM V1 서비스 계정 키가 등록돼 있어야 토큰이 발급됩니다.
 
 백엔드 환경 변수의 리다이렉트 URI 는 앱 scheme 과 정확히 일치해야 합니다.
 
@@ -192,6 +227,10 @@ pnpm eas:build:client --profile development --platform android
 
 `eas.json` 에 `development` / `preview` / `production` 세 프로필이 있고,
 프로필마다 번들 ID 와 API URL 이 다릅니다(한 기기에 동시 설치 가능).
+
+OTA 업데이트(EAS Update)는 `runtimeVersion.policy: 'appVersion'` 이라 `version` 이 같은 빌드에만
+적용됩니다. **네이티브 모듈을 추가·변경했다면 `app.config.ts` 의 `version` 을 올리고 새로 빌드하세요.**
+그대로 두면 기존 빌드가 새 JS 를 받는 순간 네이티브 모듈을 찾지 못해 앱이 깨집니다.
 
 ## 커밋 전 검사
 

@@ -68,3 +68,21 @@ export const unclaimedRankingResponseSchema = z.object({
 
 export type ZoneSummaryResponse = z.infer<typeof zoneSummaryResponseSchema>;
 export type UnclaimedRank = z.infer<typeof unclaimedRankingResponseSchema>['ranks'][number];
+
+/** `PATCH /parcel/claim` 요청. 본인 택배이면서 ARRIVED 인 것만 처리된다. */
+export interface ParcelClaimRequest {
+  invoiceNumber: string;
+}
+
+/** `PATCH /parcel/claim` 응답. `message` 는 서버가 정한 화면 안내 문구다 (예: "회수가 완료되었습니다!"). */
+export const parcelClaimResponseSchema = z.object({
+  id: z.number(),
+  invoiceNumber: z.string(),
+  alias: z.string(),
+  zone: z.string().nullish(),
+  status: z.string(),
+  claimedAt: z.string().nullish(),
+  message: z.string(),
+});
+
+export type ParcelClaimResponse = z.infer<typeof parcelClaimResponseSchema>;

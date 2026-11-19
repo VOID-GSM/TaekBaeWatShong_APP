@@ -1,5 +1,6 @@
 import {
   AuthError,
+  createExpiryTimer,
   createSessionExpiredError,
   exchangeAuthCode,
   fetchCurrentUser,
@@ -28,6 +29,12 @@ function getErrorMessage(error: unknown): string {
     : '로그인 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.';
 }
 
+const LOGOUT_ERROR_MESSAGE = '로그아웃 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+
+// 백엔드에 토큰 갱신 API 가 없어, 만료 시각에 로그아웃해 가드가 로그인 화면으로 보내게 한다.
+// 저장소를 다시 읽지 않고 메모리의 만료 시각만 보므로 로그아웃과 경합하지 않는다.
+const sessionExpiry = createExpiryTimer(() => void logoutAdmin().catch(() => {}));
+
 async function createSession(code: string): Promise<AdminSession> {
   const baseUrl = resolveApiBaseUrl(process.env.EXPO_PUBLIC_API_URL);
   const accessToken = await exchangeAuthCode(baseUrl, code);
@@ -55,6 +62,7 @@ async function restoreSession(): Promise<AdminSession | null> {
 
     if (!session || session.expiresAt <= Date.now()) {
       currentSession = null;
+      sessionExpiry.cancel();
       if (session) {
         await clearStoredAdminSession();
       }
@@ -64,12 +72,15 @@ async function restoreSession(): Promise<AdminSession | null> {
 
     currentSession = session;
     useAdminAuthStore.getState().setUser(session.user);
+    sessionExpiry.schedule(session.expiresAt);
     return session;
-  } catch (error) {
+  } catch {
+    // 저장소 읽기 실패(예: 기기가 잠겨 Keychain 에 접근할 수 없음)는 일시적일 수 있어 저장값은 남기고 로그아웃 상태로만 둔다.
+    // 손상된 저장값은 readStoredAdminSession 이 지우고 null 을 돌려준다.
     currentSession = null;
-    useAdminAuthStore.getState().setStatus('unauthenticated');
-    useAdminAuthStore.getState().setError(getErrorMessage(error));
-    throw error;
+    sessionExpiry.cancel();
+    useAdminAuthStore.getState().clear();
+    return null;
   }
 }
 
@@ -88,6 +99,7 @@ export async function loginAdmin(provider: OAuthProvider): Promise<boolean> {
 
     const session = await createSession(code);
     useAdminAuthStore.getState().setUser(session.user);
+    sessionExpiry.schedule(session.expiresAt);
     return true;
   } catch (error) {
     useAdminAuthStore.setState({ status, user, error: getErrorMessage(error) });
@@ -111,12 +123,22 @@ export async function readAdminAccessToken(): Promise<string | null> {
 }
 
 export async function logoutAdmin(): Promise<void> {
+  const session = currentSession;
   currentSession = null;
+  sessionExpiry.cancel();
+
   try {
     await clearStoredAdminSession();
-    useAdminAuthStore.getState().clear();
   } catch (error) {
-    useAdminAuthStore.getState().setError(getErrorMessage(error));
-    throw error;
+    // 저장값을 못 지웠으면 세션을 되돌려, 다시 시도할 때까지 앱이 그대로 동작하게 한다.
+    // 이미 만료된 세션은 되돌리면 로그아웃이 되풀이되고 다음 실행 때 어차피 버려지므로 그대로 로그아웃시킨다.
+    if (session && session.expiresAt > Date.now()) {
+      currentSession = session;
+      sessionExpiry.schedule(session.expiresAt);
+      useAdminAuthStore.getState().setError(LOGOUT_ERROR_MESSAGE);
+      throw error;
+    }
   }
+
+  useAdminAuthStore.getState().clear();
 }

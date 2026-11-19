@@ -12,6 +12,12 @@ export {
 } from './model/parcel';
 export { useMyParcel, type UseMyParcelResult } from './model/use-my-parcel';
 export { useOverdueRanking, type UseOverdueRankingResult } from './model/use-overdue-ranking';
+export {
+  type ClaimedParcel,
+  useRecentlyClaimedParcels,
+  type UseRecentlyClaimedParcelsResult,
+} from './model/use-recently-claimed-parcels';
+export { ClaimedParcelRow, type ClaimedParcelRowProps } from './ui/claimed-parcel-row';
 export { DeliveryStepper } from './ui/delivery-stepper';
 export { OverdueRankRow } from './ui/overdue-rank-row';
 export { ParcelCard, type ParcelCardProps } from './ui/parcel-card';
