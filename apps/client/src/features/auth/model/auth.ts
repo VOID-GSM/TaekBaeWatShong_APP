@@ -24,6 +24,26 @@ import { useAuthStore } from './auth-store';
  */
 let currentSession: AppSession | null = null;
 
+/**
+ * 로그아웃할 때 할 정리 작업(예: 이 기기의 푸시 토큰 삭제). 로그아웃한 세션의 액세스 토큰을 넘긴다 — 만료됐을 수 있다.
+ * 다른 기능(feature)을 직접 import 하지 않도록 앱 계층(app/providers)에서 주입한다.
+ * 로그아웃은 이 작업을 기다리지 않는다 — 네트워크가 느려도 화면이 바로 로그인으로 넘어가게.
+ */
+type LogoutCleanup = (accessToken: string) => Promise<void>;
+let logoutCleanup: LogoutCleanup | null = null;
+
+export function setLogoutCleanup(cleanup: LogoutCleanup | null): void {
+  logoutCleanup = cleanup;
+}
+
+/** 정리 작업을 기다리지 않고 시작만 한다. 실패해도 로그아웃에는 영향이 없다. */
+function startLogoutCleanup(session: AppSession | null): void {
+  if (!session || !logoutCleanup) return;
+  logoutCleanup(session.accessToken).catch(() => {
+    // 실패해도 로그아웃은 이미 끝났다.
+  });
+}
+
 function getErrorMessage(error: unknown): string {
   return error instanceof AuthError
     ? error.message
@@ -66,6 +86,8 @@ async function restoreSession(): Promise<AppSession | null> {
       sessionExpiry.cancel();
       if (session) {
         await clearStoredAppSession();
+        // 앱을 꺼 둔 사이 만료된 세션도 로그아웃과 같다. 스플래시를 늦추지 않게 기다리지 않는다.
+        startLogoutCleanup(session);
       }
       useAuthStore.getState().clear();
       return null;
@@ -129,6 +151,7 @@ export async function readAppAccessToken(): Promise<string | null> {
 }
 
 export async function logout(): Promise<void> {
+  const session = currentSession;
   currentSession = null;
   sessionExpiry.cancel();
 
@@ -138,5 +161,8 @@ export async function logout(): Promise<void> {
   } catch (error) {
     useAuthStore.getState().setError(LOGOUT_ERROR_MESSAGE);
     throw error;
+  } finally {
+    // 토큰은 위에서 잡아 뒀으니 세션을 지운 뒤에 시작해도 된다.
+    startLogoutCleanup(session);
   }
 }

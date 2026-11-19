@@ -8,6 +8,7 @@ import {
   loginWithDataGsm,
   logout,
   readAppAccessToken,
+  setLogoutCleanup,
 } from '../auth';
 import { useAuthStore } from '../auth-store';
 
@@ -227,6 +228,102 @@ describe('client DataGSM login', () => {
       await logout();
 
       await expect(readAppAccessToken()).resolves.toBeNull();
+    });
+  });
+
+  describe('logout cleanup', () => {
+    afterEach(() => {
+      setLogoutCleanup(null);
+    });
+
+    it('clears the session without waiting, then starts the cleanup with the access token', async () => {
+      const order: string[] = [];
+      // 끝나지 않는 정리 작업 — 로그아웃이 기다리면 이 테스트가 시간 초과로 실패한다.
+      const cleanup = jest.fn(() => {
+        order.push('cleanup');
+        return new Promise<void>(() => {});
+      });
+      jest.mocked(SecureStore.deleteItemAsync).mockImplementation(async () => {
+        order.push('clear');
+      });
+      setLogoutCleanup(cleanup);
+      const token = createJwt(EXPIRES_AT_SECONDS);
+      mockCallback('code=one-time-code');
+      fetchMock
+        .mockResolvedValueOnce(jsonResponse({ token }))
+        .mockResolvedValueOnce(
+          jsonResponse({ id: 1, email: 's25048@gsm.hs.kr', name: '홍길동', role: 'STUDENT' }),
+        );
+      await loginWithDataGsm();
+
+      await logout();
+
+      expect(cleanup).toHaveBeenCalledWith(token);
+      expect(order).toEqual(['clear', 'cleanup']);
+      expect(useAuthStore.getState()).toMatchObject({ status: 'unauthenticated', user: null });
+    });
+
+    it('passes an expired access token too — logout after a 401 is the common case', async () => {
+      const cleanup = jest.fn(async () => {});
+      setLogoutCleanup(cleanup);
+      const token = createJwt(EXPIRES_AT_SECONDS);
+      mockCallback('code=one-time-code');
+      fetchMock
+        .mockResolvedValueOnce(jsonResponse({ token }))
+        .mockResolvedValueOnce(
+          jsonResponse({ id: 1, email: 's25048@gsm.hs.kr', name: '홍길동', role: 'STUDENT' }),
+        );
+      await loginWithDataGsm();
+      jest.spyOn(Date, 'now').mockReturnValue(EXPIRES_AT_SECONDS * 1000 + 1);
+
+      await logout();
+
+      expect(cleanup).toHaveBeenCalledWith(token);
+      jest.mocked(Date.now).mockRestore();
+    });
+
+    it('still logs out when the cleanup fails', async () => {
+      setLogoutCleanup(jest.fn(async () => Promise.reject(new Error('network'))));
+      useAuthStore.setState({ status: 'authenticated' });
+      const token = createJwt(EXPIRES_AT_SECONDS);
+      mockCallback('code=one-time-code');
+      fetchMock
+        .mockResolvedValueOnce(jsonResponse({ token }))
+        .mockResolvedValueOnce(
+          jsonResponse({ id: 1, email: 's25048@gsm.hs.kr', name: '홍길동', role: 'STUDENT' }),
+        );
+      await loginWithDataGsm();
+
+      await expect(logout()).resolves.toBeUndefined();
+
+      expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith(SESSION_KEY);
+      expect(useAuthStore.getState()).toMatchObject({ status: 'unauthenticated', user: null });
+    });
+
+    it('starts the cleanup without delaying app start when an expired session is dropped', async () => {
+      const cleanup = jest.fn(() => new Promise<void>(() => {}));
+      setLogoutCleanup(cleanup);
+      jest.mocked(SecureStore.getItemAsync).mockResolvedValue(
+        JSON.stringify({
+          accessToken: 'expired',
+          expiresAt: Date.now() - 1000,
+          user: { id: 1, email: 's25048@gsm.hs.kr', name: '홍길동', role: 'STUDENT' },
+        }),
+      );
+
+      await expect(getAppAccessToken()).resolves.toBeNull();
+
+      expect(cleanup).toHaveBeenCalledWith('expired');
+      expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith(SESSION_KEY);
+    });
+
+    it('skips the cleanup when nobody is logged in', async () => {
+      const cleanup = jest.fn(async () => {});
+      setLogoutCleanup(cleanup);
+
+      await logout();
+
+      expect(cleanup).not.toHaveBeenCalled();
     });
   });
 });
