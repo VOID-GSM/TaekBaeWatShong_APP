@@ -4,7 +4,14 @@ import { type PropsWithChildren, useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { initializeAuthSession, logout, readAppAccessToken, useAuthStore } from '@/features/auth';
+import {
+  initializeAuthSession,
+  logout,
+  readAppAccessToken,
+  setLogoutCleanup,
+  useAuthStore,
+} from '@/features/auth';
+import { registerPushToken, unregisterPushToken } from '@/features/push-notification';
 
 let isApiConfigured = false;
 
@@ -28,6 +35,9 @@ function setupApi() {
     getAccessToken: readAppAccessToken,
     onUnauthorized: () => void logout().catch(() => {}),
   });
+  // 로그아웃(401 로 인한 자동 로그아웃·앱 시작 시 만료 포함)하면 세션을 지우기 전에 이 기기의 푸시 토큰을 지운다.
+  // 지우지 않으면 로그아웃한 기기로 이전 계정의 택배 알림이 계속 간다.
+  setLogoutCleanup(unregisterPushToken);
   isApiConfigured = true;
 }
 
@@ -45,6 +55,17 @@ export function AppProviders({ children }: PropsWithChildren) {
     setupApi();
     return createQueryClient();
   });
+
+  // 로그인하거나 저장된 세션을 복원하면 이 기기의 푸시 토큰을 등록한다. 실패하면 다음 앱 실행 때 다시 시도한다.
+  useEffect(
+    () =>
+      useAuthStore.subscribe((state, prev) => {
+        if (prev.user === null && state.user !== null) {
+          registerPushToken().catch((error: unknown) => console.warn('푸시 토큰 등록 실패', error));
+        }
+      }),
+    [],
+  );
 
   useEffect(() => {
     void initializeAuthSession().catch(() => {});
