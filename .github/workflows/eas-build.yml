@@ -1,0 +1,48 @@
+name: EAS Build
+
+# 빌드 횟수가 플랜마다 정해져 있어 자동으로 돌리지 않는다. Actions 탭에서 직접 실행한다.
+on:
+  workflow_dispatch:
+    inputs:
+      app:
+        description: 빌드할 앱
+        type: choice
+        options: [client, admin]
+        default: client
+      profile:
+        description: eas.json 빌드 프로필
+        type: choice
+        options: [development, preview, production]
+        default: preview
+      platform:
+        description: 플랫폼
+        type: choice
+        options: [all, android, ios]
+        default: all
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: eas build (${{ inputs.app }} · ${{ inputs.profile }} · ${{ inputs.platform }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+    defaults:
+      run:
+        working-directory: apps/${{ inputs.app }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+
+      # 빌드는 EAS 서버에서 진행된다. 끝날 때까지 기다리면 Actions 시간만 쓰므로 등록만 하고 끝낸다.
+      # 진행 상황과 설치 링크는 expo.dev 의 Builds 에서 본다.
+      - run: >-
+          pnpm exec eas build
+          --profile "${{ inputs.profile }}"
+          --platform "${{ inputs.platform }}"
+          --non-interactive
+          --no-wait
