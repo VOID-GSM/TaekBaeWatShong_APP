@@ -123,14 +123,22 @@ export async function readAdminAccessToken(): Promise<string | null> {
 }
 
 export async function logoutAdmin(): Promise<void> {
+  const session = currentSession;
   currentSession = null;
   sessionExpiry.cancel();
 
   try {
     await clearStoredAdminSession();
-    useAdminAuthStore.getState().clear();
   } catch (error) {
-    useAdminAuthStore.getState().setError(LOGOUT_ERROR_MESSAGE);
-    throw error;
+    // 저장값을 못 지웠으면 세션을 되돌려, 다시 시도할 때까지 앱이 그대로 동작하게 한다.
+    // 이미 만료된 세션은 되돌리면 로그아웃이 되풀이되고 다음 실행 때 어차피 버려지므로 그대로 로그아웃시킨다.
+    if (session && session.expiresAt > Date.now()) {
+      currentSession = session;
+      sessionExpiry.schedule(session.expiresAt);
+      useAdminAuthStore.getState().setError(LOGOUT_ERROR_MESSAGE);
+      throw error;
+    }
   }
+
+  useAdminAuthStore.getState().clear();
 }

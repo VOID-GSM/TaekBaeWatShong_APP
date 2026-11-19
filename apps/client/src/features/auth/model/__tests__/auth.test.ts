@@ -146,6 +146,45 @@ describe('client DataGSM login', () => {
     expect(useAuthStore.getState().status).toBe('unauthenticated');
   });
 
+  it('keeps the session when the stored session cannot be cleared', async () => {
+    const token = createJwt(EXPIRES_AT_SECONDS);
+    mockCallback('code=one-time-code');
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ token }))
+      .mockResolvedValueOnce(
+        jsonResponse({ id: 1, email: 's25048@gsm.hs.kr', name: '홍길동', role: 'STUDENT' }),
+      );
+    await loginWithDataGsm();
+    jest.mocked(SecureStore.deleteItemAsync).mockRejectedValueOnce(new Error('Keychain is locked'));
+
+    await expect(logout()).rejects.toThrow('Keychain is locked');
+
+    expect(useAuthStore.getState()).toMatchObject({
+      status: 'authenticated',
+      error: '로그아웃 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.',
+    });
+    await expect(readAppAccessToken()).resolves.toBe(token);
+  });
+
+  it('still signs out an expired session when it cannot be cleared', async () => {
+    mockCallback('code=one-time-code');
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ token: createJwt(EXPIRES_AT_SECONDS) }))
+      .mockResolvedValueOnce(
+        jsonResponse({ id: 1, email: 's25048@gsm.hs.kr', name: '홍길동', role: 'STUDENT' }),
+      );
+    await loginWithDataGsm();
+    const now = jest.spyOn(Date, 'now').mockReturnValue((EXPIRES_AT_SECONDS + 1) * 1000);
+    jest.mocked(SecureStore.deleteItemAsync).mockRejectedValueOnce(new Error('Keychain is locked'));
+
+    try {
+      await expect(logout()).resolves.toBeUndefined();
+      expect(useAuthStore.getState()).toMatchObject({ status: 'unauthenticated', user: null });
+    } finally {
+      now.mockRestore();
+    }
+  });
+
   it('clears the stored session on logout', async () => {
     useAuthStore.setState({ status: 'authenticated' });
 

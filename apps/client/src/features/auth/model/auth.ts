@@ -157,12 +157,18 @@ export async function logout(): Promise<void> {
 
   try {
     await clearStoredAppSession();
-    useAuthStore.getState().clear();
   } catch (error) {
-    useAuthStore.getState().setError(LOGOUT_ERROR_MESSAGE);
-    throw error;
-  } finally {
-    // 토큰은 위에서 잡아 뒀으니 세션을 지운 뒤에 시작해도 된다.
-    startLogoutCleanup(session);
+    // 저장값을 못 지웠으면 세션을 되돌려, 다시 시도할 때까지 앱이 그대로 동작하게 한다.
+    // 이미 만료된 세션은 되돌리면 로그아웃이 되풀이되고 다음 실행 때 어차피 버려지므로 그대로 로그아웃시킨다.
+    if (session && session.expiresAt > Date.now()) {
+      currentSession = session;
+      sessionExpiry.schedule(session.expiresAt);
+      useAuthStore.getState().setError(LOGOUT_ERROR_MESSAGE);
+      throw error;
+    }
   }
+
+  useAuthStore.getState().clear();
+  // 토큰은 위에서 잡아 뒀으니 세션을 지운 뒤에 시작해도 된다.
+  startLogoutCleanup(session);
 }
