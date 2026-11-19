@@ -1,4 +1,5 @@
 export * from './badge';
+export * from './barcode-scanner-input';
 export * from './brand-surface';
 export * from './button';
 export * from './card';
