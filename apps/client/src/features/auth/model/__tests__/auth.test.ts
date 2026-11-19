@@ -4,6 +4,7 @@ import * as WebBrowser from 'expo-web-browser';
 
 import {
   getAppAccessToken,
+  initializeAuthSession,
   loginWithDataGsm,
   logout,
   readAppAccessToken,
@@ -63,7 +64,9 @@ describe('client DataGSM login', () => {
     useAuthStore.setState({ status: 'unauthenticated', user: null, error: null });
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    // 로그인한 테스트가 남긴 만료 타이머를 정리한다.
+    await logout();
     delete process.env.EXPO_PUBLIC_API_URL;
   });
 
@@ -143,6 +146,45 @@ describe('client DataGSM login', () => {
     expect(useAuthStore.getState().status).toBe('unauthenticated');
   });
 
+  it('keeps the session when the stored session cannot be cleared', async () => {
+    const token = createJwt(EXPIRES_AT_SECONDS);
+    mockCallback('code=one-time-code');
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ token }))
+      .mockResolvedValueOnce(
+        jsonResponse({ id: 1, email: 's25048@gsm.hs.kr', name: '홍길동', role: 'STUDENT' }),
+      );
+    await loginWithDataGsm();
+    jest.mocked(SecureStore.deleteItemAsync).mockRejectedValueOnce(new Error('Keychain is locked'));
+
+    await expect(logout()).rejects.toThrow('Keychain is locked');
+
+    expect(useAuthStore.getState()).toMatchObject({
+      status: 'authenticated',
+      error: '로그아웃 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.',
+    });
+    await expect(readAppAccessToken()).resolves.toBe(token);
+  });
+
+  it('still signs out an expired session when it cannot be cleared', async () => {
+    mockCallback('code=one-time-code');
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ token: createJwt(EXPIRES_AT_SECONDS) }))
+      .mockResolvedValueOnce(
+        jsonResponse({ id: 1, email: 's25048@gsm.hs.kr', name: '홍길동', role: 'STUDENT' }),
+      );
+    await loginWithDataGsm();
+    const now = jest.spyOn(Date, 'now').mockReturnValue((EXPIRES_AT_SECONDS + 1) * 1000);
+    jest.mocked(SecureStore.deleteItemAsync).mockRejectedValueOnce(new Error('Keychain is locked'));
+
+    try {
+      await expect(logout()).resolves.toBeUndefined();
+      expect(useAuthStore.getState()).toMatchObject({ status: 'unauthenticated', user: null });
+    } finally {
+      now.mockRestore();
+    }
+  });
+
   it('clears the stored session on logout', async () => {
     useAuthStore.setState({ status: 'authenticated' });
 
@@ -150,6 +192,46 @@ describe('client DataGSM login', () => {
 
     expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith(SESSION_KEY);
     expect(useAuthStore.getState()).toMatchObject({ status: 'unauthenticated', user: null });
+  });
+
+  it('keeps the stored session when SecureStore cannot be read', async () => {
+    jest.mocked(SecureStore.getItemAsync).mockRejectedValue(new Error('Keychain is locked'));
+
+    await expect(initializeAuthSession()).resolves.toBeUndefined();
+
+    expect(SecureStore.deleteItemAsync).not.toHaveBeenCalled();
+    expect(useAuthStore.getState()).toMatchObject({ status: 'unauthenticated', error: null });
+  });
+
+  it('discards a corrupted stored session without showing an error', async () => {
+    jest.mocked(SecureStore.getItemAsync).mockResolvedValue('{not json');
+
+    await expect(initializeAuthSession()).resolves.toBeUndefined();
+
+    expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith(SESSION_KEY);
+    expect(useAuthStore.getState()).toMatchObject({ status: 'unauthenticated', error: null });
+  });
+
+  it('signs out when the restored token expires', async () => {
+    jest.useFakeTimers();
+    try {
+      jest.mocked(SecureStore.getItemAsync).mockResolvedValue(
+        JSON.stringify({
+          accessToken: 'token',
+          expiresAt: Date.now() + 60_000,
+          user: { id: 1, email: 's25048@gsm.hs.kr', name: '홍길동', role: 'STUDENT' },
+        }),
+      );
+
+      await initializeAuthSession();
+      expect(useAuthStore.getState().status).toBe('authenticated');
+
+      await jest.advanceTimersByTimeAsync(60_000);
+
+      expect(useAuthStore.getState()).toMatchObject({ status: 'unauthenticated', user: null });
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   describe('readAppAccessToken', () => {
@@ -218,6 +300,29 @@ describe('client DataGSM login', () => {
       expect(cleanup).toHaveBeenCalledWith(token);
       expect(order).toEqual(['clear', 'cleanup']);
       expect(useAuthStore.getState()).toMatchObject({ status: 'unauthenticated', user: null });
+    });
+
+    it('runs the cleanup when the expiry timer signs the user out', async () => {
+      jest.useFakeTimers();
+      try {
+        const cleanup = jest.fn(async () => {});
+        setLogoutCleanup(cleanup);
+        jest.mocked(SecureStore.getItemAsync).mockResolvedValue(
+          JSON.stringify({
+            accessToken: 'token',
+            expiresAt: Date.now() + 60_000,
+            user: { id: 1, email: 's25048@gsm.hs.kr', name: '홍길동', role: 'STUDENT' },
+          }),
+        );
+        await initializeAuthSession();
+
+        await jest.advanceTimersByTimeAsync(60_000);
+
+        expect(cleanup).toHaveBeenCalledWith('token');
+        expect(useAuthStore.getState().status).toBe('unauthenticated');
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('passes an expired access token too — logout after a 401 is the common case', async () => {
