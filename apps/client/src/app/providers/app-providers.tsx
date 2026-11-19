@@ -12,7 +12,11 @@ import {
   setLogoutCleanup,
   useAuthStore,
 } from '@/features/auth';
-import { registerPushToken, unregisterPushToken } from '@/features/push-notification';
+import {
+  configureForegroundNotifications,
+  registerPushToken,
+  unregisterPushToken,
+} from '@/features/push-notification';
 
 let isApiConfigured = false;
 
@@ -63,6 +67,7 @@ function onAppStateChange(status: AppStateStatus) {
 export function AppProviders({ children }: PropsWithChildren) {
   const [queryClient] = useState(() => {
     setupApi();
+    configureForegroundNotifications();
     return createQueryClient();
   });
 

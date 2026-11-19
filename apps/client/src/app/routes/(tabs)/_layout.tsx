@@ -1,7 +1,10 @@
+import { useRouter } from 'expo-router';
 import { TabList, Tabs, TabSlot, TabTrigger } from 'expo-router/ui';
+import { useCallback } from 'react';
 import { StyleSheet } from 'react-native';
 
 import { useUnreadNotificationCount } from '@/entities/notification';
+import { usePushNotificationHandling } from '@/features/push-notification';
 import { bellXml } from '@/shared/assets/bell';
 import { chatXml } from '@/shared/assets/chat';
 import { homeXml } from '@/shared/assets/home';
@@ -11,6 +14,12 @@ import { MainTabBar, MainTabButton } from '@/widgets/main-tab-bar';
 
 export default function TabsLayout() {
   const hasUnreadNotifications = useUnreadNotificationCount() > 0;
+  const router = useRouter();
+
+  // 탭 레이아웃은 로그인한 동안만 마운트된다. 그래서 로그인 전에 누른 알림은 로그인한 뒤 이동한다.
+  // 사용자용 택배 화면이 없어 누른 알림은 알림 탭으로 보낸다.
+  const openNotifications = useCallback(() => router.navigate('/notifications'), [router]);
+  usePushNotificationHandling(openNotifications);
 
   return (
     <Tabs style={{ flex: 1 }}>
