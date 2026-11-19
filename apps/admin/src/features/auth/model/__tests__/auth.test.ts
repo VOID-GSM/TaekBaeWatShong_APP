@@ -2,7 +2,7 @@ import * as Linking from 'expo-linking';
 import * as SecureStore from 'expo-secure-store';
 import * as WebBrowser from 'expo-web-browser';
 
-import { loginAdmin, logoutAdmin, readAdminAccessToken } from '../auth';
+import { initializeAdminAuthSession, loginAdmin, logoutAdmin, readAdminAccessToken } from '../auth';
 import { useAdminAuthStore } from '../auth-store';
 
 jest.mock('expo-secure-store', () => ({
@@ -57,7 +57,9 @@ describe('admin sign-up and login', () => {
     useAdminAuthStore.setState({ status: 'unauthenticated', user: null, error: null });
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    // 로그인한 테스트가 남긴 만료 타이머를 정리한다.
+    await logoutAdmin();
     delete process.env.EXPO_PUBLIC_API_URL;
   });
 
@@ -122,6 +124,45 @@ describe('admin sign-up and login', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it('keeps the session when the stored session cannot be cleared', async () => {
+    const token = createJwt(EXPIRES_AT_SECONDS);
+    mockCallback('code=one-time-code');
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ token }))
+      .mockResolvedValueOnce(
+        jsonResponse({ id: 7, email: 'driver@example.test', name: '택배기사', role: 'ADMIN' }),
+      );
+    await loginAdmin('google');
+    jest.mocked(SecureStore.deleteItemAsync).mockRejectedValueOnce(new Error('Keychain is locked'));
+
+    await expect(logoutAdmin()).rejects.toThrow('Keychain is locked');
+
+    expect(useAdminAuthStore.getState()).toMatchObject({
+      status: 'authenticated',
+      error: '로그아웃 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.',
+    });
+    await expect(readAdminAccessToken()).resolves.toBe(token);
+  });
+
+  it('still signs out an expired session when it cannot be cleared', async () => {
+    mockCallback('code=one-time-code');
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ token: createJwt(EXPIRES_AT_SECONDS) }))
+      .mockResolvedValueOnce(
+        jsonResponse({ id: 7, email: 'driver@example.test', name: '택배기사', role: 'ADMIN' }),
+      );
+    await loginAdmin('google');
+    const now = jest.spyOn(Date, 'now').mockReturnValue((EXPIRES_AT_SECONDS + 1) * 1000);
+    jest.mocked(SecureStore.deleteItemAsync).mockRejectedValueOnce(new Error('Keychain is locked'));
+
+    try {
+      await expect(logoutAdmin()).resolves.toBeUndefined();
+      expect(useAdminAuthStore.getState()).toMatchObject({ status: 'unauthenticated', user: null });
+    } finally {
+      now.mockRestore();
+    }
+  });
+
   it('clears the stored session on logout', async () => {
     useAdminAuthStore.setState({ status: 'authenticated' });
 
@@ -129,6 +170,46 @@ describe('admin sign-up and login', () => {
 
     expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith(SESSION_KEY);
     expect(useAdminAuthStore.getState()).toMatchObject({ status: 'unauthenticated', user: null });
+  });
+
+  it('keeps the stored session when SecureStore cannot be read', async () => {
+    jest.mocked(SecureStore.getItemAsync).mockRejectedValue(new Error('Keychain is locked'));
+
+    await expect(initializeAdminAuthSession()).resolves.toBeUndefined();
+
+    expect(SecureStore.deleteItemAsync).not.toHaveBeenCalled();
+    expect(useAdminAuthStore.getState()).toMatchObject({ status: 'unauthenticated', error: null });
+  });
+
+  it('discards a corrupted stored session without showing an error', async () => {
+    jest.mocked(SecureStore.getItemAsync).mockResolvedValue('{not json');
+
+    await expect(initializeAdminAuthSession()).resolves.toBeUndefined();
+
+    expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith(SESSION_KEY);
+    expect(useAdminAuthStore.getState()).toMatchObject({ status: 'unauthenticated', error: null });
+  });
+
+  it('signs out when the restored token expires', async () => {
+    jest.useFakeTimers();
+    try {
+      jest.mocked(SecureStore.getItemAsync).mockResolvedValue(
+        JSON.stringify({
+          accessToken: 'token',
+          expiresAt: Date.now() + 60_000,
+          user: { id: 1, email: 'admin@example.test', name: '홍길동', role: 'ADMIN' },
+        }),
+      );
+
+      await initializeAdminAuthSession();
+      expect(useAdminAuthStore.getState().status).toBe('authenticated');
+
+      await jest.advanceTimersByTimeAsync(60_000);
+
+      expect(useAdminAuthStore.getState()).toMatchObject({ status: 'unauthenticated', user: null });
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   describe('readAdminAccessToken', () => {

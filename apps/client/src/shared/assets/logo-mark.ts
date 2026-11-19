@@ -1,5 +1,5 @@
 /**
- * 택배왔슝 로고 마크 (Figma `Logo mark`, 130×130). 글자 그림자는 SVG 필터로 들어 있다.
+ * 택배왔숑 로고 마크 (Figma `Logo mark`, 130×130). 글자 그림자는 SVG 필터로 들어 있다.
  * SVG 파일 import 용 transformer 가 없어 문자열로 두고 `SvgXml` 로 렌더한다.
  * 색은 로고 고정색이라 테마 토큰이 아니다.
  */

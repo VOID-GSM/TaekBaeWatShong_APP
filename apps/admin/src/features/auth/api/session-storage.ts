@@ -1,4 +1,3 @@
-import { AuthError } from '@taekbae/api';
 import * as SecureStore from 'expo-secure-store';
 import { z } from 'zod';
 
@@ -18,6 +17,14 @@ export async function storeAdminSession(session: AdminSession): Promise<void> {
   await SecureStore.setItemAsync(SESSION_STORAGE_KEY, JSON.stringify(session));
 }
 
+function parseJson(value: string): unknown {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return undefined;
+  }
+}
+
 export async function readStoredAdminSession(): Promise<AdminSession | null> {
   const value = await SecureStore.getItemAsync(SESSION_STORAGE_KEY);
 
@@ -25,17 +32,12 @@ export async function readStoredAdminSession(): Promise<AdminSession | null> {
     return null;
   }
 
-  let payload: unknown;
-  try {
-    payload = JSON.parse(value);
-  } catch {
-    throw new AuthError('저장된 관리자 로그인 정보가 손상되었습니다.');
-  }
+  const parsed = adminSessionSchema.safeParse(parseJson(value));
 
-  const parsed = adminSessionSchema.safeParse(payload);
-
+  // 손상됐거나 형식이 바뀐 값은 다시 로그인하기 전까지 매번 실패하므로 지우고 없는 것으로 본다.
   if (!parsed.success) {
-    throw new AuthError('저장된 관리자 로그인 정보 형식이 올바르지 않습니다.');
+    await clearStoredAdminSession();
+    return null;
   }
 
   return parsed.data;

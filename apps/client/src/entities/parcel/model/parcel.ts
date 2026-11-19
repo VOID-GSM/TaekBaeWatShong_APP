@@ -64,8 +64,8 @@ export interface ParcelSummary {
 export interface OverdueRank {
   rank: number;
   ownerName: string;
-  parcelName: string;
-  zone: string;
+  /** 보관 구역 문자. 구역 미배정이면 null. */
+  zone: string | null;
   /** 예: '3일 07:12' */
   overdueFor: string;
 }

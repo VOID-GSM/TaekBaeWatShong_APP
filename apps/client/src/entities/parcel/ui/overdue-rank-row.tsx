@@ -15,7 +15,7 @@ export function OverdueRankRow({ item }: { item: OverdueRank }) {
           {item.ownerName}
         </Typography>
         <Typography variant="bodyMStrong" color="textSecondary" numberOfLines={1}>
-          {item.parcelName} · {item.zone}구역
+          {item.zone === null ? '구역 미배정' : `${item.zone}구역`}
         </Typography>
       </View>
       <View style={styles.timeCol}>

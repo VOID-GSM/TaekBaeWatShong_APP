@@ -11,7 +11,8 @@ import {
   type ParcelFilter,
   ParcelSummaryCard,
 } from '@/entities/parcel';
-import { useAuthStore } from '@/features/auth';
+import { logout, useAuthStore } from '@/features/auth';
+import { confirmAsync } from '@/shared/lib';
 import { Icon, IconButton, makeStyles, SelectMenu, Typography, useTheme } from '@/shared/ui';
 
 import { MOCK_PARCELS, MOCK_SUMMARY } from '../model/mock';
@@ -20,9 +21,26 @@ export function HomePage() {
   const styles = useStyles();
   const { size } = useTheme();
   const userName = useAuthStore((state) => state.user?.name);
+  const error = useAuthStore((state) => state.error);
   const [filter, setFilter] = useState<ParcelFilter>('latest');
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const router = useRouter();
   const parcels = filterParcels(MOCK_PARCELS, filter);
+
+  const handleLogout = async () => {
+    // 이름 옆 작은 링크라 잘못 누르기 쉽고, 로그아웃하면 DataGSM 로그인을 처음부터 다시 해야 해서 한 번 확인한다.
+    const confirmed = await confirmAsync({
+      title: '로그아웃할까요?',
+      confirmLabel: '로그아웃',
+      destructive: true,
+    });
+    if (!confirmed) return;
+
+    setIsLoggingOut(true);
+    // 성공하면 가드가 로그인 화면으로 보낸다. 실패 문구는 스토어의 error 로 표시한다.
+    await logout().catch(() => {});
+    setIsLoggingOut(false);
+  };
 
   // 분실 신고 화면은 운송장 번호(숫자만)로 내 택배를 찾는다.
   const openReportLost = (trackingNumber: string) =>
@@ -38,9 +56,33 @@ export function HomePage() {
           <Typography variant="bodyL" color="textSecondary">
             안녕하세요 👋
           </Typography>
-          <Typography variant="titlePage" accessibilityRole="header">
-            {userName ?? '회원'}님
-          </Typography>
+          <View style={styles.nameRow}>
+            <Typography variant="titlePage" accessibilityRole="header">
+              {userName ?? '회원'}님
+            </Typography>
+            {/* 마이페이지·설정 시안이 없어 이름 옆에 눈에 덜 띄는 링크로 둔다. */}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ disabled: isLoggingOut, busy: isLoggingOut }}
+              disabled={isLoggingOut}
+              onPress={() => void handleLogout()}
+              hitSlop={{ left: 8, right: 8 }}
+              style={({ pressed }) => [
+                styles.logoutLink,
+                pressed && styles.pressed,
+                isLoggingOut && styles.disabled,
+              ]}
+            >
+              <Typography variant="caption" color="textTertiary">
+                로그아웃
+              </Typography>
+            </Pressable>
+          </View>
+          {error !== null && (
+            <Typography variant="caption" color="textDanger" accessibilityRole="alert">
+              {error}
+            </Typography>
+          )}
         </View>
         {/* 약도·방치자 화면으로 가는 탭이 없어 인사말 옆에 눈에 덜 띄는 링크로 둔다. */}
         <Pressable
@@ -114,6 +156,8 @@ const useStyles = makeStyles(({ colors, opacity, size, spacing }) => ({
     paddingHorizontal: spacing.lg,
   },
   listHeader: { flexDirection: 'row', alignItems: 'center' },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  logoutLink: { justifyContent: 'center', minHeight: size.touchTarget },
   zoneLink: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -121,5 +165,6 @@ const useStyles = makeStyles(({ colors, opacity, size, spacing }) => ({
     minHeight: size.touchTarget,
   },
   pressed: { opacity: opacity.pressed },
+  disabled: { opacity: opacity.disabled },
   flex: { flex: 1 },
 }));

@@ -108,3 +108,43 @@ export function readTokenExpiresAt(token: string): number | null {
     return null;
   }
 }
+
+// setTimeout 은 32비트 정수 밀리초까지만 받는다.
+const MAX_TIMER_DELAY = 2 ** 31 - 1;
+
+export interface ExpiryTimer {
+  schedule: (expiresAt: number) => void;
+  cancel: () => void;
+}
+
+/**
+ * `expiresAt`(ms) 이 되면 `onExpire` 를 부르는 타이머. 다시 schedule 하면 이전 예약은 취소된다.
+ * 남은 시간이 setTimeout 한도를 넘으면 중간에 깨어나 다시 건다.
+ */
+export function createExpiryTimer(onExpire: () => void): ExpiryTimer {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+
+  const cancel = () => {
+    if (timer !== null) {
+      clearTimeout(timer);
+      timer = null;
+    }
+  };
+
+  const schedule = (expiresAt: number) => {
+    cancel();
+    timer = setTimeout(
+      () => {
+        timer = null;
+        if (Date.now() < expiresAt) {
+          schedule(expiresAt);
+        } else {
+          onExpire();
+        }
+      },
+      Math.min(Math.max(expiresAt - Date.now(), 0), MAX_TIMER_DELAY),
+    );
+  };
+
+  return { schedule, cancel };
+}

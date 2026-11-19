@@ -8,6 +8,8 @@ export type BadgeTone = 'brand' | 'success' | 'danger' | 'neutral';
 export interface BadgeProps {
   label: string;
   tone?: BadgeTone;
+  /** m: 본문 굵게(14), s: Figma Badge 캡션(12) */
+  size?: 'm' | 's';
 }
 
 const toneColors: Record<
@@ -20,13 +22,13 @@ const toneColors: Record<
   neutral: { bg: 'bgNeutralSoft', text: 'textSecondary' },
 };
 
-export function Badge({ label, tone = 'brand' }: BadgeProps) {
+export function Badge({ label, tone = 'brand', size = 'm' }: BadgeProps) {
   const styles = useStyles();
   const { bg, text } = toneColors[tone];
 
   return (
     <View style={[styles.container, styles[bg]]}>
-      <Typography variant="bodyMStrong" color={text} numberOfLines={1}>
+      <Typography variant={size === 's' ? 'caption' : 'bodyMStrong'} color={text} numberOfLines={1}>
         {label}
       </Typography>
     </View>

@@ -1,6 +1,6 @@
 ---
 name: pr-author
-description: 택배왔슝 레포에서 변경사항을 기능 단위 커밋으로 나누고, Git Flow 브랜치를 만들고, 템플릿 기반 PR을 생성/갱신하는 에이전트.
+description: 택배왔숑 레포에서 변경사항을 기능 단위 커밋으로 나누고, Git Flow 브랜치를 만들고, 템플릿 기반 PR을 생성/갱신하는 에이전트.
 model: opus
 ---
 

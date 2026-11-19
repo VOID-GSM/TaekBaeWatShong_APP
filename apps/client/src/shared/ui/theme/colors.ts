@@ -53,6 +53,8 @@ export const lightColors = {
   textBrand: palette.indigo600,
   textBrandStrong: palette.indigo800,
   textOnNavy: palette.white,
+  /** 네이비 면 위 보조 문구 (Figma color/text/on-navy-muted) */
+  textOnNavyMuted: palette.indigo300,
   textOnBrand: palette.white,
   /** 브랜드 그라데이션 위 보조 문구. Figma 에 변수 없이 rgba(255,255,255,0.75) 로 쓰였다. */
   textOnBrandMuted: palette.white75,
