@@ -1,6 +1,6 @@
 ---
 name: fsd-review
-description: 택배왔슝 레포 전용 코드 리뷰. FSD 계층 의존 방향, 슬라이스 public API, Expo Router 라우트 루트, React Native/TanStack Query/TypeScript 규칙을 기준으로 PR 또는 로컬 diff를 리뷰하고, 필요하면 GitHub PR에 인라인 코멘트로 게시한다. "코드 리뷰해줘", "PR 리뷰", "리뷰 남겨줘", "#12 리뷰", "변경사항 검토", "FSD 규칙 맞는지 봐줘", "리뷰 코멘트 달아줘", "다시 리뷰" 요청 시 반드시 이 스킬을 사용할 것. 리뷰에 달린 코멘트에 답하는 작업은 review-reply 스킬이 담당한다.
+description: 택배왔숑 레포 전용 코드 리뷰. FSD 계층 의존 방향, 슬라이스 public API, Expo Router 라우트 루트, React Native/TanStack Query/TypeScript 규칙을 기준으로 PR 또는 로컬 diff를 리뷰하고, 필요하면 GitHub PR에 인라인 코멘트로 게시한다. "코드 리뷰해줘", "PR 리뷰", "리뷰 남겨줘", "#12 리뷰", "변경사항 검토", "FSD 규칙 맞는지 봐줘", "리뷰 코멘트 달아줘", "다시 리뷰" 요청 시 반드시 이 스킬을 사용할 것. 리뷰에 달린 코멘트에 답하는 작업은 review-reply 스킬이 담당한다.
 ---
 
 # FSD Review

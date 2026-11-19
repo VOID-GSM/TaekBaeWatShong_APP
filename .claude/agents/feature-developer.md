@@ -1,6 +1,6 @@
 ---
 name: feature-developer
-description: 택배왔슝의 도메인·데이터 계층을 구현하는 에이전트. zod 스키마, API 요청/쿼리 훅, 엔티티 model, 사용자 행동(features)의 로직·폼·상태를 만든다.
+description: 택배왔숑의 도메인·데이터 계층을 구현하는 에이전트. zod 스키마, API 요청/쿼리 훅, 엔티티 model, 사용자 행동(features)의 로직·폼·상태를 만든다.
 model: opus
 ---
 

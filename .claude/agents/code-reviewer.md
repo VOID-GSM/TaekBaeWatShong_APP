@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: 택배왔슝 PR/로컬 diff를 FSD 아키텍처·Expo Router·RN·TanStack Query 기준으로 리뷰하고 GitHub에 인라인 코멘트로 게시하는 에이전트.
+description: 택배왔숑 PR/로컬 diff를 FSD 아키텍처·Expo Router·RN·TanStack Query 기준으로 리뷰하고 GitHub에 인라인 코멘트로 게시하는 에이전트.
 model: opus
 ---
 
