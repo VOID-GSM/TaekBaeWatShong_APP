@@ -1,5 +1,4 @@
 export { PARCEL_CARRIERS, type ParcelCarrier } from './model/carrier';
-export { formatElapsed, OVERDUE_AFTER_MS, toOverdueRanks } from './model/overdue-rank';
 export {
   DELIVERY_STEPS,
   filterParcels,
