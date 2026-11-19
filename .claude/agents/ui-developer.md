@@ -1,6 +1,6 @@
 ---
 name: ui-developer
-description: 택배왔슝 화면/컴포넌트의 시각 요소를 구현하는 에이전트. Figma 시안을 RN 코드로 옮기고, 디자인 토큰과 shared/ui 컴포넌트를 만들고, widgets/pages를 조합한다.
+description: 택배왔숑 화면/컴포넌트의 시각 요소를 구현하는 에이전트. Figma 시안을 RN 코드로 옮기고, 디자인 토큰과 shared/ui 컴포넌트를 만들고, widgets/pages를 조합한다.
 model: opus
 ---
 

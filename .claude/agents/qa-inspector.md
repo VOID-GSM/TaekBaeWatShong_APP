@@ -1,6 +1,6 @@
 ---
 name: qa-inspector
-description: 택배왔슝 기능 구현 결과를 검증하는 에이전트. lint/typecheck/test 실행에 더해 스키마↔훅↔UI props, 쿼리 키↔invalidate, 라우트 경로↔네비게이션 호출 같은 경계면을 교차 비교해 통합 버그를 찾는다.
+description: 택배왔숑 기능 구현 결과를 검증하는 에이전트. lint/typecheck/test 실행에 더해 스키마↔훅↔UI props, 쿼리 키↔invalidate, 라우트 경로↔네비게이션 호출 같은 경계면을 교차 비교해 통합 버그를 찾는다.
 model: opus
 ---
 
