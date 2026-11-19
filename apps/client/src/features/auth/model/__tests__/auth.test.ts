@@ -263,6 +263,29 @@ describe('client DataGSM login', () => {
       expect(useAuthStore.getState()).toMatchObject({ status: 'unauthenticated', user: null });
     });
 
+    it('runs the cleanup when the expiry timer signs the user out', async () => {
+      jest.useFakeTimers();
+      try {
+        const cleanup = jest.fn(async () => {});
+        setLogoutCleanup(cleanup);
+        jest.mocked(SecureStore.getItemAsync).mockResolvedValue(
+          JSON.stringify({
+            accessToken: 'token',
+            expiresAt: Date.now() + 60_000,
+            user: { id: 1, email: 's25048@gsm.hs.kr', name: '홍길동', role: 'STUDENT' },
+          }),
+        );
+        await initializeAuthSession();
+
+        await jest.advanceTimersByTimeAsync(60_000);
+
+        expect(cleanup).toHaveBeenCalledWith('token');
+        expect(useAuthStore.getState().status).toBe('unauthenticated');
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
     it('passes an expired access token too — logout after a 401 is the common case', async () => {
       const cleanup = jest.fn(async () => {});
       setLogoutCleanup(cleanup);
