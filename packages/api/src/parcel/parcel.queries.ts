@@ -13,12 +13,22 @@ import {
 } from '@tanstack/react-query';
 
 import type { ApiError } from '../client';
-import { claimParcel, fetchMyParcels, registerParcel } from './parcel.api';
+import {
+  claimParcel,
+  fetchMyParcels,
+  fetchUnclaimedRanking,
+  fetchZoneSummary,
+  registerParcel,
+} from './parcel.api';
 import { parcelKeys } from './parcel.keys';
 
 export const parcelQueries = {
   mine: (params: MyParcelListParams = {}) =>
     queryOptions({ queryKey: parcelKeys.mine(params), queryFn: () => fetchMyParcels(params) }),
+  zoneSummary: () =>
+    queryOptions({ queryKey: parcelKeys.zoneSummary(), queryFn: fetchZoneSummary }),
+  unclaimedRanking: () =>
+    queryOptions({ queryKey: parcelKeys.unclaimedRanking(), queryFn: fetchUnclaimedRanking }),
 };
 
 export function useRegisterParcelMutation(): UseMutationResult<

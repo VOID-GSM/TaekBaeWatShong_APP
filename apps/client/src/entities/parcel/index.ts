@@ -10,6 +10,7 @@ export {
   type ParcelSummary,
 } from './model/parcel';
 export { useMyParcel, type UseMyParcelResult } from './model/use-my-parcel';
+export { useOverdueRanking, type UseOverdueRankingResult } from './model/use-overdue-ranking';
 export {
   type ClaimedParcel,
   useRecentlyClaimedParcels,
