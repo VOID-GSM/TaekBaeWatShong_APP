@@ -9,7 +9,7 @@ export interface LogoMarkProps {
 }
 
 /** 시안(C1)의 바깥 그림자는 SVG 필터(feMorphology) 대신 `shadow.logo` 로 그린다. */
-export function LogoMark({ accessibilityLabel = '택배왔슝' }: LogoMarkProps) {
+export function LogoMark({ accessibilityLabel = '택배왔숑' }: LogoMarkProps) {
   return (
     <View
       accessible

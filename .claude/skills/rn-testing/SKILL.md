@@ -1,6 +1,6 @@
 ---
 name: rn-testing
-description: 택배왔슝 테스트 작성 규칙 — Jest(jest-expo) + React Native Testing Library로 컴포넌트·훅·zod 스키마·API 요청 함수·zustand 스토어를 테스트하고, Expo 네이티브 모듈(secure-store, router, notifications, camera)을 mock한다. "테스트 작성", "테스트 코드", "test 추가", "jest", "테스트 깨짐", "테스트 실패 고쳐줘", "커버리지", "mock", "RNTL" 요청이나 기능 구현 후 검증 테스트를 추가할 때 반드시 이 스킬을 사용할 것.
+description: 택배왔숑 테스트 작성 규칙 — Jest(jest-expo) + React Native Testing Library로 컴포넌트·훅·zod 스키마·API 요청 함수·zustand 스토어를 테스트하고, Expo 네이티브 모듈(secure-store, router, notifications, camera)을 mock한다. "테스트 작성", "테스트 코드", "test 추가", "jest", "테스트 깨짐", "테스트 실패 고쳐줘", "커버리지", "mock", "RNTL" 요청이나 기능 구현 후 검증 테스트를 추가할 때 반드시 이 스킬을 사용할 것.
 ---
 
 # RN Testing

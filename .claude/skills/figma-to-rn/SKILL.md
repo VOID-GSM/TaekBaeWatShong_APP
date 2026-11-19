@@ -1,6 +1,6 @@
 ---
 name: figma-to-rn
-description: Figma 디자인을 택배왔슝 React Native(Expo) 코드로 옮긴다 — Figma MCP로 디자인 컨텍스트를 가져와 웹 코드를 RN 프리미티브로 변환하고, 색·폰트·간격을 디자인 토큰에 매핑하고, FSD 계층에 배치한다. Figma URL(figma.com/design/...)이 주어지거나 "피그마대로 만들어줘", "시안 구현", "디자인 보고 화면 만들어줘", "Figma 토큰 가져와", "피그마 색상 반영", "디자인이랑 다른 부분 맞춰줘" 요청 시 반드시 이 스킬을 사용할 것.
+description: Figma 디자인을 택배왔숑 React Native(Expo) 코드로 옮긴다 — Figma MCP로 디자인 컨텍스트를 가져와 웹 코드를 RN 프리미티브로 변환하고, 색·폰트·간격을 디자인 토큰에 매핑하고, FSD 계층에 배치한다. Figma URL(figma.com/design/...)이 주어지거나 "피그마대로 만들어줘", "시안 구현", "디자인 보고 화면 만들어줘", "Figma 토큰 가져와", "피그마 색상 반영", "디자인이랑 다른 부분 맞춰줘" 요청 시 반드시 이 스킬을 사용할 것.
 ---
 
 # Figma → React Native
