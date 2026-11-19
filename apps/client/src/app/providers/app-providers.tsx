@@ -1,6 +1,7 @@
 import { configureApi, resolveApiBaseUrl } from '@taekbae/api';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { focusManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { type PropsWithChildren, useEffect, useState } from 'react';
+import { AppState, type AppStateStatus, Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -50,6 +51,15 @@ function createQueryClient() {
   });
 }
 
+/**
+ * RN 에는 브라우저의 visibilitychange 가 없어 react-query 가 앱 복귀를 모른다.
+ * AppState 를 focusManager 에 연결해, 포그라운드로 돌아오면 stale 쿼리를 다시 조회하게 한다(TanStack Query RN 가이드).
+ * 웹은 react-query 기본 리스너(visibilitychange)가 이미 처리한다.
+ */
+function onAppStateChange(status: AppStateStatus) {
+  if (Platform.OS !== 'web') focusManager.setFocused(status === 'active');
+}
+
 export function AppProviders({ children }: PropsWithChildren) {
   const [queryClient] = useState(() => {
     setupApi();
@@ -69,6 +79,11 @@ export function AppProviders({ children }: PropsWithChildren) {
 
   useEffect(() => {
     void initializeAuthSession().catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', onAppStateChange);
+    return () => subscription.remove();
   }, []);
 
   // 로그아웃(만료 포함)하면 이전 사용자의 응답이 다음 사용자에게 보이지 않도록 캐시를 비운다.
