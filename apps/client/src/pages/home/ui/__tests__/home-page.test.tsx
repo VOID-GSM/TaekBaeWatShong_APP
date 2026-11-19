@@ -1,12 +1,18 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 
 import { logout, useAuthStore } from '@/features/auth';
+import { confirmAsync } from '@/shared/lib';
 
 import { HomePage } from '../home-page';
 
 jest.mock('@/features/auth', () => ({
   ...jest.requireActual('@/features/auth'),
   logout: jest.fn(() => Promise.resolve()),
+}));
+
+jest.mock('@/shared/lib', () => ({
+  ...jest.requireActual('@/shared/lib'),
+  confirmAsync: jest.fn(() => Promise.resolve(true)),
 }));
 
 jest.mock('expo-router', () => {
@@ -31,6 +37,7 @@ describe('HomePage', () => {
   beforeEach(() => {
     router.push.mockClear();
     jest.mocked(logout).mockClear();
+    jest.mocked(confirmAsync).mockClear();
     useAuthStore.setState({ error: null });
   });
 
@@ -54,12 +61,25 @@ describe('HomePage', () => {
     expect(router.push).toHaveBeenCalledWith('/zone');
   });
 
-  it('이름 옆 "로그아웃"을 누르면 로그아웃한다', async () => {
+  it('이름 옆 "로그아웃"을 누르면 확인을 받은 뒤 로그아웃한다', async () => {
     await render(<HomePage />);
 
     await fireEvent.press(screen.getByRole('button', { name: '로그아웃' }));
 
+    expect(confirmAsync).toHaveBeenCalledWith(
+      expect.objectContaining({ title: '로그아웃할까요?', destructive: true }),
+    );
     expect(logout).toHaveBeenCalledTimes(1);
+  });
+
+  it('확인 창에서 취소하면 로그아웃하지 않는다', async () => {
+    jest.mocked(confirmAsync).mockResolvedValueOnce(false);
+    await render(<HomePage />);
+
+    await fireEvent.press(screen.getByRole('button', { name: '로그아웃' }));
+
+    expect(confirmAsync).toHaveBeenCalledTimes(1);
+    expect(logout).not.toHaveBeenCalled();
   });
 
   it('로그아웃 중에는 링크를 비활성화하고, 실패하면 문구를 보여준다', async () => {

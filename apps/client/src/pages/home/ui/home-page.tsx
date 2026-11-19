@@ -12,6 +12,7 @@ import {
   ParcelSummaryCard,
 } from '@/entities/parcel';
 import { logout, useAuthStore } from '@/features/auth';
+import { confirmAsync } from '@/shared/lib';
 import { Icon, IconButton, makeStyles, SelectMenu, Typography, useTheme } from '@/shared/ui';
 
 import { MOCK_PARCELS, MOCK_SUMMARY } from '../model/mock';
@@ -26,12 +27,19 @@ export function HomePage() {
   const router = useRouter();
   const parcels = filterParcels(MOCK_PARCELS, filter);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // 이름 옆 작은 링크라 잘못 누르기 쉽고, 로그아웃하면 DataGSM 로그인을 처음부터 다시 해야 해서 한 번 확인한다.
+    const confirmed = await confirmAsync({
+      title: '로그아웃할까요?',
+      confirmLabel: '로그아웃',
+      destructive: true,
+    });
+    if (!confirmed) return;
+
     setIsLoggingOut(true);
     // 성공하면 가드가 로그인 화면으로 보낸다. 실패 문구는 스토어의 error 로 표시한다.
-    logout()
-      .catch(() => {})
-      .finally(() => setIsLoggingOut(false));
+    await logout().catch(() => {});
+    setIsLoggingOut(false);
   };
 
   // 분실 신고 화면은 운송장 번호(숫자만)로 내 택배를 찾는다.
@@ -57,9 +65,13 @@ export function HomePage() {
               accessibilityRole="button"
               accessibilityState={{ disabled: isLoggingOut, busy: isLoggingOut }}
               disabled={isLoggingOut}
-              onPress={handleLogout}
-              hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
-              style={({ pressed }) => [pressed && styles.pressed, isLoggingOut && styles.disabled]}
+              onPress={() => void handleLogout()}
+              hitSlop={{ left: 8, right: 8 }}
+              style={({ pressed }) => [
+                styles.logoutLink,
+                pressed && styles.pressed,
+                isLoggingOut && styles.disabled,
+              ]}
             >
               <Typography variant="caption" color="textTertiary">
                 로그아웃
@@ -145,6 +157,7 @@ const useStyles = makeStyles(({ colors, opacity, size, spacing }) => ({
   },
   listHeader: { flexDirection: 'row', alignItems: 'center' },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  logoutLink: { justifyContent: 'center', minHeight: size.touchTarget },
   zoneLink: {
     flexDirection: 'row',
     alignItems: 'center',
