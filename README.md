@@ -248,6 +248,27 @@ OTA 업데이트(EAS Update)는 `runtimeVersion.policy: 'appVersion'` 이라 `ve
 적용됩니다. **네이티브 모듈을 추가·변경했다면 `app.config.ts` 의 `version` 을 올리고 새로 빌드하세요.**
 그대로 두면 기존 빌드가 새 JS 를 받는 순간 네이티브 모듈을 찾지 못해 앱이 깨집니다.
 
+## CI/CD (GitHub Actions)
+
+| 워크플로우                           | 언제                     | 하는 일                                                                             |
+| ------------------------------------ | ------------------------ | ----------------------------------------------------------------------------------- |
+| `CI` (`ci.yml`)                      | PR                       | `format:check` → `lint` → `typecheck` → `test`                                      |
+| `Deploy (EAS Update)` (`deploy.yml`) | `develop`·`main` 푸시    | CI 통과 후 두 앱에 OTA 배포. `develop` → `preview` 채널, `main` → `production` 채널 |
+| `EAS Build` (`eas-build.yml`)        | Actions 탭에서 직접 실행 | 앱·프로필·플랫폼을 골라 EAS 빌드를 등록(완료는 expo.dev 에서 확인)                  |
+
+- pnpm store 와 turbo 캐시를 저장해 두어 바뀌지 않은 패키지는 다시 검사하지 않습니다.
+- OTA 는 `apps`·`packages`·`pnpm-lock.yaml` 이 바뀐 경우에만 배포합니다. `eas update` 는 빌드 프로필의 env 를
+  읽지 않으므로 `eas.json` 의 같은 이름 프로필 env(API URL 등)를 넣어서 번들합니다.
+- 빌드는 플랜의 월 빌드 횟수를 쓰므로 자동으로 돌리지 않습니다. 네이티브 의존성이나 `version` 을 바꿨을 때 실행하세요.
+- `workflow_dispatch` 워크플로우는 기본 브랜치(`main`)에 파일이 있어야 Actions 탭에 나타납니다.
+
+필요한 설정:
+
+- **`EXPO_TOKEN` 시크릿**: expo.dev 의 앱 소유 계정(`jyuuuuu0`)에서 Access Token 을 만들어
+  레포 Settings → Secrets and variables → Actions 에 `EXPO_TOKEN` 으로 등록합니다.
+- **iOS 빌드**: `--non-interactive` 로 돌기 때문에 EAS 에 Apple 인증서·프로비저닝 프로필이 미리 있어야 합니다.
+  처음 한 번은 로컬에서 `pnpm eas:build:client --platform ios` 로 자격 증명을 만들어 두세요.
+
 ## 커밋 전 검사
 
 Husky `pre-commit` 훅이 lint-staged 를 돌려 스테이징된 파일만

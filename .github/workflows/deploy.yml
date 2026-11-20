@@ -1,0 +1,69 @@
+name: Deploy (EAS Update)
+
+# develop·main 에 푸시되면 CI 를 통과한 뒤 OTA 업데이트를 배포한다.
+# develop → preview 채널, main → production 채널. 네이티브 빌드는 eas-build.yml 에서 직접 실행한다.
+on:
+  push:
+    branches: [develop, main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    uses: ./.github/workflows/ci.yml
+
+  changes:
+    name: 앱 변경 여부
+    runs-on: ubuntu-latest
+    outputs:
+      app: ${{ steps.diff.outputs.app }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      # 머지 커밋의 첫 부모와 비교하면 이번에 들어온 변경 전체가 나온다. 문서만 바뀌었으면 배포하지 않는다.
+      - id: diff
+        run: |
+          if git diff --quiet HEAD^1 HEAD -- apps packages pnpm-lock.yaml; then
+            echo "app=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "app=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  update:
+    name: eas update (${{ matrix.app }})
+    needs: [check, changes]
+    if: needs.changes.outputs.app == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [client, admin]
+    # 같은 채널에는 한 번에 하나씩 배포한다. 진행 중인 배포는 끊지 않는다.
+    concurrency:
+      group: eas-update-${{ matrix.app }}-${{ github.ref }}
+      cancel-in-progress: false
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      PROFILE: ${{ github.ref_name == 'main' && 'production' || 'preview' }}
+    defaults:
+      run:
+        working-directory: apps/${{ matrix.app }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+
+      # eas update 는 eas.json 빌드 프로필의 env 를 읽지 않으므로, 빌드와 같은 값(API URL·APP_VARIANT)을 넣어 준다.
+      - run: node ../../.github/scripts/eas-profile-env.mjs eas.json "$PROFILE" >> "$GITHUB_ENV"
+
+      - run: >-
+          pnpm exec eas update
+          --channel "$PROFILE"
+          --environment "$PROFILE"
+          --message "$(git log -1 --pretty=%s)"
+          --platform all
+          --non-interactive
