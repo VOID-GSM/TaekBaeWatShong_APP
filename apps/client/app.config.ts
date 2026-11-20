@@ -82,8 +82,10 @@ const config: ExpoConfig = {
     [
       'expo-notifications',
       {
-        icon: './assets/icon.png',
-        color: '#FF6B35',
+        // Android 알림 아이콘은 알파 채널만 써서 흰 실루엣으로 그린다. 배경이 꽉 찬 앱 아이콘을 쓰면 흰 네모가 된다.
+        // 로고 마크(shared/assets/logo-mark)의 글자만 흰색·투명 배경으로 뽑았다. 색은 로고 마크 배경색.
+        icon: './assets/notification-icon.png',
+        color: '#0066CC',
       },
     ],
     [
