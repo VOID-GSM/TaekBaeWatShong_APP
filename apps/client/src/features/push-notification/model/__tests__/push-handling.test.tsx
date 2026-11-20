@@ -158,6 +158,32 @@ describe('usePushNotificationHandling — 누른 알림', () => {
   });
 });
 
+describe('usePushNotificationHandling — 웹', () => {
+  it('웹에서는 알림 API 를 부르지 않는다', () => {
+    // expo-notifications 의 마지막 응답 API 는 웹에서 UnavailabilityError 를 던진다.
+    // 훅은 모듈을 불러올 때 플랫폼으로 골라지므로, 웹으로 바꾼 뒤 새 모듈 레지스트리에서 다시 불러온다.
+    // 레지스트리가 달라 React 도 따로 불러와지므로 렌더하지 않고 직접 부른다(웹 훅은 훅을 쓰지 않는다).
+    let useWebHandling: typeof usePushNotificationHandling | undefined;
+    let isolatedNotifications: typeof Notifications | undefined;
+    jest.isolateModules(() => {
+      const isolated = jest.requireActual<{ Platform: typeof Platform }>('react-native');
+      jest.replaceProperty(isolated.Platform, 'OS', 'web');
+      isolatedNotifications = jest.requireMock<typeof Notifications>('expo-notifications');
+      useWebHandling = jest.requireActual<{
+        usePushNotificationHandling: typeof usePushNotificationHandling;
+      }>('../push-handling').usePushNotificationHandling;
+    });
+    mockLastResponse = response('tap-web', serverData);
+    const onOpen = jest.fn();
+
+    useWebHandling?.(onOpen);
+
+    expect(isolatedNotifications?.addNotificationReceivedListener).not.toHaveBeenCalled();
+    expect(isolatedNotifications?.clearLastNotificationResponse).not.toHaveBeenCalled();
+    expect(onOpen).not.toHaveBeenCalled();
+  });
+});
+
 describe('configureForegroundNotifications', () => {
   it('앱을 쓰는 중에 온 알림도 배너·알림창으로 띄우고 배지는 건드리지 않는다', async () => {
     jest.replaceProperty(Platform, 'OS', 'android');
