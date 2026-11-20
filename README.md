@@ -192,7 +192,19 @@ provider 와 관계없이 백엔드 `ADMIN_EMAILS` 에 등록된 이메일만 �
 - 서버는 푸시 `data` 에 `{ notificationId, type, parcelId }` 를 넣어 보냅니다(SERVER#33). 이 형식이 아닌 알림은 처리하지 않습니다.
 - 푸시 토큰은 Expo Go 로 받을 수 없어 development build 가 필요합니다.
 - iOS 는 EAS 프로젝트에 APNs 키가 등록돼 있어야 알림이 전달됩니다.
-- Android 는 EAS 프로젝트에 FCM V1 서비스 계정 키가 등록돼 있어야 토큰이 발급됩니다.
+- Android 는 앱에 Firebase 설정(`google-services.json`)이 들어가야 토큰이 발급되고, EAS 프로젝트에 FCM V1 서비스 계정 키가 등록돼 있어야 알림이 전달됩니다. 아래 "Android FCM 설정" 참고.
+
+#### Android FCM 설정
+
+1. Firebase 프로젝트 하나에 Android 앱 세 개를 등록합니다: `kr.hs.gsm.taekbaewatshong`, `kr.hs.gsm.taekbaewatshong.preview`, `kr.hs.gsm.taekbaewatshong.dev`. 그러면 `google-services.json` 하나에 세 앱이 모두 들어갑니다.
+2. 공개 레포라 `google-services.json` 은 커밋하지 않습니다(`.gitignore` 에 등록됨). 대신 파일 경로를 `GOOGLE_SERVICES_JSON` 환경 변수로 넘깁니다.
+   - EAS 빌드: EAS 프로젝트에 **파일** 타입 환경 변수 `GOOGLE_SERVICES_JSON` 을 만들어 development·preview·production 환경에 모두 올립니다.
+     ```bash
+     eas env:create --name GOOGLE_SERVICES_JSON --type file --value ./google-services.json --visibility secret --environment development --environment preview --environment production
+     ```
+   - 로컬 빌드(`npx expo prebuild`·`npx expo run:android`): 파일을 `apps/client/google-services.json` 에 두고 `apps/client/.env` 에 `GOOGLE_SERVICES_JSON=./google-services.json` 을 추가합니다. `eas build --local` 은 `EXPO_NO_DOTENV=1` 때문에 `.env` 를 읽지 않으니 `GOOGLE_SERVICES_JSON=./google-services.json eas build --local ...` 처럼 셸 환경 변수로 넘깁니다.
+3. Firebase 콘솔에서 서비스 계정 키(JSON)를 받아 `eas credentials` → Android → Google Service Account → FCM V1 으로 등록합니다(서버가 Expo Push 로 보낸 알림을 FCM 으로 전달하는 데 필요).
+4. `google-services.json` 이 없으면 빌드는 되지만, 앱을 켤 때 `Default FirebaseApp failed to initialize` 로그가 찍히고 Android 푸시 토큰이 발급되지 않습니다.
 
 백엔드 환경 변수의 리다이렉트 URI 는 앱 scheme 과 정확히 일치해야 합니다.
 
