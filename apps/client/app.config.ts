@@ -9,6 +9,17 @@ const bundleId = IS_DEV
     ? 'kr.hs.gsm.taekbaewatshong.preview'
     : 'kr.hs.gsm.taekbaewatshong';
 
+/**
+ * Android 푸시(FCM)용 Firebase 설정 파일 경로. Firebase 프로젝트 하나에 variant 세 패키지를 모두 등록하면 한 파일로 된다.
+ * 공개 레포라 파일은 커밋하지 않고 경로만 환경 변수로 받는다.
+ * - EAS 빌드: 파일 타입 EAS 환경 변수 `GOOGLE_SERVICES_JSON` 이 업로드한 파일의 경로를 준다.
+ * - 로컬 빌드(`expo prebuild`·`expo run:android`): `.env` 에 `GOOGLE_SERVICES_JSON=./google-services.json` 을 넣는다
+ *   (Expo CLI 가 설정을 읽기 전에 불러온다). `eas build --local` 은 `EXPO_NO_DOTENV=1` 이라 `.env` 를 읽지 않고,
+ *   secret EAS 변수도 로컬로 받을 수 없으니 셸 환경 변수로 넘긴다.
+ * 없으면 넣지 않는다. 빌드는 되지만 Android 에서 Expo 푸시 토큰이 발급되지 않는다.
+ */
+const googleServicesFile = process.env.GOOGLE_SERVICES_JSON || undefined;
+
 const appName = IS_DEV ? '택배왔숑 (dev)' : IS_PREVIEW ? '택배왔숑 (preview)' : '택배왔숑';
 
 const config: ExpoConfig = {
@@ -48,6 +59,7 @@ const config: ExpoConfig = {
 
   android: {
     package: bundleId,
+    googleServicesFile,
     adaptiveIcon: {
       foregroundImage: './assets/android-icon-foreground.png',
       backgroundImage: './assets/android-icon-background.png',

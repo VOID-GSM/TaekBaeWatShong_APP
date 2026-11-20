@@ -19,6 +19,9 @@ expo-env.d.ts
 *.p12
 *.key
 *.mobileprovision
+# Firebase 설정 (공개 레포라 EAS 환경 변수로 넣는다)
+google-services.json
+GoogleService-Info.plist
 ios/
 android/
 
