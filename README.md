@@ -198,7 +198,7 @@ provider 와 관계없이 백엔드 `ADMIN_EMAILS` 에 등록된 이메일만 �
      ```bash
      eas env:create --name GOOGLE_SERVICES_JSON --type file --value ./google-services.json --visibility secret --environment development --environment preview --environment production
      ```
-   - 로컬 빌드: 파일을 `apps/client/google-services.json` 에 두고 `apps/client/.env` 에 `GOOGLE_SERVICES_JSON=./google-services.json` 을 추가합니다.
+   - 로컬 빌드(`npx expo prebuild`·`npx expo run:android`): 파일을 `apps/client/google-services.json` 에 두고 `apps/client/.env` 에 `GOOGLE_SERVICES_JSON=./google-services.json` 을 추가합니다. `eas build --local` 은 `EXPO_NO_DOTENV=1` 때문에 `.env` 를 읽지 않으니 `GOOGLE_SERVICES_JSON=./google-services.json eas build --local ...` 처럼 셸 환경 변수로 넘깁니다.
 3. Firebase 콘솔에서 서비스 계정 키(JSON)를 받아 `eas credentials` → Android → Google Service Account → FCM V1 으로 등록합니다(서버가 Expo Push 로 보낸 알림을 FCM 으로 전달하는 데 필요).
 4. `google-services.json` 이 없으면 빌드는 되지만, 앱을 켤 때 `Default FirebaseApp failed to initialize` 로그가 찍히고 Android 푸시 토큰이 발급되지 않습니다.
 
