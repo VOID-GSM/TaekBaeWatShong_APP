@@ -3,6 +3,7 @@ export * from './brand-surface';
 export * from './button';
 export * from './google-icon';
 export * from './logo-mark';
+export * from './segmented-control';
 export * from './text-field';
 export * from './theme';
 export * from './top-bar';
