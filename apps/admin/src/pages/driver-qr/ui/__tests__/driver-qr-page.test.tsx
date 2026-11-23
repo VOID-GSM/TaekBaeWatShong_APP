@@ -168,6 +168,40 @@ describe('DriverQrPage', () => {
       expect(mockScanDriverQr).toHaveBeenCalledTimes(1);
     });
 
+    it('요청이 쿨다운보다 오래 걸려도 계속 비추는 같은 QR 은 한 번만 기록한다', async () => {
+      let resolveScan: (result: DriverQrScanResult) => void = () => {};
+      mockScanDriverQr.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveScan = resolve;
+          }),
+      );
+      const now = jest.spyOn(Date, 'now');
+      await renderPage();
+      await openScanTab();
+
+      now.mockReturnValue(0);
+      await scanQr(driverQr.qrToken);
+      for (const at of [1_000, 2_000, 3_000, 3_500]) {
+        now.mockReturnValue(at);
+        await scanQr(driverQr.qrToken);
+      }
+      await act(async () => {
+        resolveScan({
+          driverId: 1,
+          driverName: '김택배',
+          deliveryCompany: 'CJ대한통운',
+          scannedAt: '2026-11-18T14:30:00',
+        });
+      });
+      await screen.findByText('방문 기록 완료');
+      now.mockReturnValue(3_600);
+      await scanQr(driverQr.qrToken);
+
+      expect(mockScanDriverQr).toHaveBeenCalledTimes(1);
+      now.mockRestore();
+    });
+
     it('없는 QR 이면 서버 메시지를 보여준다', async () => {
       mockScanDriverQr.mockRejectedValue(new ApiError('유효하지 않은 QR 토큰입니다.', 404));
       await renderPage();

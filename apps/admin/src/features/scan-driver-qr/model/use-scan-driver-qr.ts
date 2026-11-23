@@ -16,12 +16,14 @@ export function useScanDriverQr() {
   const handleScan = useCallback(
     (raw: string) => {
       const qrToken = raw.trim();
-      if (!qrToken || inFlightRef.current) return;
+      if (!qrToken) return;
 
       const now = Date.now();
       const last = lastSeenRef.current;
-      // 무시하는 동안에도 마지막으로 본 시각을 갱신해, 계속 비추고 있으면 다시 기록하지 않는다.
+      // 무시하는 동안(요청 중 포함)에도 마지막으로 본 시각을 갱신해, 계속 비추고 있으면 다시 기록하지 않는다.
+      // 요청 중 체크를 이보다 앞에 두면 응답이 쿨다운보다 늦을 때 같은 방문이 두 번 기록된다.
       lastSeenRef.current = { token: qrToken, at: now };
+      if (inFlightRef.current) return;
       if (last && last.token === qrToken && now - last.at < SAME_QR_COOLDOWN_MS) return;
 
       inFlightRef.current = true;
