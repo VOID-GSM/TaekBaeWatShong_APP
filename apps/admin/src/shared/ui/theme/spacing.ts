@@ -46,6 +46,8 @@ export const size = {
   /** 하단 탭 바 항목의 알약 모양 배경 */
   tabPillWidth: 56,
   tabPillHeight: 30,
+  /** 탭·세그먼트처럼 글자만 있는 누름 영역의 최소 높이 (iOS 권장 44) */
+  touchTarget: 44,
   /** 안내 상자 아이콘 */
   iconS: 18,
   /** 발급된 기사 QR 이미지 */

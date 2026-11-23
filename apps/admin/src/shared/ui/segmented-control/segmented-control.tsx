@@ -46,7 +46,7 @@ export function SegmentedControl<T extends string>({
   );
 }
 
-const useStyles = makeStyles(({ colors, radius, shadow, spacing }) => ({
+const useStyles = makeStyles(({ colors, radius, shadow, size, spacing }) => ({
   track: {
     flexDirection: 'row',
     alignSelf: 'stretch',
@@ -57,6 +57,7 @@ const useStyles = makeStyles(({ colors, radius, shadow, spacing }) => ({
   },
   segment: {
     flex: 1,
+    minHeight: size.touchTarget,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: spacing.sm,
