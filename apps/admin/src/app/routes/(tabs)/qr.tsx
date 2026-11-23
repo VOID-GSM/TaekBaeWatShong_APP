@@ -1,5 +1,5 @@
-import { ComingSoonPage } from '@/pages/coming-soon';
+import { DriverQrPage } from '@/pages/driver-qr';
 
 export default function QrRoute() {
-  return <ComingSoonPage title="QR 코드" />;
+  return <DriverQrPage />;
 }

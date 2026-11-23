@@ -21,6 +21,7 @@ export const radius = {
   md: 16,
   lg: 22,
   xl: 26,
+  '2xl': 32,
   /** 하단 탭 바 위쪽 모서리. Figma 에 변수 없이 쓰인 값. */
   sheet: 20,
   full: 999,
@@ -45,6 +46,16 @@ export const size = {
   /** 하단 탭 바 항목의 알약 모양 배경 */
   tabPillWidth: 56,
   tabPillHeight: 30,
+  /** 탭·세그먼트처럼 글자만 있는 누름 영역의 최소 높이 (iOS 권장 44) */
+  touchTarget: 44,
+  /** 안내 상자 아이콘 */
+  iconS: 18,
+  /** 발급된 기사 QR 이미지 */
+  qrCode: 200,
+  /** QR 인식 카메라 영역 높이 */
+  scanViewfinder: 300,
+  /** 뷰파인더 안 모서리 프레임 */
+  scanFrame: 220,
   logoMark: 130,
   logoRing: 160,
   logoHalo: 220,
@@ -80,6 +91,18 @@ export const shadow = {
         blurRadius: 20,
         spreadDistance: 0,
         color: 'rgba(15, 23, 41, 0.08)',
+      },
+    ],
+  },
+  /** QR 뷰파인더 스캔 선의 빛 번짐 (Figma `Scan line` 그림자) */
+  scanGlow: {
+    boxShadow: [
+      {
+        offsetX: 0,
+        offsetY: 0,
+        blurRadius: 12,
+        spreadDistance: 2,
+        color: 'rgba(37, 99, 235, 0.9)',
       },
     ],
   },
