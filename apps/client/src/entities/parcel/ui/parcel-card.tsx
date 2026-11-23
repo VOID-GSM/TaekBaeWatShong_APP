@@ -3,7 +3,6 @@ import { View } from 'react-native';
 import { Button, Card, type ColorToken, Icon, makeStyles, Typography } from '@/shared/ui';
 
 import type { Parcel } from '../model/parcel';
-import { DeliveryStepper } from './delivery-stepper';
 import { ParcelStatusBadge } from './parcel-status-badge';
 
 export interface ParcelCardProps {
@@ -38,22 +37,19 @@ export function ParcelCard({ parcel, onRetrieve, onReportLost }: ParcelCardProps
           </Typography>
         </View>
       ) : parcel.status === 'inTransit' ? (
-        <>
-          <DeliveryStepper current={parcel.stepIndex ?? 0} />
-          <View style={styles.note}>
-            <Icon name="info" />
-            <Typography variant="bodyMStrong" color="textBrandStrong" style={styles.flex}>
-              아직 도착 전이에요. 도착하면 바로 알려드릴게요.
-            </Typography>
-          </View>
-        </>
+        <View style={styles.note}>
+          <Icon name="info" />
+          <Typography variant="bodyMStrong" color="textBrandStrong" style={styles.flex}>
+            아직 도착 전이에요. 도착하면 바로 알려드릴게요.
+          </Typography>
+        </View>
       ) : (
         <>
           <View style={styles.meta}>
             <MetaBox label="보관 구역" value={`${parcel.zone ?? '-'}구역`} valueColor="textBrand" />
             <MetaBox
-              label={`도착 ${parcel.arrivedAt ?? ''}`}
-              value={parcel.timeLabel ?? ''}
+              label={parcel.arrivedAt ? `도착 ${parcel.arrivedAt}` : '도착'}
+              value={parcel.timeLabel ? `${parcel.timeLabel} 경과` : '-'}
               valueColor={isOverdue ? 'textDanger' : 'textPrimary'}
               danger={isOverdue}
             />
