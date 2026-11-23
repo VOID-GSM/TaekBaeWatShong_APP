@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import type * as TaekbaeApi from '@taekbae/api';
 import { ApiError } from '@taekbae/api';
 import type {
@@ -83,7 +84,8 @@ async function scanQr(data: string) {
 }
 
 describe('DriverQrPage', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    await AsyncStorage.clear();
     mockCreateDriverQr.mockReset();
     mockScanDriverQr.mockReset();
     mockRequestPermission.mockReset();
@@ -105,6 +107,31 @@ describe('DriverQrPage', () => {
       });
       expect(await screen.findByLabelText('김택배 기사님 식별 QR 코드')).toBeOnTheScreen();
       expect(screen.getByText('CJ대한통운 · 이 QR로 기사님을 식별해요')).toBeOnTheScreen();
+    });
+
+    it('발급한 QR 은 기기에 저장되어 앱을 다시 열어도 보인다', async () => {
+      mockCreateDriverQr.mockResolvedValue(driverQr);
+      const first = await renderPage();
+
+      await fireEvent.changeText(screen.getByLabelText('기사님 이름'), '김택배');
+      await fireEvent.changeText(screen.getByLabelText('택배사'), 'CJ대한통운');
+      await fireEvent.press(screen.getByRole('button', { name: '기사님 QR 생성' }));
+      await screen.findByLabelText('김택배 기사님 식별 QR 코드');
+      await first.unmount();
+
+      // 새 QueryClient 로 다시 렌더 = 앱을 다시 켠 것과 같다.
+      await renderPage();
+
+      expect(await screen.findByLabelText('김택배 기사님 식별 QR 코드')).toBeOnTheScreen();
+      expect(mockCreateDriverQr).toHaveBeenCalledTimes(1);
+    });
+
+    it('저장된 값이 깨져 있으면 버리고 발급 전 화면을 보여준다', async () => {
+      await AsyncStorage.setItem('driver-qr/issued', '{"broken":true}');
+      await renderPage();
+
+      expect(await screen.findByText(/QR을 생성해 주세요/)).toBeOnTheScreen();
+      expect(await AsyncStorage.getItem('driver-qr/issued')).toBeNull();
     });
 
     it('빈 값이면 요청하지 않고 안내를 보여준다', async () => {
