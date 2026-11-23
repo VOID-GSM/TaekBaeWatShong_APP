@@ -1,7 +1,7 @@
 import { normalizeInvoiceNumber } from '@taekbae/utils';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -10,22 +10,31 @@ import {
   ParcelCard,
   type ParcelFilter,
   ParcelSummaryCard,
+  useMyParcels,
 } from '@/entities/parcel';
 import { logout, useAuthStore } from '@/features/auth';
 import { confirmAsync } from '@/shared/lib';
-import { Icon, IconButton, makeStyles, SelectMenu, Typography, useTheme } from '@/shared/ui';
-
-import { MOCK_PARCELS, MOCK_SUMMARY } from '../model/mock';
+import {
+  Button,
+  Card,
+  Icon,
+  IconButton,
+  makeStyles,
+  SelectMenu,
+  Typography,
+  useTheme,
+} from '@/shared/ui';
 
 export function HomePage() {
   const styles = useStyles();
-  const { size } = useTheme();
+  const { colors, size } = useTheme();
   const userName = useAuthStore((state) => state.user?.name);
   const error = useAuthStore((state) => state.error);
   const [filter, setFilter] = useState<ParcelFilter>('latest');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const router = useRouter();
-  const parcels = filterParcels(MOCK_PARCELS, filter);
+  const myParcels = useMyParcels();
+  const parcels = myParcels.parcels ? filterParcels(myParcels.parcels, filter) : [];
 
   const handleLogout = async () => {
     // 이름 옆 작은 링크라 잘못 누르기 쉽고, 로그아웃하면 DataGSM 로그인을 처음부터 다시 해야 해서 한 번 확인한다.
@@ -99,8 +108,18 @@ export function HomePage() {
         <IconButton icon="bell" accessibilityLabel="알림" />
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <ParcelSummaryCard summary={MOCK_SUMMARY} />
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={myParcels.isRefetching}
+            onRefresh={myParcels.refetch}
+            tintColor={colors.textBrand}
+          />
+        }
+      >
+        {myParcels.summary && <ParcelSummaryCard summary={myParcels.summary} />}
 
         <View style={styles.listHeader}>
           <Typography variant="bodyMStrong" style={styles.flex}>
@@ -114,7 +133,27 @@ export function HomePage() {
           />
         </View>
 
-        {parcels.length === 0 ? (
+        {myParcels.parcels === undefined ? (
+          // 재조회가 실패해도 이미 받은 목록은 유지하고, 첫 조회 전·실패 시에만 이 자리를 쓴다.
+          <Card style={styles.status}>
+            {myParcels.error === null ? (
+              <ActivityIndicator
+                color={colors.textBrand}
+                accessibilityLabel="내 택배를 불러오는 중"
+              />
+            ) : (
+              <View style={styles.statusMessage}>
+                <Typography variant="bodyMStrong" align="center" accessibilityRole="alert">
+                  내 택배를 불러오지 못했어요.
+                </Typography>
+                <Typography color="textSecondary" align="center">
+                  {myParcels.error.message}
+                </Typography>
+                <Button label="다시 시도" variant="outline" size="m" onPress={myParcels.refetch} />
+              </View>
+            )}
+          </Card>
+        ) : parcels.length === 0 ? (
           <Typography variant="bodyMStrong" color="textTertiary" align="center">
             {emptyMessage[filter]}
           </Typography>
@@ -156,6 +195,8 @@ const useStyles = makeStyles(({ colors, opacity, size, spacing }) => ({
     paddingHorizontal: spacing.lg,
   },
   listHeader: { flexDirection: 'row', alignItems: 'center' },
+  status: { alignItems: 'center', justifyContent: 'center', minHeight: 120 },
+  statusMessage: { alignItems: 'center', gap: spacing.sm },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   logoutLink: { justifyContent: 'center', minHeight: size.touchTarget },
   zoneLink: {
