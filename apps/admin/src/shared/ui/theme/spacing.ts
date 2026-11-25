@@ -5,8 +5,14 @@ import type { ViewStyle } from 'react-native';
  * mdPlus·3xl·4xl 은 시안에 변수 없이 쓰인 수치를 토큰으로 올린 것 — 디자이너 확인 필요.
  */
 export const spacing = {
+  /** 채팅 목록 카드의 이름·마지막 메시지 사이 */
+  '2xs': 2,
   xs: 4,
+  /** 채팅 목록 카드의 시각·안 읽음 배지 사이 */
+  xsPlus: 6,
   sm: 8,
+  /** 채팅 목록·말풍선 사이 간격 (시안 gap 10, 변수 없음) */
+  smPlus: 10,
   md: 12,
   mdPlus: 14,
   lg: 16,
@@ -18,6 +24,8 @@ export const spacing = {
 
 /** Figma 변수(radius/*). */
 export const radius = {
+  /** 말풍선 꼬리 쪽 모서리. 시안은 space/xs(4) 변수를 radius 로 썼다. */
+  xs: 4,
   md: 16,
   lg: 22,
   xl: 26,
@@ -56,6 +64,22 @@ export const size = {
   scanViewfinder: 300,
   /** 뷰파인더 안 모서리 프레임 */
   scanFrame: 220,
+  /** 채팅방 헤더 아바타 */
+  avatarM: 40,
+  /** 채팅 목록 아바타 */
+  avatarL: 44,
+  /** 채팅 목록 카드 높이 */
+  chatListItem: 80,
+  /** 채팅 목록의 안 읽음 개수 원 */
+  unreadBadge: 20,
+  /** 말풍선 최대 폭 */
+  bubbleMaxWidth: 270,
+  /** 채팅 입력칸·전송 버튼 높이 */
+  chatInput: 44,
+  /** 전송 아이콘 */
+  iconSend: 20,
+  /** 채팅방 신고 배너의 경고 아이콘 */
+  iconXs: 16,
   logoMark: 130,
   logoRing: 160,
   logoHalo: 220,
