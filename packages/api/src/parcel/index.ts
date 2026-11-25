@@ -1,5 +1,6 @@
 export {
   claimParcel,
+  completeParcel,
   fetchMyParcels,
   fetchUnclaimedRanking,
   fetchZoneSummary,

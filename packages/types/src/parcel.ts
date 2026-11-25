@@ -86,3 +86,12 @@ export const parcelClaimResponseSchema = z.object({
 });
 
 export type ParcelClaimResponse = z.infer<typeof parcelClaimResponseSchema>;
+
+/**
+ * `PATCH /parcel/complete` 요청 (관리자) — PENDING 택배를 도착(ARRIVED) 처리한다. 응답은 `parcelSchema` 로 검증한다.
+ * `zone` 을 생략하면 구역을 바꾸지 않는다.
+ */
+export interface ParcelCompleteRequest {
+  invoiceNumber: string;
+  zone?: string;
+}
