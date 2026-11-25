@@ -1,3 +1,4 @@
+export * from './chat';
 export * from './device-token';
 export * from './driver';
 export * from './notification';

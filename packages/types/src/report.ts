@@ -29,6 +29,8 @@ export const reportSchema = z.object({
  */
 export const adminReportSchema = z.object({
   id: z.number(),
+  /** 신고자 user id. 서버가 아직 보내지 않는다(SERVER#26) — 생기면 채팅 시작에 우선 사용한다. */
+  reporterId: z.number().nullish(),
   reporterName: z.string(),
   studentNumber: z.string().nullish(),
   reporterRole: z.string().nullish(),
