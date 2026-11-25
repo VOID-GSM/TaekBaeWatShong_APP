@@ -3,7 +3,7 @@ import { type StyleProp, View, type ViewProps, type ViewStyle } from 'react-nati
 import { type ColorToken, makeStyles } from '../theme';
 import { Typography } from '../typography';
 
-type BadgeTone = 'brand' | 'success' | 'danger';
+type BadgeTone = 'brand' | 'success' | 'warning' | 'danger';
 
 export interface BadgeProps extends Omit<ViewProps, 'children' | 'style'> {
   label: string;
@@ -14,6 +14,7 @@ export interface BadgeProps extends Omit<ViewProps, 'children' | 'style'> {
 const LABEL_COLOR: Record<BadgeTone, ColorToken> = {
   brand: 'textBrand',
   success: 'textSuccess',
+  warning: 'textWarning',
   danger: 'textDanger',
 };
 
@@ -39,5 +40,6 @@ const useStyles = makeStyles(({ colors, radius, spacing }) => ({
   },
   brand: { backgroundColor: colors.bgBrandSoft },
   success: { backgroundColor: colors.bgSuccessSoft },
+  warning: { backgroundColor: colors.bgWarningSoft },
   danger: { backgroundColor: colors.bgDangerSoft },
 }));

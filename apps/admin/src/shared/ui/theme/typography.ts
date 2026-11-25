@@ -14,6 +14,12 @@ export const typography = {
   micro: { fontFamily: fontFamily.regular, fontSize: 11, lineHeight: 16 },
   buttonL: { fontFamily: fontFamily.regular, fontSize: 16, lineHeight: 24 },
   buttonM: { fontFamily: fontFamily.regular, fontSize: 14, lineHeight: 20 },
+  /**
+   * 노트북·태블릿 화면을 멀리서 보는 결과 표시용 (택배 스캔). Figma 스타일 없음 — 디자이너 확인 필요.
+   */
+  displayXL: { fontFamily: fontFamily.bold, fontSize: 48, lineHeight: 60 },
+  displayL: { fontFamily: fontFamily.bold, fontSize: 32, lineHeight: 44 },
+  displayM: { fontFamily: fontFamily.regular, fontSize: 24, lineHeight: 34 },
 } satisfies Record<string, TextStyle>;
 
 export type TypographyVariant = keyof typeof typography;
