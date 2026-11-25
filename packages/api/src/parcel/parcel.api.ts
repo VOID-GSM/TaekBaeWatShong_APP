@@ -4,6 +4,7 @@ import {
   type ParcelClaimRequest,
   type ParcelClaimResponse,
   parcelClaimResponseSchema,
+  type ParcelCompleteRequest,
   parcelListResponseSchema,
   type ParcelRegisterRequest,
   parcelSchema,
@@ -46,4 +47,13 @@ export async function fetchUnclaimedRanking(): Promise<UnclaimedRank[]> {
 export async function claimParcel(request: ParcelClaimRequest): Promise<ParcelClaimResponse> {
   const { data } = await api().patch('/parcel/claim', request);
   return parseResponse(parcelClaimResponseSchema, data);
+}
+
+/**
+ * `PATCH /parcel/complete` — 관리자가 스캔한 운송장의 택배를 도착(ARRIVED) 처리한다.
+ * 404(등록되지 않은 운송장)·409(PENDING 이 아님)는 서버가 한국어 message 를 보낸다.
+ */
+export async function completeParcel(request: ParcelCompleteRequest): Promise<Parcel> {
+  const { data } = await api().patch('/parcel/complete', request);
+  return parseResponse(parcelSchema, data);
 }

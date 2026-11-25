@@ -3,6 +3,7 @@ import type {
   Parcel,
   ParcelClaimRequest,
   ParcelClaimResponse,
+  ParcelCompleteRequest,
   ParcelRegisterRequest,
 } from '@taekbae/types';
 import {
@@ -15,6 +16,7 @@ import {
 import type { ApiError } from '../client';
 import {
   claimParcel,
+  completeParcel,
   fetchMyParcels,
   fetchUnclaimedRanking,
   fetchZoneSummary,
@@ -55,6 +57,21 @@ export function useClaimParcelMutation(): UseMutationResult<
   return useMutation<ParcelClaimResponse, ApiError, ParcelClaimRequest>({
     mutationFn: claimParcel,
     // 회수한 택배가 '방금 회수한 택배'·홈 목록에 바로 반영되게 한다. 다음 스캔을 막지 않도록 기다리지 않는다.
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: parcelKeys.all });
+    },
+  });
+}
+
+export function useCompleteParcelMutation(): UseMutationResult<
+  Parcel,
+  ApiError,
+  ParcelCompleteRequest
+> {
+  const queryClient = useQueryClient();
+  return useMutation<Parcel, ApiError, ParcelCompleteRequest>({
+    mutationFn: completeParcel,
+    // 도착 처리한 택배가 목록·구역 요약에 반영되게 한다. 연속 스캔을 막지 않도록 기다리지 않는다.
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: parcelKeys.all });
     },

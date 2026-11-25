@@ -19,6 +19,9 @@ const palette = {
   grey100: '#eef0f8',
   indigo200: '#a5aef2',
   indigo800: '#272f85',
+  /** 경고 톤 — Figma 에 없는 값. 디자이너 확인 필요 */
+  amber100: '#fef3c7',
+  amber700: '#b45309',
 } as const;
 
 export const lightColors = {
@@ -28,6 +31,8 @@ export const lightColors = {
   bgBrandSoft: palette.indigo50,
   bgSuccessSoft: palette.green100,
   bgDangerSoft: palette.red100,
+  /** 오류는 아니지만 확인이 필요한 안내 (예: 이미 처리된 택배). 디자이너 확인 필요 */
+  bgWarningSoft: palette.amber100,
   /** 카드 안 보조 정보 상자 */
   bgSubtle: palette.grey25,
   /** 세그먼트 컨트롤 트랙 */
@@ -50,6 +55,8 @@ export const lightColors = {
   textBrandStrong: palette.indigo800,
   iconStrong: palette.navy900,
   textDanger: palette.red600,
+  /** `bgWarningSoft` 위 글자. 디자이너 확인 필요 */
+  textWarning: palette.amber700,
 } as const;
 
 export type ColorTokens = { readonly [K in keyof typeof lightColors]: string };

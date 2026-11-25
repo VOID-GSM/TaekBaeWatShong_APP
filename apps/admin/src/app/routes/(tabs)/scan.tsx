@@ -1,5 +1,5 @@
-import { ComingSoonPage } from '@/pages/coming-soon';
+import { ParcelScanPage } from '@/pages/parcel-scan';
 
 export default function ScanRoute() {
-  return <ComingSoonPage title="택배 스캔" />;
+  return <ParcelScanPage />;
 }

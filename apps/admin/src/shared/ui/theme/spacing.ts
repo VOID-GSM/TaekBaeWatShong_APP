@@ -56,6 +56,12 @@ export const size = {
   scanViewfinder: 300,
   /** 뷰파인더 안 모서리 프레임 */
   scanFrame: 220,
+  /** 바코드 스캐너 입력칸 높이 (택배 스캔). Figma 없음 — 디자이너 확인 필요 */
+  scanInput: 64,
+  /** 택배 스캔 결과 카드 최소 높이 — 결과가 바뀌어도 아래 요소가 덜 움직이게. 디자이너 확인 필요 */
+  arrivalResult: 220,
+  /** 이 너비 이상이면 택배 스캔 화면을 두 칸으로 나눈다 (태블릿·노트북). */
+  wideLayout: 768,
   logoMark: 130,
   logoRing: 160,
   logoHalo: 220,
