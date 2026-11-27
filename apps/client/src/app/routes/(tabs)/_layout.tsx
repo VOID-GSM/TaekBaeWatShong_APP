@@ -39,7 +39,7 @@ export default function TabsLayout() {
           <TabTrigger name="notifications" href="/notifications" asChild>
             <MainTabButton icon={bellXml} label="알림" showDot={hasUnreadNotifications} />
           </TabTrigger>
-          {/* 시안(C11)에서 채팅 화면에도 탭 바가 보여 탭 화면으로 둔다. */}
+          {/* 채팅 목록 → 채팅방을 탭 안 스택으로 둔다. 시안(C11)에서 채팅방에도 탭 바가 보인다. */}
           <TabTrigger name="chat" href="/chat" asChild>
             <MainTabButton icon={chatXml} label="채팅" />
           </TabTrigger>
