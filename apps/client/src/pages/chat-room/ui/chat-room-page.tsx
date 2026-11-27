@@ -9,12 +9,22 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ChatBubble, type ChatBubbleMessage, ChatDateDivider } from '@/entities/chat';
+import {
+  ChatBubble,
+  type ChatBubbleMessage,
+  ChatDateDivider,
+  toPartnerDisplay,
+} from '@/entities/chat';
 import { ChatInputBar } from '@/features/send-chat-message';
 import { Button, makeStyles, Typography, useTheme } from '@/shared/ui';
 
-import { NO_STAFF_MESSAGE, useStaffChat } from '../model/use-staff-chat';
-import { ChatHeader } from './chat-header';
+import { useChatRoom } from '../model/use-chat-room';
+import { ChatRoomHeader } from './chat-room-header';
+
+export interface ChatRoomPageProps {
+  roomId: number;
+  onBack: () => void;
+}
 
 interface DateSection {
   date: string;
@@ -25,12 +35,13 @@ const renderItem: SectionListRenderItem<ChatBubbleMessage, DateSection> = ({ ite
   <ChatBubble message={item} />
 );
 
-/** 학생 ↔ 학생생활안전부 1:1 채팅 (시안 C11). */
-export function ChatPage() {
+/** 학생·선생님의 1:1 채팅방 (시안 C11). 채팅 목록에서 들어온다. */
+export function ChatRoomPage({ roomId, onBack }: ChatRoomPageProps) {
   const styles = useStyles();
   const { colors } = useTheme();
   const listRef = useRef<SectionList<ChatBubbleMessage, DateSection>>(null);
-  const { partner, sections, isPending, error, send, isSending, refetch } = useStaffChat();
+  const { room, sections, isPending, error, send, isSending, refetch } = useChatRoom(roomId);
+  const partner = useMemo(() => (room ? toPartnerDisplay(room.partner) : undefined), [room]);
   const [sendError, setSendError] = useState<string | null>(null);
 
   const listSections = useMemo<DateSection[]>(
@@ -91,15 +102,6 @@ export function ChatPage() {
         </View>
       );
     }
-    if (partner === null) {
-      return (
-        <View style={[styles.center, styles.message]}>
-          <Typography color="textSecondary" align="center">
-            {NO_STAFF_MESSAGE}
-          </Typography>
-        </View>
-      );
-    }
     return (
       <SectionList
         ref={listRef}
@@ -112,7 +114,7 @@ export function ChatPage() {
         keyboardShouldPersistTaps="handled"
         ListEmptyComponent={
           <Typography color="textTertiary" align="center">
-            궁금한 점을 남겨 주세요
+            {partner?.isStaff ? '궁금한 점을 남겨 주세요' : '아직 주고받은 메시지가 없어요'}
           </Typography>
         }
         // 새 메시지가 붙으면 맨 아래로 내린다.
@@ -123,12 +125,12 @@ export function ChatPage() {
     );
   };
 
-  const canSend = !isPending && error === null && partner !== null;
+  const canSend = !isPending && error === null;
 
   return (
     // 아래 SafeArea 여백은 하단 탭 바가 맡는다.
     <SafeAreaView style={styles.screen} edges={['top']}>
-      <ChatHeader />
+      <ChatRoomHeader partner={partner} onBack={onBack} />
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}

@@ -4,7 +4,7 @@ import { act, renderHook, waitFor } from '@testing-library/react-native';
 import axios, { type AxiosAdapter, AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import type { PropsWithChildren } from 'react';
 
-import { NO_STAFF_MESSAGE, useStaffChat } from '../use-staff-chat';
+import { useChatRoom } from '../use-chat-room';
 
 type Route = (config: InternalAxiosRequestConfig) => { status?: number; data: unknown };
 
@@ -50,7 +50,7 @@ const message = (id: number, isMine: boolean, createdAt: string) => ({
   createdAt,
 });
 
-async function setup() {
+async function setup(roomId = 7) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false, gcTime: Infinity },
@@ -60,7 +60,7 @@ async function setup() {
   const wrapper = ({ children }: PropsWithChildren) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
-  return renderHook(() => useStaffChat(), { wrapper });
+  return renderHook(() => useChatRoom(roomId), { wrapper });
 }
 
 beforeEach(() => {
@@ -69,10 +69,10 @@ beforeEach(() => {
   configureApi({ baseURL: 'https://api.test', getAccessToken: async () => 'token' });
 });
 
-describe('useStaffChat', () => {
-  it('관리자와의 방 메시지를 날짜별로 묶고, 안 읽은 메시지가 있으면 읽음 처리한다', async () => {
+describe('useChatRoom', () => {
+  it('방 메시지를 날짜별로 묶고, 상대 메시지가 있으면 한 번만 읽음 처리한다', async () => {
     serve({
-      'GET /chat/rooms': () => ({ data: { totalUnreadCount: 1, rooms: [room(1)] } }),
+      'GET /chat/rooms/7': () => ({ data: room(1) }),
       'GET /chat/rooms/7/messages': () => ({
         data: {
           messages: [
@@ -88,7 +88,7 @@ describe('useStaffChat', () => {
     const { result, unmount } = await setup();
 
     await waitFor(() => expect(result.current.isPending).toBe(false));
-    expect(result.current.partner?.id).toBe(9);
+    expect(result.current.room?.partner.id).toBe(9);
     expect(
       result.current.sections.map(({ date, messages }) => [date, messages.map((m) => m.id)]),
     ).toEqual([
@@ -96,58 +96,38 @@ describe('useStaffChat', () => {
       ['2026년 7월 7일', [3]],
     ]);
     await waitFor(() => expect(calls).toContain('PATCH /chat/rooms/7/read'));
-    expect(calls).not.toContain('GET /chat/partners');
+    expect(calls.filter((call) => call === 'PATCH /chat/rooms/7/read')).toHaveLength(1);
     await unmount();
   });
 
-  it('방이 없으면 관리자를 찾아 두고, 첫 메시지를 보낼 때 방을 만든다', async () => {
-    let created = false;
+  it('메시지를 보낸다', async () => {
     serve({
-      'GET /chat/rooms': () => ({
-        data: { totalUnreadCount: 0, rooms: created ? [room()] : [] },
-      }),
-      'GET /chat/partners': () => ({ data: { partners: [admin], hasNext: false } }),
-      'POST /chat/rooms': () => {
-        created = true;
-        return { data: room() };
-      },
+      'GET /chat/rooms/7': () => ({ data: room() }),
+      'GET /chat/rooms/7/messages': () => ({ data: { messages: [], nextCursor: null } }),
       'POST /chat/rooms/7/messages': () => ({ data: message(1, true, '2026-07-06T15:30:00') }),
-      'GET /chat/rooms/7/messages': () => ({
-        data: { messages: [message(1, true, '2026-07-06T15:30:00')], nextCursor: null },
-      }),
     });
     const { result, unmount } = await setup();
 
     await waitFor(() => expect(result.current.isPending).toBe(false));
-    expect(result.current.partner?.id).toBe(9);
-    expect(result.current.sections).toEqual([]);
-
     await act(async () => {
       await result.current.send('안녕하세요');
     });
-    expect(calls).toEqual(
-      expect.arrayContaining(['POST /chat/rooms', 'POST /chat/rooms/7/messages']),
-    );
+    expect(calls).toContain('POST /chat/rooms/7/messages');
     await unmount();
   });
 
-  it('방도 관리자도 없으면 보내기가 안내 문구로 실패한다', async () => {
-    serve({
-      'GET /chat/rooms': () => ({ data: { totalUnreadCount: 0, rooms: [] } }),
-      'GET /chat/partners': () => ({ data: { partners: [], hasNext: false } }),
-    });
-    const { result, unmount } = await setup();
+  it('잘못된 roomId 는 요청하지 않고 찾을 수 없다고 알린다', async () => {
+    serve({});
+    const { result, unmount } = await setup(0);
 
-    await waitFor(() => expect(result.current.isPending).toBe(false));
-    expect(result.current.partner).toBeNull();
-    await act(async () => {
-      await expect(result.current.send('안녕하세요')).rejects.toThrow(NO_STAFF_MESSAGE);
-    });
+    expect(result.current.error?.message).toBe('채팅방을 찾을 수 없어요.');
+    expect(result.current.isPending).toBe(false);
+    expect(calls).toEqual([]);
     await unmount();
   });
 
-  it('방 목록을 불러오지 못하면 error 를 돌려준다', async () => {
-    serve({ 'GET /chat/rooms': () => ({ status: 500, data: { message: '서버 오류' } }) });
+  it('방을 불러오지 못하면 error 를 돌려준다', async () => {
+    serve({ 'GET /chat/rooms/7': () => ({ status: 500, data: { message: '서버 오류' } }) });
     const { result, unmount } = await setup();
 
     await waitFor(() => expect(result.current.error?.message).toBe('서버 오류'));
