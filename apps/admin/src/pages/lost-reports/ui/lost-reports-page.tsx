@@ -13,8 +13,12 @@ import {
 import { Badge, Button, makeStyles, TopBar, Typography, useTheme } from '@/shared/ui';
 
 export interface LostReportsPageProps {
-  /** 채팅 화면이 생기면 연결한다. 없으면 버튼을 눌러도 아무 일도 하지 않는다. */
+  /** 카드의 채팅 버튼. 없으면 버튼을 눌러도 아무 일도 하지 않는다. */
   onOpenChat?: (report: LostReport) => void;
+  /** 채팅방을 여는 중인 신고. 그 카드 버튼에 로딩을 보이고, 그동안 다른 채팅 버튼도 막는다. */
+  openingChatReportId?: number | null;
+  /** 채팅방을 열지 못했을 때 목록 위에 보일 문구 */
+  chatError?: string | null;
 }
 
 /** 상태별 채팅 버튼. 처리 완료된 신고는 채팅방이 있을 때만 다시 열 수 있다. */
@@ -25,7 +29,11 @@ function getChatAction(report: LostReport, state: LostReportState) {
 }
 
 /** 관리자 분실 신고 목록 (시안 A7). */
-export function LostReportsPage({ onOpenChat }: LostReportsPageProps) {
+export function LostReportsPage({
+  onOpenChat,
+  openingChatReportId = null,
+  chatError = null,
+}: LostReportsPageProps) {
   const styles = useStyles();
   const { colors } = useTheme();
   const { data: reports, error, isPending, refetch } = useQuery(reportQueries.adminList());
@@ -94,10 +102,17 @@ export function LostReportsPage({ onOpenChat }: LostReportsPageProps) {
           />
         }
         ListHeaderComponent={
-          <View style={styles.summary}>
-            <Typography style={styles.flex}>접수된 신고 {reports.length}건</Typography>
-            <Badge label={`신규 ${newCount}`} tone="danger" />
-            <Badge label={`채팅 요청 ${chatRequestedCount}`} />
+          <View style={styles.header}>
+            <View style={styles.summary}>
+              <Typography style={styles.flex}>접수된 신고 {reports.length}건</Typography>
+              <Badge label={`신규 ${newCount}`} tone="danger" />
+              <Badge label={`채팅 요청 ${chatRequestedCount}`} />
+            </View>
+            {chatError !== null && (
+              <Typography variant="caption" color="textDanger" accessibilityRole="alert">
+                {chatError}
+              </Typography>
+            )}
           </View>
         }
         ListEmptyComponent={
@@ -119,6 +134,8 @@ export function LostReportsPage({ onOpenChat }: LostReportsPageProps) {
                     size="small"
                     variant={action.variant}
                     label={action.label}
+                    loading={openingChatReportId === item.id}
+                    disabled={openingChatReportId !== null}
                     // 카드마다 라벨이 같아서, 버튼만 골라 탐색해도 어느 신고인지 알 수 있게 한다.
                     accessibilityLabel={`${item.reporterName} ${item.alias} 신고, ${action.label}`}
                     onPress={() => onOpenChat?.(item)}
@@ -149,6 +166,7 @@ const useStyles = makeStyles(({ colors, spacing }) => ({
     paddingBottom: spacing.lg,
     paddingHorizontal: spacing.lg,
   },
+  header: { gap: spacing.sm },
   summary: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   flex: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },

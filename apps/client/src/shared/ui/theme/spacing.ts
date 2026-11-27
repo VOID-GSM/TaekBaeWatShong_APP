@@ -10,6 +10,8 @@ export const spacing = {
   xs: 4,
   xsPlus: 6,
   sm: 8,
+  /** 말풍선 사이 간격 (시안 gap 10, 변수 없음) */
+  smPlus: 10,
   md: 12,
   mdPlus: 14,
   lg: 16,
@@ -21,6 +23,8 @@ export const spacing = {
 
 /** Figma 변수(radius/*). */
 export const radius = {
+  /** 말풍선 꼬리 쪽 모서리. 시안은 space/xs(4) 변수를 radius 로 썼다. */
+  xs: 4,
   sm: 10,
   /** 입력 카드(분실 신고 C9)도 이 값을 쓴다. */
   md: 16,
@@ -47,6 +51,20 @@ export const size = {
   /** 하단 탭 바 항목의 알약 모양 배경 */
   tabPillWidth: 56,
   tabPillHeight: 30,
+  /** 채팅 헤더 아바타 */
+  avatarM: 40,
+  /** 채팅 목록 아바타 */
+  avatarL: 44,
+  /** 채팅 목록 카드 최소 높이 */
+  chatListItem: 80,
+  /** 채팅 목록 안 읽음 개수 배지 */
+  unreadBadge: 20,
+  /** 말풍선 최대 폭 */
+  bubbleMaxWidth: 270,
+  /** 채팅 입력칸·전송 버튼 높이 */
+  chatInput: 44,
+  /** 전송 아이콘 */
+  iconSend: 20,
   logoMark: 130,
   logoRing: 160,
   /** 화면 상단 헤더(뒤로가기 + 제목) 높이. C9 스크린샷 추정 — 디자이너 확인 필요. */

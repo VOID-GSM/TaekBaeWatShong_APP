@@ -184,4 +184,27 @@ describe('LostReportsPage', () => {
     expect(await screen.findByText('접수된 신고 2건')).toBeOnTheScreen();
     expect(refreshControl().refreshing).toBe(false);
   });
+
+  it('채팅방을 여는 중이면 채팅 버튼을 모두 막고, 실패 문구를 목록 위에 보여준다', async () => {
+    mockFetchAllReports.mockResolvedValue([newReport, chatReport]);
+    const onOpenChat = jest.fn();
+    await render(
+      <QueryClientProvider client={queryClient()}>
+        <LostReportsPage
+          onOpenChat={onOpenChat}
+          openingChatReportId={newReport.id}
+          chatError="신고자를 채팅 상대에서 찾지 못했어요."
+        />
+      </QueryClientProvider>,
+    );
+
+    expect(await screen.findByText('신고자를 채팅 상대에서 찾지 못했어요.')).toBeOnTheScreen();
+    const opening = screen.getByRole('button', { name: '김민준 겨울 패딩 신고, 1:1 채팅 시작' });
+    expect(opening).toBeDisabled();
+    expect(opening).toBeBusy();
+    await fireEvent.press(
+      screen.getByRole('button', { name: '이선생님 교재 세트 신고, 채팅방 열기' }),
+    );
+    expect(onOpenChat).not.toHaveBeenCalled();
+  });
 });

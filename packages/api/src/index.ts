@@ -1,4 +1,5 @@
 export * from './auth';
+export * from './chat';
 export { api, type ApiConfig, ApiError, configureApi, createSessionExpiredError } from './client';
 export * from './device-token';
 export * from './driver';

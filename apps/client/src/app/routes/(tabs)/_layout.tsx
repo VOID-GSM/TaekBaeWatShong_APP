@@ -39,8 +39,10 @@ export default function TabsLayout() {
           <TabTrigger name="notifications" href="/notifications" asChild>
             <MainTabButton icon={bellXml} label="알림" showDot={hasUnreadNotifications} />
           </TabTrigger>
-          {/* 채팅 화면이 머지되면 탭이 아닌 스택 화면(/chat)으로 연결한다. */}
-          <MainTabButton icon={chatXml} label="채팅" disabled />
+          {/* 채팅 목록 → 채팅방을 탭 안 스택으로 둔다. 시안(C11)에서 채팅방에도 탭 바가 보인다. */}
+          <TabTrigger name="chat" href="/chat" asChild>
+            <MainTabButton icon={chatXml} label="채팅" />
+          </TabTrigger>
         </MainTabBar>
       </TabList>
     </Tabs>

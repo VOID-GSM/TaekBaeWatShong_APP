@@ -1,4 +1,4 @@
-import { reportQueries } from '@taekbae/api';
+import { CHAT_POLL_INTERVAL, chatQueries, reportQueries } from '@taekbae/api';
 import { useQuery } from '@tanstack/react-query';
 import { TabList, Tabs, TabSlot, TabTrigger } from 'expo-router/ui';
 import { StyleSheet } from 'react-native';
@@ -19,6 +19,12 @@ export default function TabsLayout() {
     ...reportQueries.adminList(),
     select: (reports) => reports.some((report) => getLostReportState(report) === 'new'),
   });
+  // 채팅 목록 화면과 같은 쿼리. 다른 탭에 있어도 새 메시지를 알 수 있게 폴링한다.
+  const { data: hasUnreadChats = false } = useQuery({
+    ...chatQueries.rooms(),
+    refetchInterval: CHAT_POLL_INTERVAL.rooms,
+    select: (data) => data.totalUnreadCount > 0,
+  });
 
   return (
     <Tabs style={{ flex: 1 }}>
@@ -38,8 +44,10 @@ export default function TabsLayout() {
           <TabTrigger name="qr" href="/qr" asChild>
             <MainTabButton icon={qrXml} label="QR 코드" />
           </TabTrigger>
-          {/* 채팅 화면이 머지되면 탭이 아닌 스택 화면(/chats)으로 연결한다. */}
-          <MainTabButton icon={chatXml} label="채팅" disabled />
+          {/* 채팅 목록 → 채팅방은 탭 안의 스택(chats/_layout)이라 채팅방에서도 탭 바가 보인다. */}
+          <TabTrigger name="chats" href="/chats" asChild>
+            <MainTabButton icon={chatXml} label="채팅" showDot={hasUnreadChats} />
+          </TabTrigger>
         </MainTabBar>
       </TabList>
     </Tabs>
