@@ -53,6 +53,12 @@ export const size = {
   tabPillHeight: 30,
   /** 채팅 헤더 아바타 */
   avatarM: 40,
+  /** 채팅 목록 아바타 */
+  avatarL: 44,
+  /** 채팅 목록 카드 최소 높이 */
+  chatListItem: 80,
+  /** 채팅 목록 안 읽음 개수 배지 */
+  unreadBadge: 20,
   /** 말풍선 최대 폭 */
   bubbleMaxWidth: 270,
   /** 채팅 입력칸·전송 버튼 높이 */
